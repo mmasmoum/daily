@@ -8,640 +8,1070 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="البطاقتان">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#10233F;
-    --ink-soft:#2C4260;
-    --paper:#F7F1E3;
-    --paper-2:#FFFDF7;
-    --gold:#B9862B;
-    --teal:#1F6F63;
-    --line:rgba(16,35,63,.14);
-    --shadow:0 18px 40px -22px rgba(16,35,63,.55);
-  }
+  :root{--ink:#10233F;--soft:#2C4260;--paper:#F7F1E3;--card:#FFFDF7;--gold:#B9862B;--teal:#1F6F63;--line:rgba(16,35,63,.14)}
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:"Tajawal",system-ui,-apple-system,"Segoe UI",sans-serif;
-    -webkit-text-size-adjust:100%;
-  }
-  header{
-    padding:18px 20px 14px;
-    border-bottom:1px solid var(--line);
-    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
-    background:var(--paper-2);
-    position:sticky;top:0;z-index:20;
-  }
-  header h1{font-family:"Amiri",serif;font-weight:700;font-size:26px;margin:0;letter-spacing:.5px}
-  header .sub{font-size:13px;color:var(--ink-soft);opacity:.8}
-  .wrap{
-    max-width:1180px;margin:0 auto;padding:18px 16px 120px;
-    display:grid;grid-template-columns:1fr;gap:22px;
-  }
-  @media(min-width:960px){
-    .wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:40px}
-    .panel{position:sticky;top:78px}
-  }
-  .tabs{display:flex;gap:8px;margin-bottom:14px}
-  .tab{
-    flex:1;padding:11px 10px;border:1px solid var(--line);background:var(--paper-2);
-    border-radius:12px;font:inherit;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer;
-  }
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Tajawal",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+  header{padding:16px 18px 12px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
+  header h1{font-family:"Amiri",serif;font-size:24px;margin:0}
+  header .sub{font-size:12.5px;color:var(--soft);opacity:.8}
+  .styles{display:flex;gap:8px;overflow-x:auto;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:19}
+  .styles button{white-space:nowrap;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--soft);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+  .styles button[aria-pressed="true"]{background:var(--ink);color:#F3E6C8;border-color:var(--ink)}
+  .styles button .d{font-size:11px;opacity:.7;font-weight:500}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 130px;display:grid;grid-template-columns:1fr;gap:20px}
+  @media(min-width:960px){.wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:40px}.panel{position:sticky;top:132px}}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);border-radius:12px;font:inherit;font-weight:700;font-size:13.5px;color:var(--soft);cursor:pointer}
   .tab[aria-selected="true"]{background:var(--ink);color:#F3E6C8;border-color:var(--ink)}
-  .tab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
-    outline:2px solid var(--gold);outline-offset:2px;
-  }
-  .stage{
-    background:var(--paper-2);border:1px solid var(--line);border-radius:18px;
-    padding:14px;box-shadow:var(--shadow);
-  }
-  .sheet{display:none}
-  .sheet.on{display:block}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+  .sheet{display:none}.sheet.on{display:block}
   .sheet img{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
-  .hint{font-size:12px;color:var(--ink-soft);opacity:.75;margin:10px 2px 0;line-height:1.7}
-  .panel{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:16px}
-  fieldset{border:0;padding:0;margin:0 0 18px}
-  legend{
-    font-family:"Amiri",serif;font-size:19px;font-weight:700;margin-bottom:10px;
-    padding-bottom:6px;border-bottom:2px solid var(--gold);width:100%;
-  }
-  label{display:block;font-size:13px;font-weight:500;margin:12px 0 5px;color:var(--ink-soft)}
-  input[type=text],textarea,select{
-    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
-    font:inherit;font-size:15px;background:#fff;color:var(--ink);
-  }
-  textarea{min-height:104px;resize:vertical;line-height:1.9;font-family:"Amiri",serif;font-size:17px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .row{display:flex;gap:8px;align-items:flex-end}
-  .row > div{flex:1}
-  .btn{
-    padding:11px 14px;border-radius:11px;border:1px solid var(--ink);
-    background:var(--ink);color:#F3E6C8;font:inherit;font-weight:700;font-size:14px;cursor:pointer;
-  }
+  .hint{font-size:12px;color:var(--soft);opacity:.75;margin:10px 2px 0;line-height:1.7}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+  fieldset{border:0;padding:0;margin:0 0 16px}
+  legend{font-family:"Amiri",serif;font-size:18px;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--gold);width:100%}
+  label{display:block;font-size:12.5px;font-weight:500;margin:11px 0 5px;color:var(--soft)}
+  input[type=text],textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+  textarea{min-height:96px;resize:vertical;line-height:1.9;font-family:"Amiri",serif;font-size:17px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .g2>div{min-width:0}
+  .g3>div{min-width:0}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .row{display:flex;gap:8px;align-items:flex-end}.row>div{flex:1}
+  .btn{padding:11px 14px;border-radius:11px;border:1px solid var(--ink);background:var(--ink);color:#F3E6C8;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
   .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
   .btn.gold{background:var(--gold);border-color:var(--gold);color:#20160A}
-  .btn:active{transform:translateY(1px)}
-  .actions{
-    position:fixed;inset:auto 0 0 0;background:rgba(247,241,227,.96);
-    border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-    display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px);
-  }
+  .btn.sm{padding:9px 12px;font-size:13px}
+  .actions{position:fixed;inset:auto 0 0 0;background:rgba(247,241,227,.96);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px)}
   .actions .btn{flex:1}
-  @media(min-width:960px){
-    .actions{position:static;background:none;border:0;padding:14px 0 0;backdrop-filter:none}
-  }
-  .check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}
+  @media(min-width:960px){.actions{position:static;background:none;border:0;padding:14px 0 0;backdrop-filter:none}}
+  .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
   .check input{width:18px;height:18px;accent-color:var(--gold)}
-  .saved{font-size:12px;color:var(--teal);min-height:16px;margin-top:8px;font-weight:500;line-height:1.6}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tcell label{margin:0 0 4px}
+  .hm{display:flex;align-items:center;gap:6px}
+  .hm input{width:100%;padding:9px 6px;text-align:center;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+  .hm input::-webkit-outer-spin-button,.hm input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .hm input[type=number]{-moz-appearance:textfield}
+  .hm span{font-weight:700;opacity:.5}
+  input[type=date]{width:100%;max-width:100%;min-width:0;-webkit-appearance:none;appearance:none;padding:9px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+  .saved{font-size:12px;color:var(--teal);min-height:16px;margin-top:8px;line-height:1.6}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
 <header>
   <h1>البطاقتان اليوميتان</h1>
-  <span class="sub">عدّل النص والأوقات، ثم صدّر صورتين جاهزتين للإرسال.</span>
+  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت.</div>
 </header>
 
-<div class="wrap">
+<div class="styles" id="styleBar"></div>
 
+<div class="wrap">
   <main>
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tab1" aria-selected="true" aria-controls="sheet1">الصفحة الأولى: الحديث</button>
-      <button class="tab" role="tab" id="tab2" aria-selected="false" aria-controls="sheet2">الصفحة الثانية: المواقيت</button>
+      <button class="tab" role="tab" id="tab1" aria-selected="true">الحديث</button>
+      <button class="tab" role="tab" id="tab2" aria-selected="false">المواقيت</button>
     </div>
     <div class="stage">
-      <div class="sheet on" id="sheet1" role="tabpanel" aria-labelledby="tab1"><img id="img1" alt="معاينة بطاقة الحديث"></div>
-      <div class="sheet" id="sheet2" role="tabpanel" aria-labelledby="tab2"><img id="img2" alt="معاينة بطاقة المواقيت"></div>
-      <p class="hint">على الجوال: اضغط مطولًا على الصورة لحفظها أو إرسالها مباشرة. أو استخدم أزرار التنزيل والمشاركة.</p>
+      <div class="sheet on" id="sheet1"><img id="img1" alt="معاينة بطاقة الحديث"></div>
+      <div class="sheet" id="sheet2"><img id="img2" alt="معاينة بطاقة المواقيت"></div>
+      <p class="hint">اضغط مطولًا على الصورة لحفظها أو إرسالها مباشرة من الجوال.</p>
     </div>
   </main>
 
   <aside class="panel">
-
     <fieldset>
-      <legend>الصفحة الأولى</legend>
-
-      <label for="f_preset">نماذج جاهزة</label>
-      <select id="f_preset"><option value="">اختر نموذجًا لتعبئة الحقول</option></select>
-
-      <label for="f_head">نص الترويسة</label>
-      <input type="text" id="f_head" value="قال رسول الله ﷺ">
-
-      <label for="f_body">نص الحديث</label>
-      <textarea id="f_body"></textarea>
-
-      <label for="f_src">التخريج</label>
-      <input type="text" id="f_src" value="رواه مسلم">
-
-      <label for="f_notes">فوائد مختصرة (سطر لكل فائدة، اتركه فارغًا للإخفاء)</label>
-      <textarea id="f_notes" style="min-height:80px"></textarea>
-
-      <div class="grid2">
-        <div>
-          <label for="f_theme">لوحة الألوان</label>
-          <select id="f_theme">
-            <option value="classic">مذهّب كلاسيكي</option>
-            <option value="emerald">زمردي</option>
-            <option value="indigo">نيلي</option>
-          </select>
-        </div>
-        <div>
-          <label for="f_multi">تلوين الأسطر</label>
-          <select id="f_multi">
-            <option value="1">متناوب</option>
-            <option value="0">لون واحد</option>
-          </select>
-        </div>
+      <legend>النمط</legend>
+      <div class="check">
+        <input type="checkbox" id="f_autostyle" checked>
+        <label for="f_autostyle" style="margin:0">اختر النمط تلقائيًا حسب يوم الأسبوع</label>
+      </div>
+      <div id="photoBox" hidden>
+        <label for="f_photo">صورة الخلفية (لنمط الإطار المصوَّر)</label>
+        <input type="file" id="f_photo" accept="image/*">
       </div>
     </fieldset>
 
     <fieldset>
-      <legend>الصفحة الثانية</legend>
-
-      <label for="f_city">المدينة</label>
-      <input type="text" id="f_city" value="حمص">
-
+      <legend>الصفحة الأولى</legend>
       <div class="row">
         <div>
-          <label for="f_date">التاريخ</label>
-          <input type="text" id="f_date">
+          <label for="f_lib">مكتبة الأحاديث</label>
+          <select id="f_lib"></select>
         </div>
-        <button class="btn ghost" id="btnToday" type="button">تاريخ اليوم</button>
+        <button class="btn ghost sm" id="btnNextHadith" type="button">التالي</button>
       </div>
+      <label for="f_head">الترويسة</label>
+      <input type="text" id="f_head">
+      <label for="f_body">نص الحديث</label>
+      <textarea id="f_body"></textarea>
+      <label for="f_src">التخريج</label>
+      <input type="text" id="f_src">
+      <label for="f_notes">فوائد مختصرة (سطر لكل فائدة)</label>
+      <textarea id="f_notes" style="min-height:76px"></textarea>
+      <label for="f_multi">تلوين الأسطر</label>
+      <select id="f_multi"><option value="1">متناوب</option><option value="0">لون واحد</option></select>
+    </fieldset>
 
-      <div class="grid3">
-        <div><label for="t0">الفجر</label><input type="text" id="t0" value="4.12"></div>
-        <div><label for="t1">الشروق</label><input type="text" id="t1" value="5.47"></div>
-        <div><label for="t2">الظهر</label><input type="text" id="t2" value="12.40"></div>
-        <div><label for="t3">العصر</label><input type="text" id="t3" value="4.24"></div>
-        <div><label for="t4">المغرب</label><input type="text" id="t4" value="7.33"></div>
-        <div><label for="t5">العشاء</label><input type="text" id="t5" value="9.00"></div>
+    <fieldset>
+      <legend>المكان والتاريخ</legend>
+      <div class="g2">
+        <div><label for="f_city">المدينة</label><select id="f_city"></select></div>
+        <div><label for="f_date">التاريخ</label><input type="date" id="f_date"></div>
       </div>
+      <div class="g2">
+        <div>
+          <label for="f_method">طريقة الحساب</label>
+          <select id="f_method">
+            <option value="homs">تقويم حمص المحلي</option>
+            <option value="mwl">رابطة العالم الإسلامي</option>
+            <option value="uaq">أم القرى</option>
+            <option value="egypt">الهيئة المصرية</option>
+            <option value="karachi">كراتشي</option>
+          </select>
+        </div>
+        <div>
+          <label for="f_asr">العصر</label>
+          <select id="f_asr"><option value="1">الجمهور</option><option value="2">الحنفي</option></select>
+        </div>
+      </div>
+      <div class="g2">
+        <div>
+          <label for="f_hijriAdj">تعديل الهجري</label>
+          <select id="f_hijriAdj">
+            <option value="-1">يوم أقل</option>
+            <option value="0" selected>بلا تعديل</option>
+            <option value="1">يوم أكثر</option>
+          </select>
+        </div>
+        <div>
+          <label for="f_ihtiyat">احتياط دقيقة</label>
+          <select id="f_ihtiyat"><option value="1">نعم</option><option value="0">لا</option></select>
+        </div>
+      </div>
+      <p class="hint" id="calcNote"></p>
+    </fieldset>
 
+    <fieldset>
+      <legend>المواقيت</legend>
+      <div class="times" id="timesBox"></div>
+      <button class="btn ghost sm" id="btnRecalc" type="button" style="margin-top:10px">إعادة الحساب</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>العبارات</legend>
+      <div class="row">
+        <div><label for="f_msgLib">مكتبة الرسائل</label><select id="f_msgLib"></select></div>
+        <button class="btn ghost sm" id="btnNextMsg" type="button">التالي</button>
+      </div>
       <label for="f_msg">الرسالة السفلية</label>
-      <textarea id="f_msg" style="min-height:80px"></textarea>
-
-      <label for="f_ribbon">نص الشريط السفلي</label>
-      <input type="text" id="f_ribbon" value="صلّوا عليه ... خير الأنام">
+      <textarea id="f_msg" style="min-height:70px"></textarea>
+      <div class="row">
+        <div><label for="f_ribbon">عبارة الشريط</label><input type="text" id="f_ribbon"></div>
+        <button class="btn ghost sm" id="btnRibbon" type="button">التالي</button>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="f_autoribbon" checked>
+        <label for="f_autoribbon" style="margin:0">عبارة مناسبة لليوم تلقائيًا</label>
+      </div>
     </fieldset>
 
     <div class="check">
       <input type="checkbox" id="f_auto" checked>
-      <label for="f_auto" style="margin:0">حفظ المحتوى تلقائيًا لفتحه في المرة القادمة</label>
+      <label for="f_auto" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">تنزيل الصورتين</button>
       <button class="btn" id="btnShare">مشاركة</button>
-      <button class="btn ghost" id="btnReset">استعادة النموذج</button>
+      <button class="btn ghost" id="btnReset">استعادة</button>
     </div>
   </aside>
-
 </div>
 
 <script>
 (function(){
 "use strict";
+var AR='"Amiri","Scheherazade New","Noto Naskh Arabic",serif', B='700 ';
+var W1=1080,H1=1440,W2=1080,H2=1920;
 
-var AR   = '"Amiri","Scheherazade New","Noto Naskh Arabic","Traditional Arabic",serif';
-var AR_B = '700 ';
-var W1=1080, H1=1440, W2=1080, H2=1920;
-
-var THEMES = {
-  classic:{ paper:"#FBF6EA", panel:"#FFFDF6", gold:"#C0912F", deep:"#7E1B1B",
-            cycle:["#1F6F4E","#1B4E8C","#8E1B1B","#B07514"], solo:"#1B3A5C", border:"#8E1B1B" },
-  emerald:{ paper:"#F5F8F1", panel:"#FFFFFA", gold:"#B08A2E", deep:"#14503C",
-            cycle:["#14503C","#1F6F4E","#276B57","#0F3D2E"], solo:"#14503C", border:"#14503C" },
-  indigo:{  paper:"#F4F6FB", panel:"#FFFFFF", gold:"#B98F33", deep:"#16305E",
-            cycle:["#16305E","#1B4E8C","#2D6E8E","#0E2242"], solo:"#16305E", border:"#16305E" }
+/* ============ الأنماط السبعة ============ */
+var STYLES={
+  illum:{ name:"تذهيب", day:"السبت", frame:"plait", rows:"ornate",
+    paper:"#FAF3E2", ink:"#22303F", band:"#1B3A6B", band2:"#8E1B1B",
+    gold:"#C69A34", gold2:"#F0D896", accent:["#1F6F4E","#1B4E8C","#8E1B1B","#B07514"], grain:true },
+  modern:{ name:"معاصر", day:"الأحد", frame:"rules", rows:"plain",
+    paper:"#F6F3EA", ink:"#173F33", band:"#14503C", band2:"#14503C",
+    gold:"#A98A3C", gold2:"#D8C084", accent:["#14503C","#1F6F4E","#0F3D2E","#276B57"] },
+  tile:{ name:"قيشاني", day:"الإثنين", frame:"tilestrip", rows:"ornate",
+    paper:"#F2F7F7", ink:"#0E3A44", band:"#0F6E7A", band2:"#123E86",
+    gold:"#C08A2A", gold2:"#EBC97E", accent:["#0F6E7A","#123E86","#0E3A44","#1C7F6B"] },
+  ottoman:{ name:"نبوي", day:"الثلاثاء", frame:"scallop", rows:"ornate",
+    paper:"#F5F6EF", ink:"#1D3B2A", band:"#174B34", band2:"#0F3323",
+    gold:"#B08A2E", gold2:"#E5CE93", accent:["#174B34","#1D3B2A","#0F3323","#8A6B1E"], grain:true },
+  night:{ name:"ليلي", day:"الأربعاء", frame:"hairline", rows:"ornate", dark:true,
+    paper:"#0C1C33", ink:"#F1E6C8", band:"#0A1728", band2:"#123157",
+    gold:"#D9B45A", gold2:"#F6E3A8", accent:["#F1E6C8","#D9B45A","#EBD9AC","#C9A24A"], grain:true },
+  sand:{ name:"رملي", day:"الخميس", frame:"sandrule", rows:"plain",
+    paper:"#F6EEDF", ink:"#4A3826", band:"#9C4A2A", band2:"#7A3A20",
+    gold:"#A87C3A", gold2:"#D9B67A", accent:["#9C4A2A","#4A3826","#7A3A20","#A87C3A"], grain:true },
+  photo:{ name:"مصوَّر", day:"الجمعة", frame:"photo", rows:"ornate", dark:true, photo:true,
+    paper:"#101418", ink:"#FFFFFF", band:"#000000", band2:"#000000",
+    gold:"#E0BE72", gold2:"#F7E6B4", accent:["#FFFFFF","#F7E6B4","#FFFFFF","#F7E6B4"] }
 };
+var DAY_STYLE=["modern","illum","tile","ottoman","night","sand","photo"]; /* الأحد ... السبت */
 
-var PRESETS = [
-  { t:"طلب العلم",
-    b:"مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا،\nسَهَّلَ اللهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ.",
-    s:"رواه مسلم",
-    n:"السعي في طلب العلم سبب لدخول الجنة وتيسير أسبابها.\nتضع الملائكة أجنحتها لطالب العلم رضًا بما يصنع.\nالعلماء ورثة الأنبياء، ورّثوا العلم لا الدينار والدرهم." },
-  { t:"أجر الأذى",
-    b:"مَا مِنْ مُسْلِمٍ يُصِيبُهُ أَذًى،\nإِلَّا حَاتَّ اللهُ عَنْهُ خَطَايَاهُ\nكَمَا تَحَاتُّ وَرَقُ الشَّجَرِ.",
-    s:"رواه البخاري (٥٦٤٧)", n:"" },
-  { t:"عدم الاستعجال في الدعاء",
-    b:"يُسْتَجَابُ لِأَحَدِكُمْ مَا لَمْ يَعْجَلْ،\nفَيَقُولُ: قَدْ دَعَوْتُ رَبِّي فَلَمْ يَسْتَجِبْ لِي.",
-    s:"صحيح مسلم (٧١١١)",
-    n:"قد يدرك المتأني بعض حاجته، وقد يكون من المستعجل الزلل.\nالعجلة تضع الشيء في غير موضعه، وهي بين التفريط والاستعجال قبل الوقت." }
+/* ============ العبارات ============ */
+var RIBBONS=[
+  "صلّوا على خير الأنام",
+  "اللهم صلِّ وسلّم على نبينا محمد",
+  "خير الكلام ذكر الله",
+  "سبحان الله وبحمده",
+  "أستغفر الله العظيم وأتوب إليه",
+  "لا حول ولا قوة إلا بالله",
+  "اللهم اجعل يومنا خيرًا من أمسنا"
+];
+var DAY_RIBBON={ 1:"تذكير: صيام يوم الاثنين", 4:"تذكير: صيام يوم الخميس", 5:"تذكير: سورة الكهف وكثرة الصلاة على النبي" };
+
+/* ============ مكتبة الأحاديث ============ */
+var HADITHS=[
+ {t:"الأعمال بالنيات", b:"إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ،\nوَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى.", s:"متفق عليه",
+  n:"العمل الواحد يعظم أو يسقط بحسب نية صاحبه.\nتصحيح النية أشق من العمل نفسه وأعظم أثرًا.\nالنية تحوّل العادة إلى عبادة."},
+ {t:"طلب العلم", b:"مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا،\nسَهَّلَ اللهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ.", s:"رواه مسلم",
+  n:"السعي في طلب العلم سبب لدخول الجنة وتيسير أسبابها.\nالعلماء ورثة الأنبياء، ورّثوا العلم لا الدينار والدرهم.\nكل خطوة في طريق العلم محسوبة عند الله."},
+ {t:"أجر الأذى", b:"مَا مِنْ مُسْلِمٍ يُصِيبُهُ أَذًى،\nإِلَّا حَاتَّ اللهُ عَنْهُ خَطَايَاهُ\nكَمَا تَحَاتُّ وَرَقُ الشَّجَرِ.", s:"رواه البخاري",
+  n:"المصائب مكفّرات للذنوب لا عقوبات مجردة.\nحتى الهمّ والوصب والنصب داخل في هذا الأجر.\nمن أحسن الظن بالله في بلائه هان عليه."},
+ {t:"الاستعجال في الدعاء", b:"يُسْتَجَابُ لِأَحَدِكُمْ مَا لَمْ يَعْجَلْ،\nفَيَقُولُ: قَدْ دَعَوْتُ رَبِّي فَلَمْ يَسْتَجِبْ لِي.", s:"رواه مسلم",
+  n:"تأخر الإجابة ابتلاء للصبر لا ردّ للدعاء.\nالعجلة تضع الشيء في غير موضعه وتجلب الندم.\nالدعاء لا يضيع: إجابة، أو صرف بلاء، أو ادّخار."},
+ {t:"ترك ما لا يعني", b:"مِنْ حُسْنِ إِسْلَامِ الْمَرْءِ\nتَرْكُهُ مَا لَا يَعْنِيهِ.", s:"رواه الترمذي",
+  n:"انشغال المرء بما لا يخصه أول أبواب الغيبة والفضول.\nالوقت والطاقة أثمن من أن ينفقا فيما لا ينفع.\nحسن الإسلام يقاس بما تترك كما يقاس بما تفعل."},
+ {t:"الكلمة الطيبة", b:"اتَّقُوا النَّارَ وَلَوْ بِشِقِّ تَمْرَةٍ،\nفَمَنْ لَمْ يَجِدْ فَبِكَلِمَةٍ طَيِّبَةٍ.", s:"متفق عليه",
+  n:"لا عذر لأحد في ترك المعروف مهما قلّ ذات يده.\nالكلمة الطيبة صدقة تصل حيث لا يصل المال.\nصغير العمل عند الناس قد يكون كبيرًا عند الله."},
+ {t:"الرفق", b:"إِنَّ اللهَ رَفِيقٌ يُحِبُّ الرِّفْقَ،\nوَيُعْطِي عَلَى الرِّفْقِ مَا لَا يُعْطِي عَلَى الْعُنْفِ.", s:"رواه مسلم",
+  n:"الرفق يفتح ما تغلقه الشدة في القلوب والأمور.\nما كان الرفق في شيء إلا زانه، ولا نزع من شيء إلا شانه.\nالقيادة بالرفق أبقى أثرًا من القيادة بالقوة."},
+ {t:"حب الخير للناس", b:"لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ\nمَا يُحِبُّ لِنَفْسِهِ.", s:"متفق عليه",
+  n:"كمال الإيمان مرتبط بسلامة الصدر من الحسد.\nمقياس عملي: قس ما تريده لغيرك بما تريده لنفسك.\nمن أحب الخير للناس عاد إليه الخير أضعافًا."},
+ {t:"الدال على الخير", b:"مَنْ دَلَّ عَلَى خَيْرٍ\nفَلَهُ مِثْلُ أَجْرِ فَاعِلِهِ.", s:"رواه مسلم",
+  n:"الإرشاد إلى العمل الصالح يعدل العمل نفسه في الأجر.\nنشر النافع سبب لأجر يمتد بعد صاحبه.\nلا تحقر توجيهًا صغيرًا، فقد يكون بداية طريق."},
+ {t:"المسلم من سلم", b:"الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ\nمِنْ لِسَانِهِ وَيَدِهِ.", s:"متفق عليه",
+  n:"أول علامات الإسلام كفّ الأذى قبل بذل الإحسان.\nاللسان قُدّم على اليد لأن جرحه أعمق وأبقى.\nمن أمِن الناس شرّه أحبوه وأمنوه."},
+ {t:"الصدقة لا تنقص المال", b:"مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ.", s:"رواه مسلم",
+  n:"الصدقة سبب للبركة لا للفقر مهما بدا الحساب.\nما ينقص من العدد يُعوَّض بالبركة والحفظ.\nالعطاء يزيد صاحبه عزًا لا ذلًا."},
+ {t:"القول الحسن أو الصمت", b:"مَنْ كَانَ يُؤْمِنُ بِاللهِ وَالْيَوْمِ الْآخِرِ\nفَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ.", s:"متفق عليه",
+  n:"الكلام إما غنم وإما غرم، ولا ثالث لهما.\nالصمت عن الشر عبادة يغفل عنها كثيرون.\nربط الكلام بالإيمان يدل على خطر اللسان."},
+ {t:"الطهور شطر الإيمان", b:"الطُّهُورُ شَطْرُ الْإِيمَانِ.", s:"رواه مسلم",
+  n:"الطهارة الظاهرة عنوان الطهارة الباطنة.\nالنظافة في الإسلام عبادة لا عادة.\nمن اعتنى بطهوره اعتنى بصلاته."},
+ {t:"أحب الأعمال", b:"أَحَبُّ الْأَعْمَالِ إِلَى اللهِ\nأَدْوَمُهَا وَإِنْ قَلَّ.", s:"متفق عليه",
+  n:"القليل الدائم أنفع من الكثير المنقطع.\nثبات العمل دليل صدق صاحبه.\nابدأ بما تطيق الاستمرار عليه لا بما يبهر."},
+ {t:"اتق الله حيثما كنت", b:"اتَّقِ اللهَ حَيْثُمَا كُنْتَ،\nوَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا،\nوَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ.", s:"رواه الترمذي",
+  n:"التقوى في السر والعلن سواء.\nالخطأ لا يُعالج بالحسرة بل بحسنة تمحوه.\nحسن الخلق مع الناس تمام التقوى مع الله."},
+ {t:"الدين النصيحة", b:"الدِّينُ النَّصِيحَةُ.", s:"رواه مسلم",
+  n:"النصيحة إرادة الخير للمنصوح لا إظهار العيب.\nمن نصح في السر فقد نصح، ومن نصح في العلن فقد فضح.\nالدين كله يقوم على الإخلاص والصدق مع الله والخلق."},
+ {t:"الزهد", b:"ازْهَدْ فِي الدُّنْيَا يُحِبَّكَ اللهُ،\nوَازْهَدْ فِيمَا عِنْدَ النَّاسِ يُحِبَّكَ النَّاسُ.", s:"رواه ابن ماجه",
+  n:"الزهد ليس ترك المال بل ترك تعلّق القلب به.\nالاستغناء عما في أيدي الناس يورث المهابة والمحبة.\nمن قلّت حاجته إلى الناس قلّ ذلّه لهم."},
+ {t:"لا ضرر ولا ضرار", b:"لَا ضَرَرَ وَلَا ضِرَارَ.", s:"رواه ابن ماجه",
+  n:"قاعدة جامعة تحكم المعاملات والجوار والعمل.\nلا يجوز دفع الضرر عن نفسك بإيقاعه على غيرك.\nالإسلام يمنع الضرر ابتداءً ويمنع مقابلته بمثله."},
+ {t:"البر حسن الخلق", b:"الْبِرُّ حُسْنُ الْخُلُقِ.", s:"رواه مسلم",
+  n:"حسن الخلق ثمرة الدين لا زينة زائدة عليه.\nيبلغ صاحبه بخلقه درجة الصائم القائم.\nأثقل ما يوضع في الميزان يوم القيامة."},
+ {t:"التبسم صدقة", b:"تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ\nصَدَقَةٌ.", s:"رواه الترمذي",
+  n:"أبواب الخير أوسع من أن تحصر في المال.\nالبِشر يزرع الألفة ويكسر الجفاء بلا كلفة.\nمن لم يملك عطاءً ملك وجهًا طلقًا."},
+ {t:"التيسير على المعسر", b:"وَمَنْ يَسَّرَ عَلَى مُعْسِرٍ\nيَسَّرَ اللهُ عَلَيْهِ فِي الدُّنْيَا وَالْآخِرَةِ.", s:"رواه مسلم",
+  n:"الجزاء من جنس العمل في التيسير والتعسير.\nإنظار المعسر خير من مطالبته وأبقى أجرًا.\nمن فرّج عن مكروب فرّج الله عنه يوم الكرب الأكبر."},
+ {t:"الصلاة على النبي", b:"مَنْ صَلَّى عَلَيَّ صَلَاةً\nصَلَّى اللهُ عَلَيْهِ بِهَا عَشْرًا.", s:"رواه مسلم",
+  n:"أيسر الأعمال وأعظمها بركة على قلة كلفتها.\nالإكثار منها يوم الجمعة وليلتها آكد.\nمن أراد أن يُذكر عند الله فليذكر نبيه بالصلاة عليه."},
+ {t:"خيركم", b:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ\nوَعَلَّمَهُ.", s:"رواه البخاري",
+  n:"الخيرية علّقت بالجمع بين التعلم والتعليم.\nنفع الناس بالعلم أعلى من الانتفاع به وحدك.\nتعليم آية واحدة سبب لأجر ممتد."},
+ {t:"إتقان العمل", b:"إِنَّ اللهَ يُحِبَّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا\nأَنْ يُتْقِنَهُ.", s:"رواه البيهقي",
+  n:"الإتقان مطلوب في عمل الدنيا كما في عمل الآخرة.\nجودة العمل جزء من الأمانة لا كمال زائد.\nمن أتقن عمله تعبّد لله بحرفته."}
 ];
 
-var DEF = {
-  head:"قال رسول الله ﷺ",
-  body:PRESETS[0].b, src:PRESETS[0].s, notes:PRESETS[0].n,
-  theme:"classic", multi:"1",
-  city:"حمص", date:"", times:["4.12","5.47","12.40","4.24","7.33","9.00"],
-  msg:"لا تهدر جهدك ... بالمكان الخطأ.",
-  ribbon:"صلّوا عليه ... خير الأنام"
+/* ============ مكتبة الرسائل ============ */
+var MESSAGES=[
+ "لا تهدر جهدك ... بالمكان الخطأ.",
+ "قيمتك الحقيقية في تقواك وإخلاصك وحسن خلقك.",
+ "ما فات مضى ... وما هو آتٍ فأعدّ له.",
+ "أجمل ما في اليوم أن تبدأه بنيّة صالحة.",
+ "الصبر ليس انتظارًا ... بل إحسان العمل أثناء الانتظار.",
+ "من أصلح ما بينه وبين الله، أصلح الله ما بينه وبين الناس.",
+ "خفّف الحمل عمّن حولك ... تخفّ عنك الأثقال.",
+ "لا تصغّر معروفًا ... فربّ معروف صغير كان به فرج إنسان.",
+ "كن ممّن إذا غاب افتقده الناس.",
+ "ابدأ صغيرًا ... لكن ابدأ اليوم.",
+ "في لحظة حاسمة ... قد تتقدّم الإنسانية على المنافسة.",
+ "الوقت الذي لا تذكر الله فيه ... ليس منك."
+];
+
+/* ============ المدن ============ */
+var CITIES=[
+ {n:"حمص",lat:34.7308,lng:36.7090,tz:3,m:"homs"},
+ {n:"دمشق",lat:33.5138,lng:36.2765,tz:3,m:"homs"},
+ {n:"حلب",lat:36.2021,lng:37.1343,tz:3,m:"homs"},
+ {n:"حماة",lat:35.1318,lng:36.7578,tz:3,m:"homs"},
+ {n:"اللاذقية",lat:35.5196,lng:35.7915,tz:3,m:"homs"},
+ {n:"طرطوس",lat:34.8890,lng:35.8866,tz:3,m:"homs"},
+ {n:"إدلب",lat:35.9306,lng:36.6339,tz:3,m:"homs"},
+ {n:"دير الزور",lat:35.3359,lng:40.1408,tz:3,m:"homs"},
+ {n:"الرقة",lat:35.9594,lng:39.0077,tz:3,m:"homs"},
+ {n:"الحسكة",lat:36.5024,lng:40.7477,tz:3,m:"homs"},
+ {n:"القامشلي",lat:37.0522,lng:41.2311,tz:3,m:"homs"},
+ {n:"السويداء",lat:32.7094,lng:36.5694,tz:3,m:"homs"},
+ {n:"درعا",lat:32.6189,lng:36.1021,tz:3,m:"homs"},
+ {n:"تدمر",lat:34.5624,lng:38.2841,tz:3,m:"homs"},
+ {n:"سلمية",lat:35.0114,lng:37.0531,tz:3,m:"homs"},
+ {n:"الرستن",lat:34.9256,lng:36.7325,tz:3,m:"homs"},
+ {n:"تلكلخ",lat:34.6689,lng:36.2589,tz:3,m:"homs"},
+ {n:"القصير",lat:34.5089,lng:36.5794,tz:3,m:"homs"},
+ {n:"صافيتا",lat:34.8206,lng:36.1183,tz:3,m:"homs"},
+ {n:"بانياس",lat:35.1826,lng:35.9464,tz:3,m:"homs"},
+ {n:"الرياض",lat:24.7136,lng:46.6753,tz:3,m:"uaq"},
+ {n:"جدة",lat:21.4858,lng:39.1925,tz:3,m:"uaq"},
+ {n:"مكة المكرمة",lat:21.3891,lng:39.8579,tz:3,m:"uaq"},
+ {n:"المدينة المنورة",lat:24.5247,lng:39.5692,tz:3,m:"uaq"},
+ {n:"الدمام",lat:26.4207,lng:50.0888,tz:3,m:"uaq"},
+ {n:"عمّان",lat:31.9539,lng:35.9106,tz:3,m:"mwl"},
+ {n:"بغداد",lat:33.3152,lng:44.3661,tz:3,m:"karachi"},
+ {n:"إسطنبول",lat:41.0082,lng:28.9784,tz:3,m:"mwl"},
+ {n:"الدوحة",lat:25.2854,lng:51.5310,tz:3,m:"uaq"},
+ {n:"الكويت",lat:29.3759,lng:47.9774,tz:3,m:"uaq"},
+ {n:"دبي",lat:25.2048,lng:55.2708,tz:4,m:"uaq"}
+];
+var METHODS={
+ homs:{f:18,i:16.6,min:false,label:"تقويم حمص المحلي"},
+ mwl:{f:18,i:17,min:false,label:"رابطة العالم الإسلامي"},
+ uaq:{f:18.5,i:90,min:true,label:"أم القرى"},
+ egypt:{f:19.5,i:17.5,min:false,label:"الهيئة المصرية"},
+ karachi:{f:18,i:18,min:false,label:"كراتشي"}
 };
 
-var AYAH = "فَإِذَا قَضَيْتُمُ الصَّلَاةَ فَاذْكُرُوا اللَّهَ قِيَامًا وَقُعُودًا وَعَلَىٰ جُنُوبِكُمْ، فَإِذَا اطْمَأْنَنتُمْ فَأَقِيمُوا الصَّلَاةَ، إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا. (النساء ١٠٣)";
-var LABELS = ["الفَجــر","الشَّمس","الظُّهــر","العَصــر","المَغــرب","العِشـاء"];
+/* ============ حساب المواقيت ============ */
+function julian(y,m,d){
+  if(m<=2){ y-=1; m+=12; }
+  var a=Math.floor(y/100), b=2-a+Math.floor(a/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+b-1524.5;
+}
+function sunPos(J){
+  var D=J-2451545.0, rad=Math.PI/180;
+  var g=((357.529+0.98560028*D)%360)*rad;
+  var q=(280.459+0.98564736*D)%360;
+  var L=(((q+1.915*Math.sin(g)+0.020*Math.sin(2*g))%360)+360)%360*rad;
+  var e=(23.439-0.00000036*D)*rad;
+  var dec=Math.asin(Math.sin(e)*Math.sin(L));
+  var RA=((Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/rad)/15+24)%24;
+  var eq=q/15-RA;
+  if(eq>12) eq-=24; if(eq<-12) eq+=24;
+  return {dec:dec,eq:eq};
+}
+function hourAngle(angle,dec,lat){
+  var la=lat*Math.PI/180;
+  var x=(-Math.sin(angle*Math.PI/180)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null;
+  return (Math.acos(x)*180/Math.PI)/15;
+}
+function asrAngle(factor,dec,lat){
+  var la=lat*Math.PI/180;
+  var a=Math.atan(1/(factor+Math.tan(Math.abs(la-dec))));
+  var x=(Math.sin(a)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null;
+  return (Math.acos(x)*180/Math.PI)/15;
+}
+/* يعيد ستة أوقات بصيغة {h,m} بنظام 12 ساعة */
+function prayerTimes(y,mo,d,city,methodKey,asrFactor,ihtiyat){
+  var M=METHODS[methodKey]||METHODS.mwl;
+  var J=julian(y,mo,d)-city.lng/(15*24);
+  var s=sunPos(J);
+  var noon=12+city.tz-city.lng/15-s.eq;
+  var HOR=0.833;
+  var out=[];
+  var fajr=noon-hourAngle(M.f,s.dec,city.lat);
+  var rise=noon-hourAngle(HOR,s.dec,city.lat);
+  var asr=noon+asrAngle(asrFactor,s.dec,city.lat);
+  var mag=noon+hourAngle(HOR,s.dec,city.lat);
+  var isha=M.min? mag+M.i/60 : noon+hourAngle(M.i,s.dec,city.lat);
+  var raw=[fajr,rise,noon,asr,mag,isha];
+  var adj=ihtiyat?[1,0,1,0,1,1]:[0,0,0,0,0,0];
+  for(var i=0;i<6;i++){
+    var mins=Math.round(raw[i]*60)+adj[i];
+    mins=((mins%1440)+1440)%1440;
+    var hh=Math.floor(mins/60), mm=mins%60;
+    out.push({h:(hh%12)||12,m:mm});
+  }
+  return out;
+}
+function tstr(t){ return t.h+"."+(t.m<10?"0":"")+t.m; }
 
+var LABELS=["الفَجــر","الشَّمس","الظُّهــر","العَصــر","المَغــرب","العِشـاء"];
+var DEF={ head:"قال رسول الله ﷺ", body:HADITHS[0].b, src:HADITHS[0].s, notes:HADITHS[0].n,
+  multi:"1", msg:MESSAGES[0], method:"homs", asr:"1", ihtiyat:"1", hijriAdj:"0" };
+
+/* ============ التاريخ ============ */
 var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-var MONTHS_AR=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+var MON=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 function pad(n){ return (n<10?"0":"")+n; }
 function hijri(d){
   try{
-    var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",
-      {day:"numeric",month:"long",year:"numeric"}).formatToParts(d);
-    var o={}; p.forEach(function(x){ o[x.type]=x.value; });
+    var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",{day:"numeric",month:"long",year:"numeric"}).formatToParts(d),o={};
+    p.forEach(function(x){ o[x.type]=x.value; });
     return pad(parseInt(o.day,10))+"/"+String(o.month).replace("هـ","").trim()+"/"+String(o.year).replace(/\D/g,"")+" هـ";
   }catch(e){ return ""; }
 }
 function todayString(){
-  var d=new Date();
-  var g=pad(d.getDate())+"/"+MONTHS_AR[d.getMonth()]+"/"+d.getFullYear()+" م";
-  var h=hijri(d);
-  return DAYS[d.getDay()]+" : "+(h? h+" ـ ":"")+g;
+  var d=new Date(), h=hijri(d);
+  return DAYS[d.getDay()]+" : "+(h?h+" ـ ":"")+pad(d.getDate())+"/"+MON[d.getMonth()]+"/"+d.getFullYear()+" م";
 }
 
-function rr(c,x,y,w,h,r){
-  c.beginPath();
-  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
-  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+/* ============ أدوات الرسم ============ */
+var grainPat=null;
+function grain(c,w,h,a){
+  if(!grainPat){
+    var g=document.createElement("canvas"); g.width=g.height=140;
+    var gc=g.getContext("2d"), im=gc.createImageData(140,140), i;
+    for(i=0;i<im.data.length;i+=4){ var v=200+Math.random()*55;
+      im.data[i]=im.data[i+1]=im.data[i+2]=v; im.data[i+3]=Math.random()*70; }
+    gc.putImageData(im,0,0); grainPat=g;
+  }
+  c.save(); c.globalAlpha=a; c.globalCompositeOperation="multiply";
+  c.fillStyle=c.createPattern(grainPat,"repeat"); c.fillRect(0,0,w,h); c.restore();
 }
-function star8(c,x,y,r,inner){
-  c.beginPath();
-  for(var i=0;i<16;i++){
-    var a=Math.PI/8*i - Math.PI/2, rad=(i%2===0)?r:r*inner;
+function gg(c,x0,y0,x1,y1,S){
+  var g=c.createLinearGradient(x0,y0,x1,y1);
+  g.addColorStop(0,S.gold2); g.addColorStop(.35,S.gold); g.addColorStop(.62,S.gold2); g.addColorStop(1,S.gold);
+  return g;
+}
+function starPath(c,x,y,r,inner,pts,rot){
+  var n=pts*2,i; c.beginPath();
+  for(i=0;i<n;i++){
+    var a=Math.PI/pts*i+(rot||0), rad=(i%2===0)?r:r*inner;
     var px=x+Math.cos(a)*rad, py=y+Math.sin(a)*rad;
     if(i) c.lineTo(px,py); else c.moveTo(px,py);
   }
   c.closePath();
 }
-function rosette(c,x,y,r,petal,center){
-  for(var i=0;i<6;i++){
-    var a=Math.PI/3*i;
-    c.beginPath(); c.arc(x+Math.cos(a)*r*0.62, y+Math.sin(a)*r*0.62, r*0.42, 0, Math.PI*2);
-    c.fillStyle=petal; c.fill();
+function medallion(c,x,y,r,S){
+  var i; c.save(); c.translate(x,y);
+  for(i=0;i<16;i++){
+    c.save(); c.rotate(Math.PI/8*i);
+    c.beginPath(); c.moveTo(0,0);
+    c.quadraticCurveTo(r*.30,-r*.34,0,-r);
+    c.quadraticCurveTo(-r*.30,-r*.34,0,0); c.closePath();
+    c.fillStyle=(i%2)?S.band:S.gold; c.fill();
+    c.strokeStyle=S.gold2; c.lineWidth=1.4; c.stroke(); c.restore();
   }
-  c.beginPath(); c.arc(x,y,r*0.32,0,Math.PI*2); c.fillStyle=center; c.fill();
+  starPath(c,0,0,r*.42,.44,8,-Math.PI/8); c.fillStyle=S.band2; c.fill();
+  c.strokeStyle=gg(c,-r,-r,r,r,S); c.lineWidth=3; c.stroke();
+  c.beginPath(); c.arc(0,0,r*.14,0,Math.PI*2); c.fillStyle=S.gold2; c.fill();
+  c.restore();
 }
-function wrap(c,text,maxW){
+function plait(c,x,y,len,h,S,vert){
+  c.save(); c.translate(x,y); if(vert) c.rotate(Math.PI/2);
+  c.fillStyle=S.band; c.fillRect(0,-h/2,len,h);
+  var per=h*1.35, amp=h*0.30, t, dir, i;
+  for(dir=0;dir<2;dir++){
+    c.beginPath();
+    for(t=0;t<=len;t+=6){
+      var yy=(dir?1:-1)*amp*Math.sin(t/per*Math.PI);
+      if(t===0) c.moveTo(t,yy); else c.lineTo(t,yy);
+    }
+    c.lineCap="round";
+    c.lineWidth=h*0.30; c.strokeStyle="rgba(0,0,0,.35)"; c.stroke();
+    c.lineWidth=h*0.20; c.strokeStyle=gg(c,0,-h,len,h,S); c.stroke();
+  }
+  for(i=0;i*per<=len;i++){ starPath(c,i*per,0,h*0.26,.45,8,0); c.fillStyle=S.gold2; c.fill(); }
+  c.strokeStyle=S.gold; c.lineWidth=2; c.strokeRect(0,-h/2,len,h);
+  c.restore();
+}
+function tessellation(c,w,h,color,alpha,step){
+  c.save(); c.globalAlpha=alpha; c.strokeStyle=color; c.lineWidth=2;
+  for(var y=0;y<h+step;y+=step)
+    for(var x=((y/step)|0)%2?step/2:0;x<w+step;x+=step){
+      starPath(c,x,y,step*0.44,.42,8,0); c.stroke();
+      starPath(c,x,y,step*0.22,.42,8,Math.PI/8); c.stroke();
+    }
+  c.restore();
+}
+/* شريط قيشاني */
+function tileBand(c,x,y,w,h,S){
+  c.save();
+  c.fillStyle=S.paper; c.fillRect(x,y,w,h);
+  var step=h, n, cx, cy, i=0;
+  for(n=x;n<x+w;n+=step){
+    cx=n+step/2; cy=y+h/2;
+    starPath(c,cx,cy,h*0.44,.42,8,0); c.fillStyle=(i%2)?S.band:S.band2; c.fill();
+    c.strokeStyle=S.gold; c.lineWidth=2.5; c.stroke();
+    starPath(c,cx,cy,h*0.20,.42,8,Math.PI/8); c.fillStyle=S.gold2; c.fill(); i++;
+  }
+  c.restore();
+}
+function tileBandV(c,x,y,w,h,S){
+  c.save(); c.fillStyle=S.paper; c.fillRect(x,y,w,h);
+  var step=w,i=0,n;
+  for(n=y;n<y+h;n+=step){
+    var cx=x+w/2, cy=n+step/2;
+    starPath(c,cx,cy,w*0.44,.42,8,0); c.fillStyle=(i%2)?S.band:S.band2; c.fill();
+    c.strokeStyle=S.gold; c.lineWidth=2.5; c.stroke();
+    starPath(c,cx,cy,w*0.20,.42,8,Math.PI/8); c.fillStyle=S.gold2; c.fill(); i++;
+  }
+  c.restore();
+}
+/* إطار مفصّص */
+function scallop(c,x,y,w,h,r,S){
+  var i,n;
+  c.beginPath(); c.moveTo(x+r,y);
+  n=Math.round(w/(r*2));
+  for(i=0;i<n;i++) c.arc(x+r+i*(w/n),y,(w/n)/2,Math.PI,0,false);
+  c.lineTo(x+w,y+h-r);
+  n=Math.round(h/(r*2));
+  for(i=0;i<n;i++) c.arc(x+w,y+r+i*(h/n),(h/n)/2,-Math.PI/2,Math.PI/2,false);
+  c.lineTo(x+r,y+h);
+  n=Math.round(w/(r*2));
+  for(i=n;i>0;i--) c.arc(x+i*(w/n)-(w/n)/2,y+h,(w/n)/2,0,Math.PI,false);
+  c.lineTo(x,y+r);
+  n=Math.round(h/(r*2));
+  for(i=n;i>0;i--) c.arc(x,y+i*(h/n)-(h/n)/2,(h/n)/2,Math.PI/2,-Math.PI/2,false);
+  c.closePath();
+  c.fillStyle=S.band; c.fill();
+  c.strokeStyle=gg(c,x,y,x+w,y+h,S); c.lineWidth=5; c.stroke();
+}
+function wrap(c,t,maxW){
   var out=[];
-  String(text||"").split("\n").forEach(function(par){
-    if(par.trim()===""){ out.push(""); return; }
-    var words=par.trim().split(/\s+/), line="";
-    words.forEach(function(w){
+  String(t||"").split("\n").forEach(function(p){
+    if(!p.trim()){ out.push(""); return; }
+    var ws=p.trim().split(/\s+/), line="";
+    ws.forEach(function(w){
       var test=line?line+" "+w:w;
-      if(c.measureText(test).width>maxW && line){ out.push(line); line=w; }
-      else line=test;
+      if(c.measureText(test).width>maxW&&line){ out.push(line); line=w; } else line=test;
     });
     if(line) out.push(line);
   });
   return out;
 }
-function fit(c,text,maxW,maxH,maxSize,minSize,lh,weight){
-  for(var s=maxSize;s>=minSize;s-=2){
-    c.font=(weight||"")+s+"px "+AR;
-    var L=wrap(c,text,maxW);
+function fit(c,t,maxW,maxH,mx,mn,lh,wt){
+  for(var s=mx;s>=mn;s-=2){
+    c.font=(wt||"")+s+"px "+AR;
+    var L=wrap(c,t,maxW);
     if(L.length*s*lh<=maxH) return {size:s,lines:L};
   }
-  c.font=(weight||"")+minSize+"px "+AR;
-  return {size:minSize,lines:wrap(c,text,maxW)};
+  c.font=(wt||"")+mn+"px "+AR;
+  return {size:mn,lines:wrap(c,t,maxW)};
 }
-function center(c,lines,cx,y,size,lh,color){
-  c.textAlign="center"; c.textBaseline="alphabetic";
-  lines.forEach(function(l,i){
-    c.fillStyle=(typeof color==="function")?color(i):color;
-    c.fillText(l,cx,y+i*size*lh);
-  });
+function lines(c,L,cx,y,s,lh,color){
+  c.textAlign="center";
+  L.forEach(function(l,i){ c.fillStyle=(typeof color==="function")?color(i):color; c.fillText(l,cx,y+i*s*lh); });
+}
+var photoImg=null;
+function photoBG(c,w,h){
+  if(photoImg){
+    var r=Math.max(w/photoImg.width,h/photoImg.height);
+    c.drawImage(photoImg,(w-photoImg.width*r)/2,(h-photoImg.height*r)/2,photoImg.width*r,photoImg.height*r);
+  } else {
+    var g=c.createLinearGradient(0,0,w,h);
+    g.addColorStop(0,"#20303F"); g.addColorStop(.5,"#3E4A44"); g.addColorStop(1,"#12181D");
+    c.fillStyle=g; c.fillRect(0,0,w,h);
+  }
+  var s=c.createLinearGradient(0,0,0,h);
+  s.addColorStop(0,"rgba(6,10,14,.82)"); s.addColorStop(.45,"rgba(6,10,14,.55)"); s.addColorStop(1,"rgba(6,10,14,.88)");
+  c.fillStyle=s; c.fillRect(0,0,w,h);
 }
 
-function drawCard1(c,d){
-  var T=THEMES[d.theme]||THEMES.classic;
-  c.save(); c.direction="rtl";
-  c.fillStyle=T.paper; c.fillRect(0,0,W1,H1);
+/* ============ البطاقة الأولى ============ */
+function card1(c,S,d){
+  c.save(); c.direction="rtl"; c.textBaseline="alphabetic";
+  var F=S.frame;
 
-  c.strokeStyle=T.gold; c.lineWidth=3; c.strokeRect(26,26,W1-52,H1-52);
-  c.globalAlpha=.45; c.fillStyle="#FFFFFF"; c.fillRect(40,40,W1-80,H1-80); c.globalAlpha=1;
-  c.strokeStyle=T.border; c.lineWidth=6; c.strokeRect(112,112,W1-224,H1-224);
-  c.strokeStyle=T.gold; c.lineWidth=2; c.strokeRect(126,126,W1-252,H1-252);
+  if(F==="photo") photoBG(c,W1,H1);
+  else { c.fillStyle=S.paper; c.fillRect(0,0,W1,H1); }
 
-  var petals=[T.deep,"#1B4E8C",T.gold,"#1F6F4E"], k=0, step=74, x, y;
-  for(x=76;x<=W1-76;x+=step){
-    rosette(c,x,76,20,petals[k%4],T.gold);
-    rosette(c,x,H1-76,20,petals[(k+2)%4],T.gold); k++;
+  if(F==="plait"){
+    c.strokeStyle=gg(c,0,0,W1,H1,S); c.lineWidth=4; c.strokeRect(30,30,W1-60,H1-60);
+    var bh=62,m=54;
+    plait(c,m+bh/2,m+bh/2,W1-2*m-bh,bh,S,false);
+    plait(c,m+bh/2,H1-m-bh/2,W1-2*m-bh,bh,S,false);
+    plait(c,m+bh/2,m+bh/2,H1-2*m-bh,bh,S,true);
+    plait(c,W1-m-bh/2,m+bh/2,H1-2*m-bh,bh,S,true);
+    [[m+bh/2,m+bh/2],[W1-m-bh/2,m+bh/2],[m+bh/2,H1-m-bh/2],[W1-m-bh/2,H1-m-bh/2]]
+      .forEach(function(p){ medallion(c,p[0],p[1],54,S); });
+    c.strokeStyle=S.band2; c.lineWidth=3; c.strokeRect(m+bh+16,m+bh+16,W1-2*(m+bh+16),H1-2*(m+bh+16));
   }
-  for(y=150;y<=H1-150;y+=step){
-    rosette(c,76,y,20,petals[k%4],T.gold);
-    rosette(c,W1-76,y,20,petals[(k+1)%4],T.gold); k++;
+  else if(F==="tilestrip"){
+    var t=86;
+    tileBand(c,0,0,W1,t,S); tileBand(c,0,H1-t,W1,t,S);
+    tileBandV(c,0,t,t,H1-2*t,S); tileBandV(c,W1-t,t,t,H1-2*t,S);
+    c.strokeStyle=gg(c,0,0,W1,H1,S); c.lineWidth=4; c.strokeRect(t+12,t+12,W1-2*t-24,H1-2*t-24);
+    c.lineWidth=1.5; c.strokeRect(t+22,t+22,W1-2*t-44,H1-2*t-44);
   }
-  [[76,76],[W1-76,76],[76,H1-76],[W1-76,H1-76]].forEach(function(p){
-    star8(c,p[0],p[1],34,.46); c.fillStyle=T.deep; c.fill();
-    star8(c,p[0],p[1],20,.46); c.fillStyle=T.gold; c.fill();
-  });
+  else if(F==="scallop"){
+    scallop(c,86,86,W1-172,H1-172,44,S);
+    c.fillStyle=S.paper;
+    c.fillRect(126,126,W1-252,H1-252);
+    c.strokeStyle=gg(c,0,0,W1,H1,S); c.lineWidth=3; c.strokeRect(126,126,W1-252,H1-252);
+    tessellation(c,W1,H1,S.band,.05,180);
+  }
+  else if(F==="rules"){
+    tessellation(c,W1,H1,S.band,.055,190);
+    c.globalAlpha=.55; c.strokeStyle=S.band; c.lineWidth=2; c.strokeRect(70,70,W1-140,H1-140); c.globalAlpha=1;
+    c.strokeStyle=S.gold; c.lineWidth=5; c.strokeRect(84,84,W1-168,H1-168);
+  }
+  else if(F==="hairline"){
+    var rg=c.createRadialGradient(W1/2,H1*.42,60,W1/2,H1*.42,W1*.85);
+    rg.addColorStop(0,"#173257"); rg.addColorStop(1,S.paper);
+    c.fillStyle=rg; c.fillRect(0,0,W1,H1);
+    c.save(); c.translate(W1/2,H1*.42); c.globalAlpha=.16;
+    for(var i=0;i<48;i++){ c.rotate(Math.PI/24); c.beginPath(); c.moveTo(0,0); c.lineTo(0,-900);
+      c.lineWidth=(i%2)?2:8; c.strokeStyle=S.gold; c.stroke(); }
+    c.restore();
+    c.strokeStyle=gg(c,0,0,W1,H1,S); c.lineWidth=3; c.strokeRect(56,56,W1-112,H1-112);
+    c.lineWidth=1.5; c.strokeRect(70,70,W1-140,H1-140);
+    [[56,56],[W1-56,56],[56,H1-56],[W1-56,H1-56]].forEach(function(p){
+      starPath(c,p[0],p[1],26,.44,8,0); c.fillStyle=S.gold; c.fill(); });
+  }
+  else if(F==="sandrule"){
+    c.strokeStyle=S.band; c.lineWidth=16; c.strokeRect(64,64,W1-128,H1-128);
+    c.strokeStyle=S.gold; c.lineWidth=3; c.strokeRect(96,96,W1-192,H1-192);
+    [[64,64],[W1-64,64],[64,H1-64],[W1-64,H1-64]].forEach(function(p){
+      c.save(); c.translate(p[0],p[1]); c.rotate(Math.PI/4);
+      c.fillStyle=S.band2; c.fillRect(-26,-26,52,52);
+      c.fillStyle=S.gold2; c.fillRect(-12,-12,24,24); c.restore(); });
+  }
+  else {
+    c.strokeStyle=gg(c,0,0,W1,H1,S); c.lineWidth=3; c.strokeRect(52,52,W1-104,H1-104);
+    c.lineWidth=1; c.strokeRect(64,64,W1-128,H1-128);
+  }
 
-  c.font=AR_B+"46px "+AR; c.textAlign="center";
-  var hw=c.measureText(d.head).width+96;
-  rr(c,W1/2-hw/2,178,hw,88,16); c.fillStyle=T.deep; c.fill();
-  c.strokeStyle=T.gold; c.lineWidth=3; c.stroke();
-  c.fillStyle="#F5DFA6"; c.fillText(d.head,W1/2,236);
+  /* الترويسة */
+  c.font=B+"44px "+AR; c.textAlign="center";
+  var hw=c.measureText(d.head).width+110, hy=232;
+  if(F==="rules"||F==="sandrule"){
+    c.fillStyle=S.band; c.fillRect(W1/2-hw/2,hy-56,hw,84); c.fillStyle=S.paper;
+  } else {
+    starPath(c,W1/2-hw/2-34,hy-16,20,.45,8,0); c.fillStyle=S.gold; c.fill();
+    starPath(c,W1/2+hw/2+34,hy-16,20,.45,8,0); c.fill();
+    c.beginPath(); c.moveTo(W1/2-hw/2,hy+22); c.lineTo(W1/2+hw/2,hy+22);
+    c.strokeStyle=gg(c,W1/2-hw/2,0,W1/2+hw/2,0,S); c.lineWidth=3; c.stroke();
+    c.fillStyle=S.dark?S.gold2:S.band2;
+  }
+  c.fillText(d.head,W1/2,hy);
 
-  var hasNotes=d.notes.trim().length>0;
-  var px=170, py=308, pw=W1-340, ph=(hasNotes?720:840);
-  rr(c,px,py,pw,ph,20); c.fillStyle=T.panel; c.fill();
-  c.strokeStyle=T.gold; c.lineWidth=4; c.stroke();
-  rr(c,px+14,py+14,pw-28,ph-28,14); c.lineWidth=1.5; c.stroke();
-  [[px+52,py+52],[px+pw-52,py+52],[px+52,py+ph-52],[px+pw-52,py+ph-52]].forEach(function(p){
-    star8(c,p[0],p[1],18,.45); c.globalAlpha=.5; c.fillStyle=T.gold; c.fill(); c.globalAlpha=1;
-  });
+  /* النص */
+  var boxW=W1-440, top=380, boxH=560;
+  var f=fit(c,d.body,boxW,boxH,84,32,1.6,B);
+  c.font=B+f.size+"px "+AR;
+  var blk=f.lines.length*f.size*1.6;
+  if(S.dark){ c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=18; }
+  lines(c,f.lines,W1/2,top+(boxH-blk)/2+f.size,f.size,1.6,function(i){
+    return d.multi==="1"?S.accent[i%S.accent.length]:(S.dark?S.ink:S.accent[0]); });
+  c.shadowBlur=0;
 
-  var lh=1.55;
-  var f=fit(c,d.body,pw-150,ph-230,86,32,lh,AR_B);
-  c.font=AR_B+f.size+"px "+AR;
-  var blockH=f.lines.length*f.size*lh;
-  var startY=py+(ph-90-blockH)/2+f.size;
-  center(c,f.lines,W1/2,startY,f.size,lh,function(i){
-    return d.multi==="1" ? T.cycle[i%T.cycle.length] : T.solo;
-  });
-
+  /* التخريج */
+  var sy=top+boxH+80;
   if(d.src.trim()){
-    c.font="34px "+AR; c.textAlign="center";
-    var sw=c.measureText(d.src).width+70;
-    rr(c,W1/2-sw/2,py+ph-86,sw,60,10);
-    c.fillStyle="rgba(0,0,0,.05)"; c.fill();
-    c.strokeStyle=T.gold; c.lineWidth=1.5; c.stroke();
-    c.fillStyle=T.solo; c.fillText(d.src,W1/2,py+ph-44);
+    c.font="34px "+AR; c.globalAlpha=.7; c.strokeStyle=S.gold; c.lineWidth=2;
+    c.beginPath(); c.moveTo(W1/2-190,sy-14); c.lineTo(W1/2-70,sy-14);
+    c.moveTo(W1/2+70,sy-14); c.lineTo(W1/2+190,sy-14); c.stroke(); c.globalAlpha=1;
+    c.fillStyle=S.dark?S.gold2:S.ink; c.textAlign="center"; c.fillText(d.src,W1/2,sy);
   }
 
-  if(hasNotes){
-    var ny=py+ph+30, nh=H1-ny-150;
-    rr(c,px,ny,pw,nh,16); c.fillStyle="rgba(255,255,255,.72)"; c.fill();
-    c.strokeStyle="rgba(0,0,0,.10)"; c.lineWidth=1.5; c.stroke();
+  /* الفوائد */
+  if(d.notes.trim()){
+    var ny=sy+66, nh=H1-ny-200;
     c.font="30px "+AR;
-    var nl=fit(c,d.notes,pw-100,nh-60,32,18,1.8,"");
-    c.font=nl.size+"px "+AR; c.textAlign="right";
-    nl.lines.forEach(function(l,i){
-      var ly=ny+54+i*nl.size*1.8;
-      c.fillStyle=T.gold;
-      c.beginPath(); c.arc(px+pw-32,ly-10,5,0,Math.PI*2); c.fill();
-      c.fillStyle="#3A3428"; c.fillText(l,px+pw-52,ly);
+    var n=fit(c,d.notes,W1-500,nh,32,18,1.85,"");
+    c.font=n.size+"px "+AR; c.textAlign="right";
+    n.lines.forEach(function(l,i){
+      var ly=ny+40+i*n.size*1.85;
+      starPath(c,W1-262,ly-10,9,.45,8,0); c.fillStyle=S.gold; c.fill();
+      c.fillStyle=S.dark?"rgba(255,255,255,.82)":"rgba(34,48,63,.80)";
+      c.fillText(l,W1-288,ly);
     });
   }
+  if(S.grain&&F!=="photo") grain(c,W1,H1,S.dark?.10:.20);
   c.restore();
 }
 
-function drawCard2(c,d){
-  c.save(); c.direction="rtl";
-  var BLUE="#0E2E6E", BLUE2="#17509E", GOLD="#D9A62E", GOLD2="#F3D07A", INK="#12356F";
+/* ============ عناصر المسجد ============ */
+function dome(c,cx,base,w,h,fill,gold){
+  var hw=w/2;
+  c.beginPath(); c.moveTo(cx-hw,base);
+  c.bezierCurveTo(cx-hw*1.06,base-h*.42,cx-hw*.86,base-h*.72,cx,base-h);
+  c.bezierCurveTo(cx+hw*.86,base-h*.72,cx+hw*1.06,base-h*.42,cx+hw,base);
+  c.closePath(); c.fillStyle=fill; c.fill();
+  c.strokeStyle=gold; c.lineWidth=4; c.stroke();
+  c.beginPath(); c.moveTo(cx,base-h); c.lineTo(cx,base-h-46); c.lineWidth=6; c.stroke();
+  c.beginPath(); c.arc(cx,base-h-70,20,Math.PI*.28,Math.PI*1.72); c.lineWidth=7; c.stroke();
+}
+function minaret(c,x,base,hh,fill,gold){
+  c.fillStyle=fill; c.fillRect(x-15,base-hh,30,hh);
+  c.fillRect(x-26,base-hh*.62,52,16);
+  c.strokeStyle=gold; c.lineWidth=3; c.strokeRect(x-26,base-hh*.62,52,16);
+  c.beginPath(); c.moveTo(x-18,base-hh); c.quadraticCurveTo(x,base-hh-58,x+18,base-hh); c.closePath();
+  c.fill(); c.stroke();
+  c.beginPath(); c.moveTo(x,base-hh-58); c.lineTo(x,base-hh-84); c.stroke();
+}
 
-  c.fillStyle="#F5F8FD"; c.fillRect(0,0,W2,H2);
-  c.globalAlpha=.05; c.fillStyle=BLUE;
-  for(var yy=430;yy<H2;yy+=150){
-    for(var xx=(((yy/150)|0)%2?75:0);xx<W2;xx+=150){ star8(c,xx,yy,46,.42); c.fill(); }
+/* ============ البطاقة الثانية ============ */
+function card2(c,S,d){
+  c.save(); c.direction="rtl"; c.textBaseline="alphabetic";
+  var F=S.frame, headH=560, i, y;
+
+  if(F==="photo") photoBG(c,W2,H2);
+  else if(F==="hairline"){
+    var g=c.createLinearGradient(0,0,0,H2);
+    g.addColorStop(0,"#071227"); g.addColorStop(.55,"#0C1C33"); g.addColorStop(1,"#050B16");
+    c.fillStyle=g; c.fillRect(0,0,W2,H2);
+    for(i=0;i<150;i++){
+      c.beginPath(); c.arc(Math.random()*W2,Math.random()*H2*.55,Math.random()*2.4,0,Math.PI*2);
+      c.fillStyle="rgba(255,245,210,"+(0.25+Math.random()*0.6)+")"; c.fill();
+    }
+  } else {
+    c.fillStyle=S.paper; c.fillRect(0,0,W2,H2);
+    tessellation(c,W2,H2,S.band,.05,200);
   }
-  c.globalAlpha=1;
 
-  var g=c.createLinearGradient(0,0,0,400);
-  g.addColorStop(0,"#081E4B"); g.addColorStop(1,BLUE2);
-  c.fillStyle=g; c.fillRect(0,0,W2,392);
-
-  var ag=c.createLinearGradient(0,120,0,392); ag.addColorStop(0,GOLD2); ag.addColorStop(1,GOLD);
-  c.strokeStyle=ag; c.lineJoin="round";
-  [[0,26],[70,16]].forEach(function(a){
-    c.lineWidth=a[1]; c.beginPath();
-    c.moveTo(-20,392); c.lineTo(-20,300+a[0]);
-    c.quadraticCurveTo(W2/2,60+a[0],W2+20,300+a[0]); c.lineTo(W2+20,392); c.stroke();
-  });
-
-  c.fillStyle="#1B57B0";
-  c.fillRect(W2/2-24,150,6,70);
-  c.beginPath(); c.arc(W2/2-21,146,10,0,Math.PI*2); c.fill();
-  c.beginPath(); c.moveTo(W2/2-150,392); c.lineTo(W2/2-150,300);
-  c.quadraticCurveTo(W2/2,132,W2/2+150,300); c.lineTo(W2/2+150,392); c.closePath(); c.fill();
-  [-190,190].forEach(function(o){
-    c.fillRect(W2/2+o-14,236,28,156);
-    c.beginPath(); c.moveTo(W2/2+o-20,236); c.lineTo(W2/2+o,190); c.lineTo(W2/2+o+20,236); c.closePath(); c.fill();
-  });
-
-  [200,W2-200].forEach(function(x){
-    c.strokeStyle=GOLD; c.lineWidth=4;
-    c.beginPath(); c.moveTo(x,0); c.lineTo(x,150); c.stroke();
-    var lg=c.createLinearGradient(x-38,150,x+38,300);
-    lg.addColorStop(0,GOLD2); lg.addColorStop(1,GOLD);
-    c.fillStyle=lg;
-    c.beginPath();
-    c.moveTo(x,150); c.lineTo(x+38,192); c.lineTo(x+30,268); c.lineTo(x,300);
-    c.lineTo(x-30,268); c.lineTo(x-38,192); c.closePath(); c.fill();
-    c.fillStyle="rgba(255,245,190,.75)"; c.fillRect(x-16,200,32,58);
-  });
+  /* الترويسة */
+  if(F==="plait"||F==="scallop"||F==="tilestrip"){
+    var hg=c.createLinearGradient(0,0,0,headH);
+    hg.addColorStop(0,S.band2); hg.addColorStop(1,S.band);
+    c.fillStyle=hg; c.fillRect(0,0,W2,headH);
+    c.save(); c.beginPath(); c.rect(0,0,W2,headH); c.clip();
+    dome(c,W2/2,headH,300,240,S.band2,S.gold2);
+    minaret(c,W2/2-215,headH,300,S.band2,S.gold2);
+    minaret(c,W2/2+215,headH,300,S.band2,S.gold2);
+    c.restore();
+    if(F==="tilestrip") tileBand(c,0,headH-46,W2,60,S);
+    else plait(c,40,headH-2,W2-80,54,S,false);
+  }
+  else if(F==="rules"||F==="sandrule"){
+    c.fillStyle=S.band; c.fillRect(0,0,W2,headH-120);
+    c.save(); c.beginPath(); c.rect(0,0,W2,headH-120); c.clip();
+    dome(c,W2/2,headH-120,290,230,S.band2,S.gold2);
+    minaret(c,W2/2-210,headH-120,280,S.band2,S.gold2);
+    minaret(c,W2/2+210,headH-120,280,S.band2,S.gold2);
+    c.restore();
+    c.strokeStyle=S.gold; c.lineWidth=6;
+    c.beginPath(); c.moveTo(0,headH-120); c.lineTo(W2,headH-120); c.stroke();
+  }
+  else {
+    c.save(); c.globalAlpha=.92;
+    dome(c,W2/2,headH-40,300,240,F==="photo"?"rgba(0,0,0,.35)":"rgba(10,22,44,.92)",S.gold);
+    minaret(c,W2/2-215,headH-40,300,F==="photo"?"rgba(0,0,0,.35)":"rgba(10,22,44,.92)",S.gold);
+    minaret(c,W2/2+215,headH-40,300,F==="photo"?"rgba(0,0,0,.35)":"rgba(10,22,44,.92)",S.gold);
+    c.restore();
+    c.strokeStyle=gg(c,0,0,W2,0,S); c.lineWidth=3;
+    c.beginPath(); c.moveTo(90,headH+18); c.lineTo(W2-90,headH+18); c.stroke();
+  }
 
   c.textAlign="center";
-  c.font=AR_B+"70px "+AR; c.fillStyle="#8A5E12";
-  c.fillText("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",W2/2,540);
-  c.font="27px "+AR;
-  center(c,wrap(c,AYAH,W2-260),W2/2,600,27,1.6,"#3D5B8C");
+  c.font=B+"68px "+AR;
+  c.fillStyle=S.dark?S.gold2:(F==="rules"||F==="sandrule"?S.band:"#7A5410");
+  if(S.dark){ c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=16; }
+  c.fillText("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",W2/2,headH+130);
+  c.shadowBlur=0;
 
-  c.font=AR_B+"40px "+AR;
-  c.fillStyle=INK; c.textAlign="center";
-  c.fillText("حسب التوقيت المحلي لمدينة "+d.city+" وما حولها ليوم:",W2/2,790);
-  c.font=AR_B+"40px "+AR;
-  center(c,wrap(c,d.date,W2-180),W2/2,858,40,1.4,"#0B4F8A");
+  c.font=B+"38px "+AR; c.fillStyle=S.dark?"rgba(255,255,255,.85)":S.ink;
+  c.fillText("مواقيت الصلاة في "+d.city+" وما حولها",W2/2,headH+215);
+  c.font="34px "+AR; c.fillStyle=S.dark?S.gold2:S.band;
+  lines(c,wrap(c,d.date,W2-180),W2/2,headH+272,34,1.4,S.dark?S.gold2:S.band);
 
-  var top=990, gap=132, i, y;
+  var top=headH+400, gapY=126;
   for(i=0;i<6;i++){
-    y=top+i*gap;
-    c.save();
-    c.strokeStyle="rgba(14,46,110,.55)"; c.lineWidth=3; c.lineJoin="round"; c.fillStyle=GOLD;
-    c.font=AR_B+"66px "+AR; c.textAlign="right";
-    c.strokeText(LABELS[i],880,y); c.fillText(LABELS[i],880,y);
-    c.font=AR_B+"56px "+AR; c.textAlign="center";
-    c.strokeText(":",640,y); c.fillText(":",640,y);
-    c.font=AR_B+"72px "+AR; c.textAlign="right";
-    c.strokeText(d.times[i],540,y); c.fillText(d.times[i],540,y);
-    c.restore();
+    y=top+i*gapY;
+    if(S.rows==="ornate"){
+      c.save();
+      c.font=B+"62px "+AR; c.textAlign="right"; c.fillStyle=S.dark?S.gold2:S.band;
+      c.fillText(LABELS[i],850,y);
+      c.font=B+"70px "+AR; c.fillStyle=gg(c,300,y-50,560,y,S);
+      c.strokeStyle=S.dark?"rgba(0,0,0,.5)":"rgba(0,0,0,.35)"; c.lineWidth=2.5;
+      c.strokeText(d.times[i],520,y); c.fillText(d.times[i],520,y);
+      c.restore();
+      starPath(c,W2/2+8,y-20,11,.45,8,0); c.globalAlpha=.85; c.fillStyle=S.gold; c.fill(); c.globalAlpha=1;
+    } else {
+      c.save();
+      c.fillStyle="rgba(0,0,0,.045)"; c.fillRect(180,y-72,W2-360,100);
+      c.font=B+"60px "+AR; c.textAlign="right"; c.fillStyle=S.band; c.fillText(LABELS[i],830,y);
+      c.font=B+"64px "+AR; c.fillStyle=S.gold; c.fillText(d.times[i],500,y);
+      c.restore();
+    }
     if(i<5){
-      c.strokeStyle="rgba(14,46,110,.10)"; c.lineWidth=2;
-      c.beginPath(); c.moveTo(300,y+36); c.lineTo(880,y+36); c.stroke();
+      c.strokeStyle=S.dark?"rgba(217,180,90,.22)":"rgba(0,0,0,.10)"; c.lineWidth=2;
+      c.beginPath(); c.moveTo(230,y+30); c.lineTo(850,y+30); c.stroke();
     }
   }
 
   if(d.msg.trim()){
-    c.font="36px "+AR;
-    var m=fit(c,d.msg,W2-200,210,38,22,1.7,"");
+    c.font="34px "+AR;
+    var m=fit(c,d.msg,W2-260,150,36,22,1.7,"");
     c.font=m.size+"px "+AR;
-    center(c,m.lines,W2/2,1798-(m.lines.length-1)*m.size*1.7,m.size,1.7,"#12356F");
+    lines(c,m.lines,W2/2,H2-250-(m.lines.length-1)*m.size*1.7,m.size,1.7,
+      S.dark?"rgba(255,255,255,.85)":S.ink);
   }
 
-  c.fillStyle=GOLD;
-  for(var s=20;s<W2;s+=54){
-    c.beginPath(); c.moveTo(s-16,H2-96); c.lineTo(s,H2-126); c.lineTo(s+16,H2-96); c.closePath(); c.fill();
+  if(d.ribbon.trim()){
+    c.font=B+"42px "+AR;
+    var bw=Math.min(W2-140,c.measureText(d.ribbon).width+130), by=H2-150;
+    c.beginPath(); c.moveTo(W2/2-bw/2,by); c.lineTo(W2/2+bw/2,by);
+    c.lineTo(W2/2+bw/2-34,by+40); c.lineTo(W2/2-bw/2+34,by+40); c.closePath();
+    c.fillStyle=S.dark?"rgba(217,180,90,.16)":"rgba(0,0,0,.05)"; c.fill();
+    c.strokeStyle=gg(c,W2/2-bw/2,by,W2/2+bw/2,by+40,S); c.lineWidth=3; c.stroke();
+    c.textAlign="center"; c.fillStyle=S.dark?S.gold2:S.band;
+    c.fillText(d.ribbon,W2/2,by+30);
   }
-  c.fillStyle=BLUE; c.fillRect(0,H2-96,W2,96);
-  var bg2=c.createLinearGradient(0,H2-84,0,H2-16);
-  bg2.addColorStop(0,GOLD2); bg2.addColorStop(1,GOLD);
-  c.font=AR_B+"44px "+AR; c.textAlign="center";
-  var bw=Math.min(W2-120,c.measureText(d.ribbon).width+120);
-  rr(c,W2/2-bw/2,H2-84,bw,68,34); c.fillStyle=bg2; c.fill();
-  c.fillStyle=BLUE; c.fillText(d.ribbon,W2/2,H2-36);
+
+  if(S.grain&&F!=="photo") grain(c,W2,H2,S.dark?.09:.18);
   c.restore();
 }
 
+/* ============ الواجهة ============ */
 var cv1=document.createElement("canvas"); cv1.width=W1; cv1.height=H1;
 var cv2=document.createElement("canvas"); cv2.width=W2; cv2.height=H2;
-var ctx1=cv1.getContext("2d"), ctx2=cv2.getContext("2d");
-function $(id){ return document.getElementById(id); }
+var x1=cv1.getContext("2d"), x2=cv2.getContext("2d");
+function $(i){ return document.getElementById(i); }
+var styleKey=DAY_STYLE[new Date().getDay()], ribbonIdx=0, hadithIdx=0, msgIdx=0;
 
+function pickedDate(){
+  var v=$("f_date").value, p=v?v.split("-"):null;
+  if(!p||p.length!==3) return new Date();
+  return new Date(+p[0],+p[1]-1,+p[2]);
+}
+function isoToday(){
+  var d=new Date();
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
+function dateString(){
+  var d=pickedDate(), off=parseInt($("f_hijriAdj").value,10)||0;
+  var hd=new Date(d.getTime()+off*86400000), h=hijri(hd);
+  return DAYS[d.getDay()]+" : "+(h?h+" ـ ":"")+pad(d.getDate())+"/"+MON[d.getMonth()]+"/"+d.getFullYear()+" م";
+}
+function defaultRibbon(){
+  var dw=pickedDate().getDay();
+  return DAY_RIBBON[dw]||RIBBONS[0];
+}
+function readTimes(){
+  var out=[],i,h,m;
+  for(i=0;i<6;i++){
+    h=parseInt($("h"+i).value,10); m=parseInt($("m"+i).value,10);
+    if(isNaN(h)) h=12; if(isNaN(m)) m=0;
+    out.push(h+"."+(m<10?"0":"")+m);
+  }
+  return out;
+}
+function writeTimes(list){
+  for(var i=0;i<6;i++){ $("h"+i).value=list[i].h; $("m"+i).value=pad(list[i].m); }
+}
+function recalc(){
+  var d=pickedDate(), c=city();
+  var list=prayerTimes(d.getFullYear(),d.getMonth()+1,d.getDate(),c,
+    $("f_method").value,parseInt($("f_asr").value,10),$("f_ihtiyat").value==="1");
+  writeTimes(list);
+  $("calcNote").textContent="محسوبة لـ"+c.n+" حسب "+METHODS[$("f_method").value].label+
+    (c.tz!==3?" (توقيت +"+c.tz+")":"")+". عدّل أي وقت يدويًا عند الحاجة.";
+}
 function readState(){
-  return {
-    head:$("f_head").value, body:$("f_body").value, src:$("f_src").value,
-    notes:$("f_notes").value, theme:$("f_theme").value, multi:$("f_multi").value,
-    city:$("f_city").value, date:$("f_date").value,
-    times:[0,1,2,3,4,5].map(function(i){ return $("t"+i).value; }),
-    msg:$("f_msg").value, ribbon:$("f_ribbon").value
-  };
+  return { head:$("f_head").value, body:$("f_body").value, src:$("f_src").value, notes:$("f_notes").value,
+    multi:$("f_multi").value, cityIdx:$("f_city").selectedIndex, date:dateString(), iso:$("f_date").value,
+    method:$("f_method").value, asr:$("f_asr").value, ihtiyat:$("f_ihtiyat").value, hijriAdj:$("f_hijriAdj").value,
+    times:readTimes(), msg:$("f_msg").value, ribbon:$("f_ribbon").value,
+    styleKey:styleKey, autoStyle:$("f_autostyle").checked, autoRibbon:$("f_autoribbon").checked };
 }
 function applyState(s){
-  $("f_head").value=s.head; $("f_body").value=s.body; $("f_src").value=s.src;
-  $("f_notes").value=s.notes; $("f_theme").value=s.theme; $("f_multi").value=s.multi;
-  $("f_city").value=s.city; $("f_date").value=s.date||todayString();
-  (s.times||DEF.times).forEach(function(v,i){ $("t"+i).value=v; });
-  $("f_msg").value=s.msg; $("f_ribbon").value=s.ribbon;
+  $("f_head").value=s.head; $("f_body").value=s.body; $("f_src").value=s.src; $("f_notes").value=s.notes;
+  $("f_multi").value=s.multi;
+  $("f_city").selectedIndex=(typeof s.cityIdx==="number")?s.cityIdx:0;
+  $("f_date").value=isoToday();
+  $("f_method").value=s.method||city().m;
+  $("f_asr").value=s.asr||"1";
+  $("f_ihtiyat").value=s.ihtiyat||"1";
+  $("f_hijriAdj").value=s.hijriAdj||"0";
+  $("f_msg").value=s.msg;
+  $("f_autostyle").checked=s.autoStyle!==false;
+  $("f_autoribbon").checked=s.autoRibbon!==false;
+  $("f_ribbon").value=$("f_autoribbon").checked?defaultRibbon():(s.ribbon||defaultRibbon());
+  styleKey=$("f_autostyle").checked?DAY_STYLE[pickedDate().getDay()]:(s.styleKey||styleKey);
+  markStyle(); recalc();
 }
-
+function markStyle(){
+  Array.prototype.forEach.call($("styleBar").children,function(b){
+    b.setAttribute("aria-pressed",b.dataset.k===styleKey);
+  });
+  $("photoBox").hidden=!STYLES[styleKey].photo;
+}
 var timer=null;
 function render(){
-  var d=readState();
-  drawCard1(ctx1,d); drawCard2(ctx2,d);
+  var s=readState(), S=STYLES[styleKey];
+  var d={ head:s.head, body:s.body, src:s.src, notes:s.notes, multi:s.multi,
+          city:CITIES[s.cityIdx].n, date:s.date, times:s.times, msg:s.msg, ribbon:s.ribbon };
+  x1.clearRect(0,0,W1,H1); x2.clearRect(0,0,W2,H2);
+  card1(x1,S,d); card2(x2,S,d);
   $("img1").src=cv1.toDataURL("image/png");
   $("img2").src=cv2.toDataURL("image/png");
 }
-function schedule(){
-  clearTimeout(timer);
-  timer=setTimeout(function(){ render(); save(); },220);
-}
+function schedule(){ clearTimeout(timer); timer=setTimeout(function(){ render(); save(); },220); }
 
-/* التخزين: يستخدم مخزن Claude إن وُجد، وإلا مخزن المتصفح (GitHub Pages وغيره) */
-var KEY="two-cards:v1";
-function store(v){
-  return new Promise(function(res){
-    var done=false;
-    try{
-      if(window.storage && window.storage.set){
-        window.storage.set(KEY,v).then(function(){ res(true); })["catch"](function(){ res(fallbackSet(v)); });
-        done=true;
-      }
-    }catch(e){}
-    if(!done) res(fallbackSet(v));
-  });
-}
-function fallbackSet(v){ try{ window.localStorage.setItem(KEY,v); return true; }catch(e){ return false; } }
-function fallbackGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ return null; } }
-
+/* التخزين */
+var KEY="two-cards:v3";
+function fbSet(v){ try{ window.localStorage.setItem(KEY,v); return true; }catch(e){ return false; } }
+function fbGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ return null; } }
 function save(){
   if(!$("f_auto").checked) return;
-  store(JSON.stringify(readState())).then(function(ok){
-    if(!ok) return;
-    var el=$("saved"); el.textContent="تم الحفظ";
-    setTimeout(function(){ if(el.textContent==="تم الحفظ") el.textContent=""; },1400);
-  });
+  var v=JSON.stringify(readState()), done=false;
+  function ok(){ var el=$("saved"); el.textContent="تم الحفظ";
+    setTimeout(function(){ if(el.textContent==="تم الحفظ") el.textContent=""; },1400); }
+  try{
+    if(window.storage&&window.storage.set){
+      window.storage.set(KEY,v).then(ok)["catch"](function(){ if(fbSet(v)) ok(); }); done=true;
+    }
+  }catch(e){}
+  if(!done&&fbSet(v)) ok();
 }
 function load(){
   return new Promise(function(res){
-    var raw=null;
     function fin(r){ try{ res(r?JSON.parse(r):null); }catch(e){ res(null); } }
     try{
-      if(window.storage && window.storage.get){
-        window.storage.get(KEY).then(function(r){
-          fin(r && r.value ? r.value : fallbackGet());
-        })["catch"](function(){ fin(fallbackGet()); });
+      if(window.storage&&window.storage.get){
+        window.storage.get(KEY).then(function(r){ fin(r&&r.value?r.value:fbGet()); })["catch"](function(){ fin(fbGet()); });
         return;
       }
     }catch(e){}
-    raw=fallbackGet(); fin(raw);
+    fin(fbGet());
   });
 }
 
-function stamp(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+/* التصدير */
+function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function toBlob(cv){ return new Promise(function(r){ cv.toBlob(r,"image/png"); }); }
-function download(blob,name){
-  var u=URL.createObjectURL(blob), a=document.createElement("a");
-  a.href=u; a.download=name; document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(u); },3000);
-}
-
+function dl(b,n){ var u=URL.createObjectURL(b), a=document.createElement("a");
+  a.href=u; a.download=n; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(u); },3000); }
 $("btnDl").onclick=function(){
   render();
-  toBlob(cv1).then(function(b){
-    download(b,"hadith-"+stamp()+".png");
-    return toBlob(cv2);
-  }).then(function(b){
-    setTimeout(function(){ download(b,"prayer-"+stamp()+".png"); },700);
-  });
+  toBlob(cv1).then(function(b){ dl(b,"hadith-"+stamp()+".png"); return toBlob(cv2); })
+    .then(function(b){ setTimeout(function(){ dl(b,"prayer-"+stamp()+".png"); },700); });
 };
 $("btnShare").onclick=function(){
   render();
   Promise.all([toBlob(cv1),toBlob(cv2)]).then(function(bs){
     try{
-      var files=[ new File([bs[0]],"hadith-"+stamp()+".png",{type:"image/png"}),
-                  new File([bs[1]],"prayer-"+stamp()+".png",{type:"image/png"}) ];
-      if(navigator.canShare && navigator.canShare({files:files})){
-        navigator.share({files:files})["catch"](function(){});
-        return;
-      }
+      var f=[new File([bs[0]],"hadith-"+stamp()+".png",{type:"image/png"}),
+             new File([bs[1]],"prayer-"+stamp()+".png",{type:"image/png"})];
+      if(navigator.canShare&&navigator.canShare({files:f})){ navigator.share({files:f})["catch"](function(){}); return; }
     }catch(e){}
-    $("saved").textContent="المشاركة المباشرة غير مدعومة في هذا المتصفح. استخدم التنزيل أو الضغط المطول على الصورة.";
+    $("saved").textContent="المشاركة غير مدعومة هنا. استخدم التنزيل أو الضغط المطول على الصورة.";
   });
 };
 $("btnReset").onclick=function(){
-  var s=JSON.parse(JSON.stringify(DEF)); s.date=todayString();
+  var s=JSON.parse(JSON.stringify(DEF));
+  s.autoStyle=true; s.autoRibbon=true; s.cityIdx=0;
   applyState(s); render(); save();
 };
-$("btnToday").onclick=function(){ $("f_date").value=todayString(); schedule(); };
 
-PRESETS.forEach(function(p,i){
-  var o=document.createElement("option");
-  o.value=String(i); o.textContent=p.t; $("f_preset").appendChild(o);
+/* حقول المواقيت */
+(function buildTimes(){
+  var box=$("timesBox"), i;
+  for(i=0;i<6;i++){
+    var cell=document.createElement("div");
+    cell.className="tcell";
+    cell.innerHTML='<label for="h'+i+'">'+LABELS[i].replace(/ـ/g,"")+'</label>'+
+      '<div class="hm"><input type="number" id="h'+i+'" min="1" max="12" inputmode="numeric">'+
+      '<span>:</span><input type="number" id="m'+i+'" min="0" max="59" inputmode="numeric"></div>';
+    box.appendChild(cell);
+  }
+})();
+
+/* المكتبات */
+HADITHS.forEach(function(h,i){
+  var o=document.createElement("option"); o.value=String(i); o.textContent=h.t; $("f_lib").appendChild(o);
 });
-$("f_preset").onchange=function(){
-  var i=this.value; if(i==="") return;
-  $("f_body").value=PRESETS[i].b; $("f_src").value=PRESETS[i].s; $("f_notes").value=PRESETS[i].n;
+function useHadith(i){
+  hadithIdx=i; $("f_lib").selectedIndex=i;
+  $("f_body").value=HADITHS[i].b; $("f_src").value=HADITHS[i].s; $("f_notes").value=HADITHS[i].n;
+  schedule();
+}
+$("f_lib").onchange=function(){ useHadith(this.selectedIndex); };
+$("btnNextHadith").onclick=function(){ useHadith((hadithIdx+1)%HADITHS.length); };
+
+MESSAGES.forEach(function(m,i){
+  var o=document.createElement("option"); o.value=String(i);
+  o.textContent=m.length>34?m.slice(0,34)+"…":m; $("f_msgLib").appendChild(o);
+});
+function useMsg(i){ msgIdx=i; $("f_msgLib").selectedIndex=i; $("f_msg").value=MESSAGES[i]; schedule(); }
+$("f_msgLib").onchange=function(){ useMsg(this.selectedIndex); };
+$("btnNextMsg").onclick=function(){ useMsg((msgIdx+1)%MESSAGES.length); };
+$("btnRibbon").onclick=function(){
+  ribbonIdx=(ribbonIdx+1)%RIBBONS.length;
+  $("f_ribbon").value=RIBBONS[ribbonIdx];
+  $("f_autoribbon").checked=false; schedule();
+};
+
+/* المدن */
+CITIES.forEach(function(c){
+  var o=document.createElement("option"); o.textContent=c.n; $("f_city").appendChild(o);
+});
+$("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedule(); };
+$("f_date").onchange=function(){
+  if($("f_autostyle").checked){ styleKey=DAY_STYLE[pickedDate().getDay()]; markStyle(); }
+  if($("f_autoribbon").checked) $("f_ribbon").value=defaultRibbon();
+  recalc(); schedule();
+};
+["f_method","f_asr","f_ihtiyat"].forEach(function(id){
+  $(id).onchange=function(){ recalc(); schedule(); };
+});
+$("f_hijriAdj").onchange=schedule;
+$("btnRecalc").onclick=function(){ recalc(); schedule(); };
+
+$("f_photo").onchange=function(e){
+  var f=e.target.files&&e.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){ var im=new Image(); im.onload=function(){ photoImg=im; render(); }; im.src=r.result; };
+  r.readAsDataURL(f);
+};
+
+/* الأنماط */
+Object.keys(STYLES).forEach(function(k){
+  var b=document.createElement("button");
+  b.dataset.k=k;
+  b.innerHTML=STYLES[k].name+' <span class="d">'+STYLES[k].day+'</span>';
+  b.onclick=function(){ styleKey=k; $("f_autostyle").checked=false; markStyle(); schedule(); };
+  $("styleBar").appendChild(b);
+});
+$("f_autostyle").onchange=function(){
+  if(this.checked){ styleKey=DAY_STYLE[pickedDate().getDay()]; markStyle(); }
+  schedule();
+};
+$("f_autoribbon").onchange=function(){
+  if(this.checked) $("f_ribbon").value=defaultRibbon();
   schedule();
 };
 
 function tabTo(n){
-  $("tab1").setAttribute("aria-selected",n===1);
-  $("tab2").setAttribute("aria-selected",n===2);
-  $("sheet1").classList.toggle("on",n===1);
-  $("sheet2").classList.toggle("on",n===2);
+  $("tab1").setAttribute("aria-selected",n===1); $("tab2").setAttribute("aria-selected",n===2);
+  $("sheet1").classList.toggle("on",n===1); $("sheet2").classList.toggle("on",n===2);
 }
 $("tab1").onclick=function(){ tabTo(1); };
 $("tab2").onclick=function(){ tabTo(2); };
 
-["f_head","f_body","f_src","f_notes","f_theme","f_multi","f_city","f_date","f_msg","f_ribbon",
- "t0","t1","t2","t3","t4","t5"].forEach(function(id){
-  $(id).addEventListener("input",schedule);
-  $(id).addEventListener("change",schedule);
+["f_head","f_body","f_src","f_notes","f_multi","f_msg","f_ribbon",
+ "h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"].forEach(function(id){
+  $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule);
 });
 
 (function start(){
-  var s=JSON.parse(JSON.stringify(DEF)); s.date=todayString();
+  var s=JSON.parse(JSON.stringify(DEF));
+  s.autoStyle=true; s.autoRibbon=true; s.cityIdx=0;
   applyState(s);
   load().then(function(saved){
-    if(saved){ saved.date=saved.date||todayString(); applyState(saved); }
+    if(saved){ applyState(saved); }
     var go=function(){ render(); };
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,1600); }
-    else go();
+    if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,1600); } else go();
   });
 })();
-
 })();
+
 </script>
 </body>
 </html>
