@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>البطاقتان اليوميتان</title>
+<meta name="theme-color" content="#10233F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="البطاقتان">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10233F;
+    --ink-soft:#2C4260;
+    --paper:#F7F1E3;
+    --paper-2:#FFFDF7;
+    --gold:#B9862B;
+    --teal:#1F6F63;
+    --line:rgba(16,35,63,.14);
+    --shadow:0 18px 40px -22px rgba(16,35,63,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Tajawal",system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  header{
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    background:var(--paper-2);
+    position:sticky;top:0;z-index:20;
+  }
+  header h1{font-family:"Amiri",serif;font-weight:700;font-size:26px;margin:0;letter-spacing:.5px}
+  header .sub{font-size:13px;color:var(--ink-soft);opacity:.8}
+  .wrap{
+    max-width:1180px;margin:0 auto;padding:18px 16px 120px;
+    display:grid;grid-template-columns:1fr;gap:22px;
+  }
+  @media(min-width:960px){
+    .wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:40px}
+    .panel{position:sticky;top:78px}
+  }
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{
+    flex:1;padding:11px 10px;border:1px solid var(--line);background:var(--paper-2);
+    border-radius:12px;font:inherit;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer;
+  }
+  .tab[aria-selected="true"]{background:var(--ink);color:#F3E6C8;border-color:var(--ink)}
+  .tab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+    outline:2px solid var(--gold);outline-offset:2px;
+  }
+  .stage{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:18px;
+    padding:14px;box-shadow:var(--shadow);
+  }
+  .sheet{display:none}
+  .sheet.on{display:block}
+  .sheet img{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
+  .hint{font-size:12px;color:var(--ink-soft);opacity:.75;margin:10px 2px 0;line-height:1.7}
+  .panel{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:16px}
+  fieldset{border:0;padding:0;margin:0 0 18px}
+  legend{
+    font-family:"Amiri",serif;font-size:19px;font-weight:700;margin-bottom:10px;
+    padding-bottom:6px;border-bottom:2px solid var(--gold);width:100%;
+  }
+  label{display:block;font-size:13px;font-weight:500;margin:12px 0 5px;color:var(--ink-soft)}
+  input[type=text],textarea,select{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font:inherit;font-size:15px;background:#fff;color:var(--ink);
+  }
+  textarea{min-height:104px;resize:vertical;line-height:1.9;font-family:"Amiri",serif;font-size:17px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .row{display:flex;gap:8px;align-items:flex-end}
+  .row > div{flex:1}
+  .btn{
+    padding:11px 14px;border-radius:11px;border:1px solid var(--ink);
+    background:var(--ink);color:#F3E6C8;font:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#20160A}
+  .btn:active{transform:translateY(1px)}
+  .actions{
+    position:fixed;inset:auto 0 0 0;background:rgba(247,241,227,.96);
+    border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px);
+  }
+  .actions .btn{flex:1}
+  @media(min-width:960px){
+    .actions{position:static;background:none;border:0;padding:14px 0 0;backdrop-filter:none}
+  }
+  .check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}
+  .check input{width:18px;height:18px;accent-color:var(--gold)}
+  .saved{font-size:12px;color:var(--teal);min-height:16px;margin-top:8px;font-weight:500;line-height:1.6}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>البطاقتان اليوميتان</h1>
+  <span class="sub">عدّل النص والأوقات، ثم صدّر صورتين جاهزتين للإرسال.</span>
+</header>
+
+<div class="wrap">
+
+  <main>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab1" aria-selected="true" aria-controls="sheet1">الصفحة الأولى: الحديث</button>
+      <button class="tab" role="tab" id="tab2" aria-selected="false" aria-controls="sheet2">الصفحة الثانية: المواقيت</button>
+    </div>
+    <div class="stage">
+      <div class="sheet on" id="sheet1" role="tabpanel" aria-labelledby="tab1"><img id="img1" alt="معاينة بطاقة الحديث"></div>
+      <div class="sheet" id="sheet2" role="tabpanel" aria-labelledby="tab2"><img id="img2" alt="معاينة بطاقة المواقيت"></div>
+      <p class="hint">على الجوال: اضغط مطولًا على الصورة لحفظها أو إرسالها مباشرة. أو استخدم أزرار التنزيل والمشاركة.</p>
+    </div>
+  </main>
+
+  <aside class="panel">
+
+    <fieldset>
+      <legend>الصفحة الأولى</legend>
+
+      <label for="f_preset">نماذج جاهزة</label>
+      <select id="f_preset"><option value="">اختر نموذجًا لتعبئة الحقول</option></select>
+
+      <label for="f_head">نص الترويسة</label>
+      <input type="text" id="f_head" value="قال رسول الله ﷺ">
+
+      <label for="f_body">نص الحديث</label>
+      <textarea id="f_body"></textarea>
+
+      <label for="f_src">التخريج</label>
+      <input type="text" id="f_src" value="رواه مسلم">
+
+      <label for="f_notes">فوائد مختصرة (سطر لكل فائدة، اتركه فارغًا للإخفاء)</label>
+      <textarea id="f_notes" style="min-height:80px"></textarea>
+
+      <div class="grid2">
+        <div>
+          <label for="f_theme">لوحة الألوان</label>
+          <select id="f_theme">
+            <option value="classic">مذهّب كلاسيكي</option>
+            <option value="emerald">زمردي</option>
+            <option value="indigo">نيلي</option>
+          </select>
+        </div>
+        <div>
+          <label for="f_multi">تلوين الأسطر</label>
+          <select id="f_multi">
+            <option value="1">متناوب</option>
+            <option value="0">لون واحد</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>الصفحة الثانية</legend>
+
+      <label for="f_city">المدينة</label>
+      <input type="text" id="f_city" value="حمص">
+
+      <div class="row">
+        <div>
+          <label for="f_date">التاريخ</label>
+          <input type="text" id="f_date">
+        </div>
+        <button class="btn ghost" id="btnToday" type="button">تاريخ اليوم</button>
+      </div>
+
+      <div class="grid3">
+        <div><label for="t0">الفجر</label><input type="text" id="t0" value="4.12"></div>
+        <div><label for="t1">الشروق</label><input type="text" id="t1" value="5.47"></div>
+        <div><label for="t2">الظهر</label><input type="text" id="t2" value="12.40"></div>
+        <div><label for="t3">العصر</label><input type="text" id="t3" value="4.24"></div>
+        <div><label for="t4">المغرب</label><input type="text" id="t4" value="7.33"></div>
+        <div><label for="t5">العشاء</label><input type="text" id="t5" value="9.00"></div>
+      </div>
+
+      <label for="f_msg">الرسالة السفلية</label>
+      <textarea id="f_msg" style="min-height:80px"></textarea>
+
+      <label for="f_ribbon">نص الشريط السفلي</label>
+      <input type="text" id="f_ribbon" value="صلّوا عليه ... خير الأنام">
+    </fieldset>
+
+    <div class="check">
+      <input type="checkbox" id="f_auto" checked>
+      <label for="f_auto" style="margin:0">حفظ المحتوى تلقائيًا لفتحه في المرة القادمة</label>
+    </div>
+    <p class="saved" id="saved"></p>
+
+    <div class="actions">
+      <button class="btn gold" id="btnDl">تنزيل الصورتين</button>
+      <button class="btn" id="btnShare">مشاركة</button>
+      <button class="btn ghost" id="btnReset">استعادة النموذج</button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var AR   = '"Amiri","Scheherazade New","Noto Naskh Arabic","Traditional Arabic",serif';
+var AR_B = '700 ';
+var W1=1080, H1=1440, W2=1080, H2=1920;
+
+var THEMES = {
+  classic:{ paper:"#FBF6EA", panel:"#FFFDF6", gold:"#C0912F", deep:"#7E1B1B",
+            cycle:["#1F6F4E","#1B4E8C","#8E1B1B","#B07514"], solo:"#1B3A5C", border:"#8E1B1B" },
+  emerald:{ paper:"#F5F8F1", panel:"#FFFFFA", gold:"#B08A2E", deep:"#14503C",
+            cycle:["#14503C","#1F6F4E","#276B57","#0F3D2E"], solo:"#14503C", border:"#14503C" },
+  indigo:{  paper:"#F4F6FB", panel:"#FFFFFF", gold:"#B98F33", deep:"#16305E",
+            cycle:["#16305E","#1B4E8C","#2D6E8E","#0E2242"], solo:"#16305E", border:"#16305E" }
+};
+
+var PRESETS = [
+  { t:"طلب العلم",
+    b:"مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا،\nسَهَّلَ اللهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ.",
+    s:"رواه مسلم",
+    n:"السعي في طلب العلم سبب لدخول الجنة وتيسير أسبابها.\nتضع الملائكة أجنحتها لطالب العلم رضًا بما يصنع.\nالعلماء ورثة الأنبياء، ورّثوا العلم لا الدينار والدرهم." },
+  { t:"أجر الأذى",
+    b:"مَا مِنْ مُسْلِمٍ يُصِيبُهُ أَذًى،\nإِلَّا حَاتَّ اللهُ عَنْهُ خَطَايَاهُ\nكَمَا تَحَاتُّ وَرَقُ الشَّجَرِ.",
+    s:"رواه البخاري (٥٦٤٧)", n:"" },
+  { t:"عدم الاستعجال في الدعاء",
+    b:"يُسْتَجَابُ لِأَحَدِكُمْ مَا لَمْ يَعْجَلْ،\nفَيَقُولُ: قَدْ دَعَوْتُ رَبِّي فَلَمْ يَسْتَجِبْ لِي.",
+    s:"صحيح مسلم (٧١١١)",
+    n:"قد يدرك المتأني بعض حاجته، وقد يكون من المستعجل الزلل.\nالعجلة تضع الشيء في غير موضعه، وهي بين التفريط والاستعجال قبل الوقت." }
+];
+
+var DEF = {
+  head:"قال رسول الله ﷺ",
+  body:PRESETS[0].b, src:PRESETS[0].s, notes:PRESETS[0].n,
+  theme:"classic", multi:"1",
+  city:"حمص", date:"", times:["4.12","5.47","12.40","4.24","7.33","9.00"],
+  msg:"لا تهدر جهدك ... بالمكان الخطأ.",
+  ribbon:"صلّوا عليه ... خير الأنام"
+};
+
+var AYAH = "فَإِذَا قَضَيْتُمُ الصَّلَاةَ فَاذْكُرُوا اللَّهَ قِيَامًا وَقُعُودًا وَعَلَىٰ جُنُوبِكُمْ، فَإِذَا اطْمَأْنَنتُمْ فَأَقِيمُوا الصَّلَاةَ، إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا. (النساء ١٠٣)";
+var LABELS = ["الفَجــر","الشَّمس","الظُّهــر","العَصــر","المَغــرب","العِشـاء"];
+
+var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+var MONTHS_AR=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+function pad(n){ return (n<10?"0":"")+n; }
+function hijri(d){
+  try{
+    var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",
+      {day:"numeric",month:"long",year:"numeric"}).formatToParts(d);
+    var o={}; p.forEach(function(x){ o[x.type]=x.value; });
+    return pad(parseInt(o.day,10))+"/"+String(o.month).replace("هـ","").trim()+"/"+String(o.year).replace(/\D/g,"")+" هـ";
+  }catch(e){ return ""; }
+}
+function todayString(){
+  var d=new Date();
+  var g=pad(d.getDate())+"/"+MONTHS_AR[d.getMonth()]+"/"+d.getFullYear()+" م";
+  var h=hijri(d);
+  return DAYS[d.getDay()]+" : "+(h? h+" ـ ":"")+g;
+}
+
+function rr(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function star8(c,x,y,r,inner){
+  c.beginPath();
+  for(var i=0;i<16;i++){
+    var a=Math.PI/8*i - Math.PI/2, rad=(i%2===0)?r:r*inner;
+    var px=x+Math.cos(a)*rad, py=y+Math.sin(a)*rad;
+    if(i) c.lineTo(px,py); else c.moveTo(px,py);
+  }
+  c.closePath();
+}
+function rosette(c,x,y,r,petal,center){
+  for(var i=0;i<6;i++){
+    var a=Math.PI/3*i;
+    c.beginPath(); c.arc(x+Math.cos(a)*r*0.62, y+Math.sin(a)*r*0.62, r*0.42, 0, Math.PI*2);
+    c.fillStyle=petal; c.fill();
+  }
+  c.beginPath(); c.arc(x,y,r*0.32,0,Math.PI*2); c.fillStyle=center; c.fill();
+}
+function wrap(c,text,maxW){
+  var out=[];
+  String(text||"").split("\n").forEach(function(par){
+    if(par.trim()===""){ out.push(""); return; }
+    var words=par.trim().split(/\s+/), line="";
+    words.forEach(function(w){
+      var test=line?line+" "+w:w;
+      if(c.measureText(test).width>maxW && line){ out.push(line); line=w; }
+      else line=test;
+    });
+    if(line) out.push(line);
+  });
+  return out;
+}
+function fit(c,text,maxW,maxH,maxSize,minSize,lh,weight){
+  for(var s=maxSize;s>=minSize;s-=2){
+    c.font=(weight||"")+s+"px "+AR;
+    var L=wrap(c,text,maxW);
+    if(L.length*s*lh<=maxH) return {size:s,lines:L};
+  }
+  c.font=(weight||"")+minSize+"px "+AR;
+  return {size:minSize,lines:wrap(c,text,maxW)};
+}
+function center(c,lines,cx,y,size,lh,color){
+  c.textAlign="center"; c.textBaseline="alphabetic";
+  lines.forEach(function(l,i){
+    c.fillStyle=(typeof color==="function")?color(i):color;
+    c.fillText(l,cx,y+i*size*lh);
+  });
+}
+
+function drawCard1(c,d){
+  var T=THEMES[d.theme]||THEMES.classic;
+  c.save(); c.direction="rtl";
+  c.fillStyle=T.paper; c.fillRect(0,0,W1,H1);
+
+  c.strokeStyle=T.gold; c.lineWidth=3; c.strokeRect(26,26,W1-52,H1-52);
+  c.globalAlpha=.45; c.fillStyle="#FFFFFF"; c.fillRect(40,40,W1-80,H1-80); c.globalAlpha=1;
+  c.strokeStyle=T.border; c.lineWidth=6; c.strokeRect(112,112,W1-224,H1-224);
+  c.strokeStyle=T.gold; c.lineWidth=2; c.strokeRect(126,126,W1-252,H1-252);
+
+  var petals=[T.deep,"#1B4E8C",T.gold,"#1F6F4E"], k=0, step=74, x, y;
+  for(x=76;x<=W1-76;x+=step){
+    rosette(c,x,76,20,petals[k%4],T.gold);
+    rosette(c,x,H1-76,20,petals[(k+2)%4],T.gold); k++;
+  }
+  for(y=150;y<=H1-150;y+=step){
+    rosette(c,76,y,20,petals[k%4],T.gold);
+    rosette(c,W1-76,y,20,petals[(k+1)%4],T.gold); k++;
+  }
+  [[76,76],[W1-76,76],[76,H1-76],[W1-76,H1-76]].forEach(function(p){
+    star8(c,p[0],p[1],34,.46); c.fillStyle=T.deep; c.fill();
+    star8(c,p[0],p[1],20,.46); c.fillStyle=T.gold; c.fill();
+  });
+
+  c.font=AR_B+"46px "+AR; c.textAlign="center";
+  var hw=c.measureText(d.head).width+96;
+  rr(c,W1/2-hw/2,178,hw,88,16); c.fillStyle=T.deep; c.fill();
+  c.strokeStyle=T.gold; c.lineWidth=3; c.stroke();
+  c.fillStyle="#F5DFA6"; c.fillText(d.head,W1/2,236);
+
+  var hasNotes=d.notes.trim().length>0;
+  var px=170, py=308, pw=W1-340, ph=(hasNotes?720:840);
+  rr(c,px,py,pw,ph,20); c.fillStyle=T.panel; c.fill();
+  c.strokeStyle=T.gold; c.lineWidth=4; c.stroke();
+  rr(c,px+14,py+14,pw-28,ph-28,14); c.lineWidth=1.5; c.stroke();
+  [[px+52,py+52],[px+pw-52,py+52],[px+52,py+ph-52],[px+pw-52,py+ph-52]].forEach(function(p){
+    star8(c,p[0],p[1],18,.45); c.globalAlpha=.5; c.fillStyle=T.gold; c.fill(); c.globalAlpha=1;
+  });
+
+  var lh=1.55;
+  var f=fit(c,d.body,pw-150,ph-230,86,32,lh,AR_B);
+  c.font=AR_B+f.size+"px "+AR;
+  var blockH=f.lines.length*f.size*lh;
+  var startY=py+(ph-90-blockH)/2+f.size;
+  center(c,f.lines,W1/2,startY,f.size,lh,function(i){
+    return d.multi==="1" ? T.cycle[i%T.cycle.length] : T.solo;
+  });
+
+  if(d.src.trim()){
+    c.font="34px "+AR; c.textAlign="center";
+    var sw=c.measureText(d.src).width+70;
+    rr(c,W1/2-sw/2,py+ph-86,sw,60,10);
+    c.fillStyle="rgba(0,0,0,.05)"; c.fill();
+    c.strokeStyle=T.gold; c.lineWidth=1.5; c.stroke();
+    c.fillStyle=T.solo; c.fillText(d.src,W1/2,py+ph-44);
+  }
+
+  if(hasNotes){
+    var ny=py+ph+30, nh=H1-ny-150;
+    rr(c,px,ny,pw,nh,16); c.fillStyle="rgba(255,255,255,.72)"; c.fill();
+    c.strokeStyle="rgba(0,0,0,.10)"; c.lineWidth=1.5; c.stroke();
+    c.font="30px "+AR;
+    var nl=fit(c,d.notes,pw-100,nh-60,32,18,1.8,"");
+    c.font=nl.size+"px "+AR; c.textAlign="right";
+    nl.lines.forEach(function(l,i){
+      var ly=ny+54+i*nl.size*1.8;
+      c.fillStyle=T.gold;
+      c.beginPath(); c.arc(px+pw-32,ly-10,5,0,Math.PI*2); c.fill();
+      c.fillStyle="#3A3428"; c.fillText(l,px+pw-52,ly);
+    });
+  }
+  c.restore();
+}
+
+function drawCard2(c,d){
+  c.save(); c.direction="rtl";
+  var BLUE="#0E2E6E", BLUE2="#17509E", GOLD="#D9A62E", GOLD2="#F3D07A", INK="#12356F";
+
+  c.fillStyle="#F5F8FD"; c.fillRect(0,0,W2,H2);
+  c.globalAlpha=.05; c.fillStyle=BLUE;
+  for(var yy=430;yy<H2;yy+=150){
+    for(var xx=(((yy/150)|0)%2?75:0);xx<W2;xx+=150){ star8(c,xx,yy,46,.42); c.fill(); }
+  }
+  c.globalAlpha=1;
+
+  var g=c.createLinearGradient(0,0,0,400);
+  g.addColorStop(0,"#081E4B"); g.addColorStop(1,BLUE2);
+  c.fillStyle=g; c.fillRect(0,0,W2,392);
+
+  var ag=c.createLinearGradient(0,120,0,392); ag.addColorStop(0,GOLD2); ag.addColorStop(1,GOLD);
+  c.strokeStyle=ag; c.lineJoin="round";
+  [[0,26],[70,16]].forEach(function(a){
+    c.lineWidth=a[1]; c.beginPath();
+    c.moveTo(-20,392); c.lineTo(-20,300+a[0]);
+    c.quadraticCurveTo(W2/2,60+a[0],W2+20,300+a[0]); c.lineTo(W2+20,392); c.stroke();
+  });
+
+  c.fillStyle="#1B57B0";
+  c.fillRect(W2/2-24,150,6,70);
+  c.beginPath(); c.arc(W2/2-21,146,10,0,Math.PI*2); c.fill();
+  c.beginPath(); c.moveTo(W2/2-150,392); c.lineTo(W2/2-150,300);
+  c.quadraticCurveTo(W2/2,132,W2/2+150,300); c.lineTo(W2/2+150,392); c.closePath(); c.fill();
+  [-190,190].forEach(function(o){
+    c.fillRect(W2/2+o-14,236,28,156);
+    c.beginPath(); c.moveTo(W2/2+o-20,236); c.lineTo(W2/2+o,190); c.lineTo(W2/2+o+20,236); c.closePath(); c.fill();
+  });
+
+  [200,W2-200].forEach(function(x){
+    c.strokeStyle=GOLD; c.lineWidth=4;
+    c.beginPath(); c.moveTo(x,0); c.lineTo(x,150); c.stroke();
+    var lg=c.createLinearGradient(x-38,150,x+38,300);
+    lg.addColorStop(0,GOLD2); lg.addColorStop(1,GOLD);
+    c.fillStyle=lg;
+    c.beginPath();
+    c.moveTo(x,150); c.lineTo(x+38,192); c.lineTo(x+30,268); c.lineTo(x,300);
+    c.lineTo(x-30,268); c.lineTo(x-38,192); c.closePath(); c.fill();
+    c.fillStyle="rgba(255,245,190,.75)"; c.fillRect(x-16,200,32,58);
+  });
+
+  c.textAlign="center";
+  c.font=AR_B+"70px "+AR; c.fillStyle="#8A5E12";
+  c.fillText("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",W2/2,540);
+  c.font="27px "+AR;
+  center(c,wrap(c,AYAH,W2-260),W2/2,600,27,1.6,"#3D5B8C");
+
+  c.font=AR_B+"40px "+AR;
+  c.fillStyle=INK; c.textAlign="center";
+  c.fillText("حسب التوقيت المحلي لمدينة "+d.city+" وما حولها ليوم:",W2/2,790);
+  c.font=AR_B+"40px "+AR;
+  center(c,wrap(c,d.date,W2-180),W2/2,858,40,1.4,"#0B4F8A");
+
+  var top=990, gap=132, i, y;
+  for(i=0;i<6;i++){
+    y=top+i*gap;
+    c.save();
+    c.strokeStyle="rgba(14,46,110,.55)"; c.lineWidth=3; c.lineJoin="round"; c.fillStyle=GOLD;
+    c.font=AR_B+"66px "+AR; c.textAlign="right";
+    c.strokeText(LABELS[i],880,y); c.fillText(LABELS[i],880,y);
+    c.font=AR_B+"56px "+AR; c.textAlign="center";
+    c.strokeText(":",640,y); c.fillText(":",640,y);
+    c.font=AR_B+"72px "+AR; c.textAlign="right";
+    c.strokeText(d.times[i],540,y); c.fillText(d.times[i],540,y);
+    c.restore();
+    if(i<5){
+      c.strokeStyle="rgba(14,46,110,.10)"; c.lineWidth=2;
+      c.beginPath(); c.moveTo(300,y+36); c.lineTo(880,y+36); c.stroke();
+    }
+  }
+
+  if(d.msg.trim()){
+    c.font="36px "+AR;
+    var m=fit(c,d.msg,W2-200,210,38,22,1.7,"");
+    c.font=m.size+"px "+AR;
+    center(c,m.lines,W2/2,1798-(m.lines.length-1)*m.size*1.7,m.size,1.7,"#12356F");
+  }
+
+  c.fillStyle=GOLD;
+  for(var s=20;s<W2;s+=54){
+    c.beginPath(); c.moveTo(s-16,H2-96); c.lineTo(s,H2-126); c.lineTo(s+16,H2-96); c.closePath(); c.fill();
+  }
+  c.fillStyle=BLUE; c.fillRect(0,H2-96,W2,96);
+  var bg2=c.createLinearGradient(0,H2-84,0,H2-16);
+  bg2.addColorStop(0,GOLD2); bg2.addColorStop(1,GOLD);
+  c.font=AR_B+"44px "+AR; c.textAlign="center";
+  var bw=Math.min(W2-120,c.measureText(d.ribbon).width+120);
+  rr(c,W2/2-bw/2,H2-84,bw,68,34); c.fillStyle=bg2; c.fill();
+  c.fillStyle=BLUE; c.fillText(d.ribbon,W2/2,H2-36);
+  c.restore();
+}
+
+var cv1=document.createElement("canvas"); cv1.width=W1; cv1.height=H1;
+var cv2=document.createElement("canvas"); cv2.width=W2; cv2.height=H2;
+var ctx1=cv1.getContext("2d"), ctx2=cv2.getContext("2d");
+function $(id){ return document.getElementById(id); }
+
+function readState(){
+  return {
+    head:$("f_head").value, body:$("f_body").value, src:$("f_src").value,
+    notes:$("f_notes").value, theme:$("f_theme").value, multi:$("f_multi").value,
+    city:$("f_city").value, date:$("f_date").value,
+    times:[0,1,2,3,4,5].map(function(i){ return $("t"+i).value; }),
+    msg:$("f_msg").value, ribbon:$("f_ribbon").value
+  };
+}
+function applyState(s){
+  $("f_head").value=s.head; $("f_body").value=s.body; $("f_src").value=s.src;
+  $("f_notes").value=s.notes; $("f_theme").value=s.theme; $("f_multi").value=s.multi;
+  $("f_city").value=s.city; $("f_date").value=s.date||todayString();
+  (s.times||DEF.times).forEach(function(v,i){ $("t"+i).value=v; });
+  $("f_msg").value=s.msg; $("f_ribbon").value=s.ribbon;
+}
+
+var timer=null;
+function render(){
+  var d=readState();
+  drawCard1(ctx1,d); drawCard2(ctx2,d);
+  $("img1").src=cv1.toDataURL("image/png");
+  $("img2").src=cv2.toDataURL("image/png");
+}
+function schedule(){
+  clearTimeout(timer);
+  timer=setTimeout(function(){ render(); save(); },220);
+}
+
+/* التخزين: يستخدم مخزن Claude إن وُجد، وإلا مخزن المتصفح (GitHub Pages وغيره) */
+var KEY="two-cards:v1";
+function store(v){
+  return new Promise(function(res){
+    var done=false;
+    try{
+      if(window.storage && window.storage.set){
+        window.storage.set(KEY,v).then(function(){ res(true); })["catch"](function(){ res(fallbackSet(v)); });
+        done=true;
+      }
+    }catch(e){}
+    if(!done) res(fallbackSet(v));
+  });
+}
+function fallbackSet(v){ try{ window.localStorage.setItem(KEY,v); return true; }catch(e){ return false; } }
+function fallbackGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ return null; } }
+
+function save(){
+  if(!$("f_auto").checked) return;
+  store(JSON.stringify(readState())).then(function(ok){
+    if(!ok) return;
+    var el=$("saved"); el.textContent="تم الحفظ";
+    setTimeout(function(){ if(el.textContent==="تم الحفظ") el.textContent=""; },1400);
+  });
+}
+function load(){
+  return new Promise(function(res){
+    var raw=null;
+    function fin(r){ try{ res(r?JSON.parse(r):null); }catch(e){ res(null); } }
+    try{
+      if(window.storage && window.storage.get){
+        window.storage.get(KEY).then(function(r){
+          fin(r && r.value ? r.value : fallbackGet());
+        })["catch"](function(){ fin(fallbackGet()); });
+        return;
+      }
+    }catch(e){}
+    raw=fallbackGet(); fin(raw);
+  });
+}
+
+function stamp(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function toBlob(cv){ return new Promise(function(r){ cv.toBlob(r,"image/png"); }); }
+function download(blob,name){
+  var u=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=u; a.download=name; document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(u); },3000);
+}
+
+$("btnDl").onclick=function(){
+  render();
+  toBlob(cv1).then(function(b){
+    download(b,"hadith-"+stamp()+".png");
+    return toBlob(cv2);
+  }).then(function(b){
+    setTimeout(function(){ download(b,"prayer-"+stamp()+".png"); },700);
+  });
+};
+$("btnShare").onclick=function(){
+  render();
+  Promise.all([toBlob(cv1),toBlob(cv2)]).then(function(bs){
+    try{
+      var files=[ new File([bs[0]],"hadith-"+stamp()+".png",{type:"image/png"}),
+                  new File([bs[1]],"prayer-"+stamp()+".png",{type:"image/png"}) ];
+      if(navigator.canShare && navigator.canShare({files:files})){
+        navigator.share({files:files})["catch"](function(){});
+        return;
+      }
+    }catch(e){}
+    $("saved").textContent="المشاركة المباشرة غير مدعومة في هذا المتصفح. استخدم التنزيل أو الضغط المطول على الصورة.";
+  });
+};
+$("btnReset").onclick=function(){
+  var s=JSON.parse(JSON.stringify(DEF)); s.date=todayString();
+  applyState(s); render(); save();
+};
+$("btnToday").onclick=function(){ $("f_date").value=todayString(); schedule(); };
+
+PRESETS.forEach(function(p,i){
+  var o=document.createElement("option");
+  o.value=String(i); o.textContent=p.t; $("f_preset").appendChild(o);
+});
+$("f_preset").onchange=function(){
+  var i=this.value; if(i==="") return;
+  $("f_body").value=PRESETS[i].b; $("f_src").value=PRESETS[i].s; $("f_notes").value=PRESETS[i].n;
+  schedule();
+};
+
+function tabTo(n){
+  $("tab1").setAttribute("aria-selected",n===1);
+  $("tab2").setAttribute("aria-selected",n===2);
+  $("sheet1").classList.toggle("on",n===1);
+  $("sheet2").classList.toggle("on",n===2);
+}
+$("tab1").onclick=function(){ tabTo(1); };
+$("tab2").onclick=function(){ tabTo(2); };
+
+["f_head","f_body","f_src","f_notes","f_theme","f_multi","f_city","f_date","f_msg","f_ribbon",
+ "t0","t1","t2","t3","t4","t5"].forEach(function(id){
+  $(id).addEventListener("input",schedule);
+  $(id).addEventListener("change",schedule);
+});
+
+(function start(){
+  var s=JSON.parse(JSON.stringify(DEF)); s.date=todayString();
+  applyState(s);
+  load().then(function(saved){
+    if(saved){ saved.date=saved.date||todayString(); applyState(saved); }
+    var go=function(){ render(); };
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,1600); }
+    else go();
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
