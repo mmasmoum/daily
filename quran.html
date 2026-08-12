@@ -56,7 +56,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.2</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.4</b></div>
 </header>
 
 <div class="wrap">
@@ -353,7 +353,7 @@ function tstr(o){ return o.h+"."+(o.m<10?"0":"")+o.m; }
 var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 var MON=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 function pad(n){ return (n<10?"0":"")+n; }
-function toAr(s){ return String(s).replace(/[0-9]/g,function(d){ return "٠١٢٣٤٥٦٧٨٩"[+d]; }); }
+function toAr(s){ return String(s); }
 function hijri(d){
   try{
     var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",{day:"numeric",month:"long",year:"numeric"}).formatToParts(d),o={};
@@ -445,12 +445,20 @@ function poster(c,S){
   c.restore();
 
   /* الشريط العلوي */
-  var ty=76, x=W-110;
-  var w1=pill(c,S.city,x,ty,"rgba(46,125,79,.10)",GREEN,26); x-=w1/2;
-  if(S.toR!==null){ x-=20; var w2=pill(c,"باقٍ على رمضان "+toAr(S.toR)+" يومًا",x-100,ty,"rgba(0,0,0,.045)",INK,25); x-=w2+40; }
-  moonIcon(c,150,ty,24,S.ph);
-  c.textAlign="left"; c.font="24px "+CA; c.fillStyle=MUT;
-  c.fillText("القمر",184,ty+9);
+  var ty=76, fs=25, gap=16, right=W-64;
+  function pw(txt,size){ c.font="600 "+size+"px "+CA; return c.measureText(txt).width+42; }
+  var tCity=S.city, tRam=(S.toR!==null)?("باقٍ على رمضان "+S.toR+" يومًا"):null;
+  var wCity=pw(tCity,fs), wRam=tRam?pw(tRam,fs):0;
+  var moonW=150;
+  while(wCity+wRam+gap+moonW+128>W&&fs>19){
+    fs-=1; wCity=pw(tCity,fs); wRam=tRam?pw(tRam,fs):0;
+  }
+  pill(c,tCity,right-wCity/2,ty,"rgba(46,125,79,.12)",GREEN,fs);
+  right-=wCity+gap;
+  if(tRam){ pill(c,tRam,right-wRam/2,ty,"rgba(0,0,0,.05)",INK,fs); right-=wRam+gap; }
+  moonIcon(c,96,ty,23,S.ph);
+  c.textAlign="left"; c.font=(fs-2)+"px "+CA; c.fillStyle=MUT;
+  c.fillText("القمر",128,ty+8);
 
   /* القرص */
   var cx=W/2, cy=606, R=288, ring=46, inR=R-ring/2, outR=R+ring/2;
@@ -467,7 +475,7 @@ function poster(c,S){
   for(i=0;i<48;i++){
     a=ang(i/2);
     var half=(i%2===1), major=(i%6===0);
-    var len=half?9:(major?26:16);
+    var len=half?8:(major?20:13);
     c.beginPath();
     c.moveTo(cx+Math.cos(a)*(inR-2),cy+Math.sin(a)*(inR-2));
     c.lineTo(cx+Math.cos(a)*(inR-2-len),cy+Math.sin(a)*(inR-2-len));
@@ -475,15 +483,15 @@ function poster(c,S){
     c.lineWidth=major?3.5:(half?1.2:2);
     c.stroke();
   }
-  c.textAlign="center"; c.textBaseline="middle"; c.font="22px "+CA; c.fillStyle="rgba(28,43,38,.45)";
+  c.textAlign="center"; c.textBaseline="middle"; c.font="20px "+CA; c.fillStyle="rgba(28,43,38,.42)";
   for(i=0;i<8;i++){
     var hh=i*3; a=ang(hh);
-    var nx=cx+Math.cos(a)*(inR-52), ny=cy+Math.sin(a)*(inR-52);
+    var nx=cx+Math.cos(a)*(inR-36), ny=cy+Math.sin(a)*(inR-36);
     c.fillText(toAr((hh%12)||12),nx,ny);
   }
   c.font="19px "+CA; c.fillStyle="rgba(28,43,38,.34)";
-  c.fillText("منتصف الليل",cx,cy-(inR-92));
-  c.fillText("الظهيرة",cx,cy+(inR-92));
+  c.fillText("منتصف الليل",cx,cy-(inR-74));
+  c.fillText("الظهيرة",cx,cy+(inR-74));
   c.textBaseline="alphabetic";
 
   /* مؤشر الآن */
@@ -517,9 +525,9 @@ function poster(c,S){
   c.font="27px "+CA; c.fillStyle=MUT;
   c.fillText(S.hijri,cx,cy+34);
   c.fillText(S.greg,cx,cy+76);
-  c.beginPath(); c.moveTo(cx-66,cy+108); c.lineTo(cx+66,cy+108);
+  c.beginPath(); c.moveTo(cx-52,cy+110); c.lineTo(cx+52,cy+110);
   c.strokeStyle="rgba(168,128,47,.5)"; c.lineWidth=1.6; c.stroke();
-  c.font="22px "+CA; c.fillStyle=GOLD; c.fillText(S.dayLen,cx,cy+142);
+  c.font="21px "+CA; c.fillStyle=GOLD; c.fillText(S.dayLen,cx,cy+140);
 
   /* الآية */
   var vy=1124;
@@ -595,7 +603,7 @@ function state(){
     day:DAYS[d.getDay()],
     hijri:hj? toAr(hj.d)+" "+hj.m+" "+toAr(hj.y)+" هـ" : "",
     greg:toAr(d.getDate())+" "+MON[d.getMonth()]+" "+toAr(d.getFullYear())+" م",
-    dayLen:"طول النهار "+toAr(Math.floor(dayLen))+" ساعة و"+toAr(Math.round((dayLen%1)*60))+" دقيقة",
+    dayLen:"النهار "+toAr(Math.floor(dayLen))+":"+toAr(pad(Math.round((dayLen%1)*60))),
     city:c.n, h:h, disp:t.map(tstr),
     verse:$("f_verse").value, ref:$("f_ref").value, refl:$("f_refl").value,
     dua:$("f_dua").value, sign:$("f_sign").value,
