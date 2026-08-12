@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>قرص اليوم</title>
+<meta name="theme-color" content="#1C2B26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="قرص اليوم">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1C2B26;--soft:#4E5F58;--paper:#F2F0E8;--card:#FBFAF6;--gold:#A8802F;--green:#2E7D4F;--line:rgba(28,43,38,.14)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Cairo",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+  header{padding:14px 18px 10px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
+  header h1{font-family:"Amiri",serif;font-size:23px;margin:0}
+  header .sub{font-size:12px;color:var(--soft)}
+  header .sub b{color:var(--gold)}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 130px;display:grid;grid-template-columns:1fr;gap:20px}
+  @media(min-width:960px){.wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:40px}.panel{position:sticky;top:80px}}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+  .stage img{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
+  .hint{font-size:12px;color:var(--soft);margin:10px 2px 0;line-height:1.7}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+  fieldset{border:0;padding:0;margin:0 0 16px}
+  legend{font-family:"Amiri",serif;font-size:18px;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--gold);width:100%}
+  label{display:block;font-size:12.5px;margin:11px 0 5px;color:var(--soft)}
+  input[type=text],textarea,select,input[type=date]{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
+  textarea{min-height:104px;resize:vertical;line-height:2;font-family:"Scheherazade New","Amiri",serif;font-size:19px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g2>div{min-width:0}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.g3>div{min-width:0}
+  .row{display:flex;gap:8px;align-items:flex-end}.row>div{flex:1}
+  .times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hm{display:flex;align-items:center;gap:6px}
+  .hm input{width:100%;padding:9px 6px;text-align:center;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+  .hm input::-webkit-outer-spin-button,.hm input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .hm input[type=number]{-moz-appearance:textfield}
+  .hm span{font-weight:700;opacity:.45}
+  .btn{padding:11px 14px;border-radius:11px;border:1px solid var(--ink);background:var(--ink);color:#F2EFE2;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#1B1405}
+  .btn.sm{padding:9px 12px;font-size:13px}
+  .actions{position:fixed;inset:auto 0 0 0;background:rgba(242,240,232,.96);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px)}
+  .actions .btn{flex:1}
+  @media(min-width:960px){.actions{position:static;background:none;border:0;padding:14px 0 0;backdrop-filter:none}}
+  .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
+  .check input{width:18px;height:18px;accent-color:var(--gold)}
+  .saved{font-size:12px;color:var(--green);min-height:16px;margin-top:8px;line-height:1.6}
+  .warn{font-size:12px;color:#8C2F26;line-height:1.7;margin:6px 0 0}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>قرص اليوم</h1>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.2</b></div>
+</header>
+
+<div class="wrap">
+  <main>
+    <div class="stage">
+      <img id="out" alt="معاينة البوستر">
+      <p class="hint">اضغط مطولًا على الصورة لحفظها أو إرسالها مباشرة من الجوال.</p>
+    </div>
+  </main>
+
+  <aside class="panel">
+    <fieldset>
+      <legend>الآية</legend>
+      <div class="row">
+        <div><label for="f_lib">مكتبة الآيات</label><select id="f_lib"></select></div>
+        <button class="btn ghost sm" id="btnNext" type="button">التالية</button>
+      </div>
+      <label for="f_verse">نص الآية</label>
+      <textarea id="f_verse"></textarea>
+      <p class="warn">راجع نص الآية ورقمها من مصحف أو تطبيق موثوق قبل الإرسال. المكتبة للتذكير لا للتوثيق.</p>
+      <label for="f_ref">الموضع</label>
+      <input type="text" id="f_ref">
+      <label for="f_refl">سطر التأمل (اتركه فارغًا للإخفاء)</label>
+      <textarea id="f_refl" style="min-height:70px"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>المكان والتاريخ</legend>
+      <div class="g2">
+        <div><label for="f_city">المدينة</label><select id="f_city"></select></div>
+        <div><label for="f_date">التاريخ</label><input type="date" id="f_date"></div>
+      </div>
+      <div class="g2">
+        <div>
+          <label for="f_method">طريقة الحساب</label>
+          <select id="f_method">
+            <option value="homs">تقويم حمص المحلي</option>
+            <option value="mwl">رابطة العالم الإسلامي</option>
+            <option value="uaq">أم القرى</option>
+            <option value="egypt">الهيئة المصرية</option>
+            <option value="karachi">كراتشي</option>
+          </select>
+        </div>
+        <div><label for="f_asr">العصر</label>
+          <select id="f_asr"><option value="1">الجمهور</option><option value="2">الحنفي</option></select>
+        </div>
+      </div>
+      <div class="g2">
+        <div><label for="f_hijriAdj">تعديل الهجري</label>
+          <select id="f_hijriAdj"><option value="-1">يوم أقل</option><option value="0" selected>بلا تعديل</option><option value="1">يوم أكثر</option></select>
+        </div>
+        <div><label for="f_ihtiyat">احتياط دقيقة</label>
+          <select id="f_ihtiyat"><option value="1">نعم</option><option value="0">لا</option></select>
+        </div>
+      </div>
+      <p class="hint" id="calcNote"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>المواقيت</legend>
+      <div class="times" id="timesBox"></div>
+      <button class="btn ghost sm" id="btnRecalc" type="button" style="margin-top:10px">إعادة الحساب</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>الأسفل</legend>
+      <div class="row">
+        <div><label for="f_duaLib">مكتبة الأدعية</label><select id="f_duaLib"></select></div>
+        <button class="btn ghost sm" id="btnNextDua" type="button">التالي</button>
+      </div>
+      <label for="f_dua">دعاء قصير</label>
+      <input type="text" id="f_dua">
+      <label for="f_sign">التوقيع</label>
+      <input type="text" id="f_sign">
+      <div class="check">
+        <input type="checkbox" id="f_now" checked>
+        <label for="f_now" style="margin:0">إظهار مؤشر «الآن» على القرص</label>
+      </div>
+    </fieldset>
+
+    <div class="check">
+      <input type="checkbox" id="f_auto" checked>
+      <label for="f_auto" style="margin:0">حفظ تلقائي</label>
+    </div>
+    <p class="saved" id="saved"></p>
+
+    <div class="actions">
+      <button class="btn gold" id="btnDl">تنزيل الصورة</button>
+      <button class="btn" id="btnShare">مشاركة</button>
+      <button class="btn ghost" id="btnReset">استعادة</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+"use strict";
+var AM='"Amiri",serif', SH='"Scheherazade New","Amiri",serif', CA='"Cairo",system-ui,sans-serif';
+var W=1080,H=1620;
+var INK="#1C2B26", PAPER="#F7F5EE", GOLD="#A8802F", GOLD2="#D8B267",
+    NIGHT="#243440", DAWN="#8FA0A4", DAYC="#EDE7D4", MUT="#78827B", GREEN="#2E7D4F", ACC="#8C2F26";
+
+/* ============ مكتبة الآيات: الأخلاق والمعاملة والحكمة ============ */
+var VERSES=[
+ {c:"القول",t:"القول الحسن",v:"وَقُولُوا لِلنَّاسِ حُسْنًا",r:"البقرة ٨٣",n:"الكلمة الطيبة أول ما يُطلب في معاملة الناس جميعًا."},
+ {c:"القول",t:"أحسن القول",v:"وَقُل لِّعِبَادِي يَقُولُوا الَّتِي هِيَ أَحْسَنُ",r:"الإسراء ٥٣",n:"المطلوب الأحسن لا الحسن، وبين المرتبتين فرق كبير."},
+ {c:"القول",t:"القول السديد",v:"يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَقُولُوا قَوْلًا سَدِيدًا",r:"الأحزاب ٧٠",n:"السداد أن يكون الكلام صوابًا في نفسه، مصيبًا لموضعه."},
+ {c:"القول",t:"اجتناب الزور",v:"وَاجْتَنِبُوا قَوْلَ الزُّورِ",r:"الحج ٣٠",n:"شهادة الزور والكذب في الحديث بابٌ واحد."},
+ {c:"القول",t:"الإعراض عن اللغو",v:"وَالَّذِينَ هُمْ عَنِ اللَّغْوِ مُعْرِضُونَ",r:"المؤمنون ٣",n:"من صفات المفلحين: ترك ما لا فائدة فيه."},
+ {c:"القول",t:"المرور الكريم",v:"وَإِذَا مَرُّوا بِاللَّغْوِ مَرُّوا كِرَامًا",r:"الفرقان ٧٢",n:"لا يخوضون ولا يقفون، ويمضون بكرامة دون تشفٍّ."},
+
+ {c:"التسامح",t:"دفع الإساءة",v:"ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ",r:"فصلت ٣٤",n:"العداوة تُطفأ بالإحسان لا بالمثل، وهذا أشقّ الأخلاق وأعظمها أثرًا."},
+ {c:"التسامح",t:"العفو والصفح",v:"وَإِن تَعْفُوا وَتَصْفَحُوا وَتَغْفِرُوا فَإِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ",r:"التغابن ١٤",n:"الجزاء من جنس العمل: تعفو فيُعفى عنك."},
+ {c:"التسامح",t:"محبة المحسنين",v:"فَاعْفُ عَنْهُمْ وَاصْفَحْ إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ",r:"المائدة ١٣",n:"العفو مقام إحسان لا ضعف."},
+ {c:"التسامح",t:"أتحبون أن يُغفر لكم",v:"وَلْيَعْفُوا وَلْيَصْفَحُوا أَلَا تُحِبُّونَ أَن يَغْفِرَ اللَّهُ لَكُمْ",r:"النور ٢٢",n:"سؤال يقطع كل حجة لمن أصرّ على المقاطعة."},
+ {c:"التسامح",t:"الصفح الجميل",v:"فَاصْفَحِ الصَّفْحَ الْجَمِيلَ",r:"الحجر ٨٥",n:"الصفح الجميل ما لا عتاب معه ولا تذكير بالإساءة."},
+ {c:"التسامح",t:"العفو والإصلاح",v:"وَجَزَاءُ سَيِّئَةٍ سَيِّئَةٌ مِّثْلُهَا فَمَنْ عَفَا وَأَصْلَحَ فَأَجْرُهُ عَلَى اللَّهِ",r:"الشورى ٤٠",n:"العدل مباح، والعفو أعلى، وأجره غير محدود."},
+ {c:"التسامح",t:"الصبر والمغفرة",v:"وَلَمَن صَبَرَ وَغَفَرَ إِنَّ ذَٰلِكَ لَمِنْ عَزْمِ الْأُمُورِ",r:"الشورى ٤٣",n:"لا يقدر عليه إلا صاحب عزيمة."},
+ {c:"التسامح",t:"العفو والإعراض",v:"خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِضْ عَنِ الْجَاهِلِينَ",r:"الأعراف ١٩٩",n:"ثلاث قواعد جامعة في التعامل مع الناس كلهم."},
+ {c:"التسامح",t:"كظم الغيظ",v:"وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ وَاللَّهُ يُحِبُّ الْمُحْسِنِينَ",r:"آل عمران ١٣٤",n:"ثلاث مراتب: تكظم، ثم تعفو، ثم تحسن إلى من أساء."},
+
+ {c:"المعاملة",t:"العدل والإحسان",v:"إِنَّ اللَّهَ يَأْمُرُ بِالْعَدْلِ وَالْإِحْسَانِ وَإِيتَاءِ ذِي الْقُرْبَىٰ",r:"النحل ٩٠",n:"العدل أن تعطي ما عليك، والإحسان أن تزيد عليه تفضلًا."},
+ {c:"المعاملة",t:"الفضل بين الناس",v:"وَلَا تَنسَوُا الْفَضْلَ بَيْنَكُمْ",r:"البقرة ٢٣٧",n:"حتى عند الفراق والخصومة يبقى الجميل السابق محفوظًا."},
+ {c:"المعاملة",t:"جزاء الإحسان",v:"هَلْ جَزَاءُ الْإِحْسَانِ إِلَّا الْإِحْسَانُ",r:"الرحمن ٦٠",n:"قاعدة كونية قبل أن تكون خُلقًا."},
+ {c:"المعاملة",t:"أحسن كما أُحسن إليك",v:"وَأَحْسِن كَمَا أَحْسَنَ اللَّهُ إِلَيْكَ",r:"القصص ٧٧",n:"إحسانك إلى الناس شكر عملي لإحسان الله إليك."},
+ {c:"المعاملة",t:"العدل مع المخالف",v:"وَلَا يَجْرِمَنَّكُمْ شَنَآنُ قَوْمٍ عَلَىٰ أَلَّا تَعْدِلُوا اعْدِلُوا هُوَ أَقْرَبُ لِلتَّقْوَىٰ",r:"المائدة ٨",n:"البغض لا يبرر الظلم، والعدل مع من تكره أصدق ميزان."},
+ {c:"المعاملة",t:"العدل ولو على النفس",v:"كُونُوا قَوَّامِينَ بِالْقِسْطِ شُهَدَاءَ لِلَّهِ وَلَوْ عَلَىٰ أَنفُسِكُمْ",r:"النساء ١٣٥",n:"أصعب صور العدل: أن تشهد على نفسك أو قريبك."},
+ {c:"المعاملة",t:"العدل في القول",v:"وَإِذَا قُلْتُمْ فَاعْدِلُوا وَلَوْ كَانَ ذَا قُرْبَىٰ",r:"الأنعام ١٥٢",n:"القرابة لا تشتري الحكم ولا تميل بالشهادة."},
+ {c:"المعاملة",t:"الوفاء بالكيل",v:"وَأَوْفُوا الْكَيْلَ وَالْمِيزَانَ بِالْقِسْطِ",r:"الأنعام ١٥٢",n:"الأمانة في التفاصيل الصغيرة معيار الصدق في الكبيرة."},
+ {c:"المعاملة",t:"حقوق الناس",v:"وَلَا تَبْخَسُوا النَّاسَ أَشْيَاءَهُمْ",r:"الأعراف ٨٥",n:"البخس ليس في المال وحده، بل في الجهد والحق والاعتراف بالفضل."},
+ {c:"المعاملة",t:"أموال الناس",v:"وَلَا تَأْكُلُوا أَمْوَالَكُم بَيْنَكُم بِالْبَاطِلِ",r:"البقرة ١٨٨",n:"كل كسب بلا حق داخل في الآية مهما كان شكله القانوني."},
+ {c:"المعاملة",t:"الوفاء بالعهد",v:"وَأَوْفُوا بِالْعَهْدِ إِنَّ الْعَهْدَ كَانَ مَسْئُولًا",r:"الإسراء ٣٤",n:"العهد يشمل العقد المكتوب والوعد العابر، وكلاهما مسؤول عنه."},
+ {c:"المعاملة",t:"إنظار المعسر",v:"وَإِن كَانَ ذُو عُسْرَةٍ فَنَظِرَةٌ إِلَىٰ مَيْسَرَةٍ",r:"البقرة ٢٨٠",n:"التيسير على المدين حق شرعي لا تفضلًا محضًا."},
+ {c:"المعاملة",t:"الصدقة بلا أذى",v:"قَوْلٌ مَّعْرُوفٌ وَمَغْفِرَةٌ خَيْرٌ مِّن صَدَقَةٍ يَتْبَعُهَا أَذًى",r:"البقرة ٢٦٣",n:"العطاء الذي يجرح كرامة الآخذ خير منه الاعتذار الجميل."},
+ {c:"المعاملة",t:"المنّ يبطل العمل",v:"لَا تُبْطِلُوا صَدَقَاتِكُم بِالْمَنِّ وَالْأَذَىٰ",r:"البقرة ٢٦٤",n:"التذكير بالمعروف يمحوه، والسكوت عنه يحفظه."},
+
+ {c:"الأخلاق",t:"لين الجانب",v:"فَبِمَا رَحْمَةٍ مِّنَ اللَّهِ لِنتَ لَهُمْ وَلَوْ كُنتَ فَظًّا غَلِيظَ الْقَلْبِ لَانفَضُّوا مِنْ حَوْلِكَ",r:"آل عمران ١٥٩",n:"الشدة تفرّق الناس مهما كان صاحبها على حق."},
+ {c:"الأخلاق",t:"عباد الرحمن",v:"وَعِبَادُ الرَّحْمَٰنِ الَّذِينَ يَمْشُونَ عَلَى الْأَرْضِ هَوْنًا وَإِذَا خَاطَبَهُمُ الْجَاهِلُونَ قَالُوا سَلَامًا",r:"الفرقان ٦٣",n:"أول صفاتهم: هدوء في المشية، وحلم عند السفه."},
+ {c:"الأخلاق",t:"خفض الجناح",v:"وَاخْفِضْ جَنَاحَكَ لِمَنِ اتَّبَعَكَ مِنَ الْمُؤْمِنِينَ",r:"الشعراء ٢١٥",n:"التواضع لمن هم دونك في المكانة من تمام القيادة."},
+ {c:"الأخلاق",t:"ترك الخيلاء",v:"وَلَا تُصَعِّرْ خَدَّكَ لِلنَّاسِ وَلَا تَمْشِ فِي الْأَرْضِ مَرَحًا",r:"لقمان ١٨",n:"الإعراض بالوجه عن الناس أول علامات الكبر."},
+ {c:"الأخلاق",t:"القصد في المشي",v:"وَاقْصِدْ فِي مَشْيِكَ وَاغْضُضْ مِن صَوْتِكَ",r:"لقمان ١٩",n:"الاتزان في الحركة والصوت أدب قلّ من ينتبه إليه."},
+ {c:"الأخلاق",t:"الصدق",v:"يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَكُونُوا مَعَ الصَّادِقِينَ",r:"التوبة ١١٩",n:"لم يقل كونوا صادقين فحسب، بل الزموا صحبتهم."},
+ {c:"الأخلاق",t:"الحسنات تمحو",v:"إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ",r:"هود ١١٤",n:"الخطأ يُعالج بعمل صالح يليه، لا بالحسرة وحدها."},
+ {c:"الأخلاق",t:"البر بالإنفاق",v:"لَن تَنَالُوا الْبِرَّ حَتَّىٰ تُنفِقُوا مِمَّا تُحِبُّونَ",r:"آل عمران ٩٢",n:"البذل من الفائض سهل، والبر أن تعطي ما تحب."},
+ {c:"الأخلاق",t:"الاعتدال في الإنفاق",v:"وَلَا تَجْعَلْ يَدَكَ مَغْلُولَةً إِلَىٰ عُنُقِكَ وَلَا تَبْسُطْهَا كُلَّ الْبَسْطِ",r:"الإسراء ٢٩",n:"بين البخل والتبذير طريق واحد: القصد."},
+ {c:"الأخلاق",t:"ميزان التفاضل",v:"إِنَّ أَكْرَمَكُمْ عِندَ اللَّهِ أَتْقَاكُمْ",r:"الحجرات ١٣",n:"لا نسب ولا منصب ولا مال، الميزان واحد لا يقبل غيره."},
+
+ {c:"المجتمع",t:"التعارف",v:"وَجَعَلْنَاكُمْ شُعُوبًا وَقَبَائِلَ لِتَعَارَفُوا",r:"الحجرات ١٣",n:"الاختلاف مقصود ليبني التعارف، لا ليولّد التفاخر."},
+ {c:"المجتمع",t:"لا سخرية",v:"يَا أَيُّهَا الَّذِينَ آمَنُوا لَا يَسْخَرْ قَوْمٌ مِّن قَوْمٍ وَلَا تَلْمِزُوا أَنفُسَكُمْ وَلَا تَنَابَزُوا بِالْأَلْقَابِ",r:"الحجرات ١١",n:"ثلاث آفات مجتمعية: الاستهزاء، والعيب، والتلقيب."},
+ {c:"المجتمع",t:"اجتناب الظن",v:"اجْتَنِبُوا كَثِيرًا مِّنَ الظَّنِّ إِنَّ بَعْضَ الظَّنِّ إِثْمٌ وَلَا تَجَسَّسُوا وَلَا يَغْتَب بَّعْضُكُم بَعْضًا",r:"الحجرات ١٢",n:"سلسلة متصلة: سوء الظن يقود إلى التجسس، والتجسس إلى الغيبة."},
+ {c:"المجتمع",t:"التثبت من الخبر",v:"يَا أَيُّهَا الَّذِينَ آمَنُوا إِن جَاءَكُمْ فَاسِقٌ بِنَبَإٍ فَتَبَيَّنُوا",r:"الحجرات ٦",n:"أكثر ما يُبتلى به الناس اليوم: النقل بلا تثبت."},
+ {c:"المجتمع",t:"الإصلاح بين الناس",v:"إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ فَأَصْلِحُوا بَيْنَ أَخَوَيْكُمْ",r:"الحجرات ١٠",n:"الإصلاح واجب على الطرف الثالث لا خيار له."},
+ {c:"المجتمع",t:"ذات البين",v:"وَأَصْلِحُوا ذَاتَ بَيْنِكُمْ",r:"الأنفال ١",n:"فساد ذات البين حالقة تحلق الدين لا الشعر."},
+ {c:"المجتمع",t:"التعاون",v:"وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ",r:"المائدة ٢",n:"الشراكة في الخير أصل، والتفرد به نقص."},
+ {c:"المجتمع",t:"الشورى",v:"وَأَمْرُهُمْ شُورَىٰ بَيْنَهُمْ",r:"الشورى ٣٨",n:"الشورى صفة ملازمة للجماعة الراشدة لا إجراء طارئ."},
+ {c:"المجتمع",t:"المشاورة",v:"وَشَاوِرْهُمْ فِي الْأَمْرِ",r:"آل عمران ١٥٩",n:"أُمر بها من يوحى إليه، فكيف بمن دونه."},
+ {c:"المجتمع",t:"لا إكراه",v:"لَا إِكْرَاهَ فِي الدِّينِ",r:"البقرة ٢٥٦",n:"القناعة لا تُفرض، والإيمان اختيار لا إلزام."},
+ {c:"المجتمع",t:"الدعوة بالحكمة",v:"ادْعُ إِلَىٰ سَبِيلِ رَبِّكَ بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ وَجَادِلْهُم بِالَّتِي هِيَ أَحْسَنُ",r:"النحل ١٢٥",n:"ثلاث وسائل مرتبة، ليس فيها إغلاظ ولا تعنيف."},
+
+ {c:"الأسرة",t:"بر الوالدين",v:"وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا",r:"الإسراء ٢٣",n:"قرن حقهما بحقه، فلا عذر في التقصير."},
+ {c:"الأسرة",t:"القول الكريم",v:"فَلَا تَقُل لَّهُمَا أُفٍّ وَلَا تَنْهَرْهُمَا وَقُل لَّهُمَا قَوْلًا كَرِيمًا",r:"الإسراء ٢٣",n:"مُنع أدنى كلمة ضجر، فما فوقها أولى بالمنع."},
+ {c:"الأسرة",t:"دعاء الوالدين",v:"وَقُل رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",r:"الإسراء ٢٤",n:"الرحمة المطلوبة لهما أوسع من الطاعة، وتبقى بعد رحيلهما."},
+ {c:"الأسرة",t:"وصية لقمان",v:"يَا بُنَيَّ أَقِمِ الصَّلَاةَ وَأْمُرْ بِالْمَعْرُوفِ وَانْهَ عَنِ الْمُنكَرِ وَاصْبِرْ عَلَىٰ مَا أَصَابَكَ",r:"لقمان ١٧",n:"تربية تبدأ بالعبادة وتنتهي بتحمل الأثر."},
+ {c:"الأسرة",t:"حق القرابة",v:"وَآتِ ذَا الْقُرْبَىٰ حَقَّهُ وَالْمِسْكِينَ وَابْنَ السَّبِيلِ وَلَا تُبَذِّرْ تَبْذِيرًا",r:"الإسراء ٢٦",n:"الحقوق مرتبة: القريب أولًا، ثم الأبعد."},
+ {c:"الأسرة",t:"اليتيم والسائل",v:"فَأَمَّا الْيَتِيمَ فَلَا تَقْهَرْ وَأَمَّا السَّائِلَ فَلَا تَنْهَرْ",r:"الضحى ٩",n:"الضعيف يُختبر به الناس، والقهر أشدّ من المنع."},
+ {c:"الأسرة",t:"الإطعام على الحب",v:"وَيُطْعِمُونَ الطَّعَامَ عَلَىٰ حُبِّهِ مِسْكِينًا وَيَتِيمًا وَأَسِيرًا",r:"الإنسان ٨",n:"يعطون ما يحبون، ولمن لا يرجون منه جزاء."},
+
+ {c:"العلم والعمل",t:"طلب الزيادة",v:"وَقُل رَّبِّ زِدْنِي عِلْمًا",r:"طه ١١٤",n:"الدعاء الوحيد الذي أُمر بطلب الزيادة فيه هو العلم."},
+ {c:"العلم والعمل",t:"لا يستوون",v:"قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ",r:"الزمر ٩",n:"سؤال إنكاري لا يحتمل إلا جوابًا واحدًا."},
+ {c:"العلم والعمل",t:"خشية العلماء",v:"إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ",r:"فاطر ٢٨",n:"العلم الذي لا يورث خشية ليس هو المقصود."},
+ {c:"العلم والعمل",t:"الحكمة",v:"يُؤْتِي الْحِكْمَةَ مَن يَشَاءُ وَمَن يُؤْتَ الْحِكْمَةَ فَقَدْ أُوتِيَ خَيْرًا كَثِيرًا",r:"البقرة ٢٦٩",n:"الحكمة وضع الشيء في موضعه، وهي أثمن من العلم المجرد."},
+ {c:"العلم والعمل",t:"لا تقفُ ما لا تعلم",v:"وَلَا تَقْفُ مَا لَيْسَ لَكَ بِهِ عِلْمٌ",r:"الإسراء ٣٦",n:"نقل الخبر بلا تثبت داخل في النهي."},
+ {c:"العلم والعمل",t:"السعي",v:"وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",r:"النجم ٣٩",n:"لا يُحسب لك إلا ما بذلت فيه جهدًا."},
+ {c:"العلم والعمل",t:"استباق الخيرات",v:"فَاسْتَبِقُوا الْخَيْرَاتِ",r:"البقرة ١٤٨",n:"المنافسة المشروعة الوحيدة: في الخير."},
+ {c:"العلم والعمل",t:"مثقال ذرة",v:"وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ",r:"الزلزلة ٧",n:"لا شيء يضيع، ولا صغير في ميزان الله."},
+ {c:"العلم والعمل",t:"المجاهدة",v:"وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا",r:"العنكبوت ٦٩",n:"الهداية ثمرة بذل، لا انتظار."},
+
+ {c:"الصبر والرجاء",t:"مع العسر يسرًا",v:"إِنَّ مَعَ الْعُسْرِ يُسْرًا",r:"الشرح ٦",n:"اليسر مصاحب للعسر لا لاحق له فقط."},
+ {c:"الصبر والرجاء",t:"معية الصابرين",v:"إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",r:"البقرة ١٥٣",n:"معية نصر وتأييد، لا مجرد علم واطلاع."},
+ {c:"الصبر والرجاء",t:"الصبر الجميل",v:"فَاصْبِرْ صَبْرًا جَمِيلًا",r:"المعارج ٥",n:"الجميل ما لا شكوى فيه لغير الله."},
+ {c:"الصبر والرجاء",t:"لا تيأسوا",v:"وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ",r:"يوسف ٨٧",n:"اليأس من الفرج أشد من البلاء نفسه."},
+ {c:"الصبر والرجاء",t:"المخرج",v:"وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",r:"الطلاق ٢",n:"المخرج يأتي من حيث لا يُحتسب، وشرطه تقوى في السر."},
+ {c:"الصبر والرجاء",t:"الشكر",v:"وَلَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ",r:"إبراهيم ٧",n:"الشكر باب زيادة مضمون، وقلّ من يطرقه."},
+ {c:"الصبر والرجاء",t:"تغيير النفس",v:"إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّىٰ يُغَيِّرُوا مَا بِأَنفُسِهِمْ",r:"الرعد ١١",n:"التغيير الخارجي فرع عن تغيير داخلي يسبقه."},
+ {c:"الصبر والرجاء",t:"خير الزاد",v:"وَتَزَوَّدُوا فَإِنَّ خَيْرَ الزَّادِ التَّقْوَىٰ",r:"البقرة ١٩٧",n:"في السفر والحياة كلها، الزاد الحقيقي واحد."},
+ {c:"الصبر والرجاء",t:"حسنة الدارين",v:"رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",r:"البقرة ٢٠١",n:"أجمع دعاء في القرآن، وأكثر ما دعا به النبي ﷺ."},
+ {c:"الصبر والرجاء",t:"التواصي",v:"وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ",r:"العصر ٣",n:"النجاة لا تكتمل فردية، بل بتواصٍ بين اثنين فأكثر."},
+ {c:"الصبر والرجاء",t:"لا تمدّ عينيك",v:"وَلَا تَمُدَّنَّ عَيْنَيْكَ إِلَىٰ مَا مَتَّعْنَا بِهِ أَزْوَاجًا مِّنْهُمْ",r:"طه ١٣١",n:"النظر إلى ما عند الناس أول الطريق إلى السخط."}
+];
+
+var DUAS=[
+ "اللهم إني أسألك حسن الخلق وحسن المعاملة",
+ "اللهم اهدني لأحسن الأخلاق، لا يهدي لأحسنها إلا أنت",
+ "اللهم كما حسّنت خَلقي فحسّن خُلُقي",
+ "اللهم إني أسألك الثبات في الأمر والعزيمة على الرشد",
+ "اللهم أعنّي على ذكرك وشكرك وحسن عبادتك",
+ "اللهم اجعل يومي هذا خيرًا من أمسي",
+ "اللهم أصلح لي شأني كله، ولا تكلني إلى نفسي طرفة عين",
+ "اللهم إني أسألك علمًا نافعًا ورزقًا طيبًا وعملًا متقبلًا",
+ "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة",
+ "اللهم اغفر لي ولوالديّ وارحمهما كما ربياني صغيرًا",
+ "اللهم إني أسألك الهدى والتقى والعفاف والغنى",
+ "اللهم اكفني بحلالك عن حرامك، وأغنني بفضلك عمّن سواك",
+ "اللهم ألّف بين قلوبنا وأصلح ذات بيننا",
+ "اللهم اشرح صدري ويسّر أمري",
+ "اللهم اجعل عملي كله صالحًا، واجعله لوجهك خالصًا",
+ "اللهم يسّر ولا تعسّر، وتمّم بالخير",
+ "اللهم إني أعوذ بك من الهمّ والحزن",
+ "اللهم بارك لنا فيما رزقتنا",
+ "اللهم اجعلني من التوابين واجعلني من المتطهرين",
+ "اللهم إني أسألك رضاك والجنة"
+];
+
+/* ============ المدن والحساب ============ */
+var CITIES=[
+ {n:"حمص",lat:34.7308,lng:36.7090,tz:3,m:"homs"},{n:"دمشق",lat:33.5138,lng:36.2765,tz:3,m:"homs"},
+ {n:"حلب",lat:36.2021,lng:37.1343,tz:3,m:"homs"},{n:"حماة",lat:35.1318,lng:36.7578,tz:3,m:"homs"},
+ {n:"اللاذقية",lat:35.5196,lng:35.7915,tz:3,m:"homs"},{n:"طرطوس",lat:34.8890,lng:35.8866,tz:3,m:"homs"},
+ {n:"إدلب",lat:35.9306,lng:36.6339,tz:3,m:"homs"},{n:"دير الزور",lat:35.3359,lng:40.1408,tz:3,m:"homs"},
+ {n:"الرقة",lat:35.9594,lng:39.0077,tz:3,m:"homs"},{n:"الحسكة",lat:36.5024,lng:40.7477,tz:3,m:"homs"},
+ {n:"القامشلي",lat:37.0522,lng:41.2311,tz:3,m:"homs"},{n:"السويداء",lat:32.7094,lng:36.5694,tz:3,m:"homs"},
+ {n:"درعا",lat:32.6189,lng:36.1021,tz:3,m:"homs"},{n:"تدمر",lat:34.5624,lng:38.2841,tz:3,m:"homs"},
+ {n:"سلمية",lat:35.0114,lng:37.0531,tz:3,m:"homs"},{n:"الرستن",lat:34.9256,lng:36.7325,tz:3,m:"homs"},
+ {n:"تلكلخ",lat:34.6689,lng:36.2589,tz:3,m:"homs"},{n:"القصير",lat:34.5089,lng:36.5794,tz:3,m:"homs"},
+ {n:"صافيتا",lat:34.8206,lng:36.1183,tz:3,m:"homs"},{n:"بانياس",lat:35.1826,lng:35.9464,tz:3,m:"homs"},
+ {n:"الرياض",lat:24.7136,lng:46.6753,tz:3,m:"uaq"},{n:"جدة",lat:21.4858,lng:39.1925,tz:3,m:"uaq"},
+ {n:"مكة المكرمة",lat:21.3891,lng:39.8579,tz:3,m:"uaq"},{n:"المدينة المنورة",lat:24.5247,lng:39.5692,tz:3,m:"uaq"},
+ {n:"الدمام",lat:26.4207,lng:50.0888,tz:3,m:"uaq"},{n:"عمّان",lat:31.9539,lng:35.9106,tz:3,m:"mwl"},
+ {n:"بغداد",lat:33.3152,lng:44.3661,tz:3,m:"karachi"},{n:"إسطنبول",lat:41.0082,lng:28.9784,tz:3,m:"mwl"},
+ {n:"الدوحة",lat:25.2854,lng:51.5310,tz:3,m:"uaq"},{n:"الكويت",lat:29.3759,lng:47.9774,tz:3,m:"uaq"},
+ {n:"دبي",lat:25.2048,lng:55.2708,tz:4,m:"uaq"}
+];
+var METHODS={
+ homs:{f:18,i:16.6,min:false,label:"تقويم حمص المحلي"},
+ mwl:{f:18,i:17,min:false,label:"رابطة العالم الإسلامي"},
+ uaq:{f:18.5,i:90,min:true,label:"أم القرى"},
+ egypt:{f:19.5,i:17.5,min:false,label:"الهيئة المصرية"},
+ karachi:{f:18,i:18,min:false,label:"كراتشي"}
+};
+function julian(y,m,d){
+  if(m<=2){ y-=1; m+=12; }
+  var a=Math.floor(y/100), b=2-a+Math.floor(a/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+b-1524.5;
+}
+function sunPos(J){
+  var Dd=J-2451545.0, rad=Math.PI/180;
+  var g=((357.529+0.98560028*Dd)%360)*rad;
+  var q=(280.459+0.98564736*Dd)%360;
+  var L=(((q+1.915*Math.sin(g)+0.020*Math.sin(2*g))%360)+360)%360*rad;
+  var e=(23.439-0.00000036*Dd)*rad;
+  var dec=Math.asin(Math.sin(e)*Math.sin(L));
+  var RA=((Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/rad)/15+24)%24;
+  var eq=q/15-RA;
+  if(eq>12) eq-=24; if(eq<-12) eq+=24;
+  return {dec:dec,eq:eq};
+}
+function hourAngle(angle,dec,lat){
+  var la=lat*Math.PI/180;
+  var x=(-Math.sin(angle*Math.PI/180)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null;
+  return (Math.acos(x)*180/Math.PI)/15;
+}
+function asrAngle(factor,dec,lat){
+  var la=lat*Math.PI/180;
+  var a=Math.atan(1/(factor+Math.tan(Math.abs(la-dec))));
+  var x=(Math.sin(a)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null;
+  return (Math.acos(x)*180/Math.PI)/15;
+}
+/* يعيد الساعات العشرية بنظام ٢٤ */
+function prayerHours(y,mo,d,city,mk,asrF,ih){
+  var M=METHODS[mk]||METHODS.homs;
+  var J=julian(y,mo,d)-city.lng/(15*24), s=sunPos(J);
+  var noon=12+city.tz-city.lng/15-s.eq, HOR=0.833;
+  var mag=noon+hourAngle(HOR,s.dec,city.lat);
+  var raw=[ noon-hourAngle(M.f,s.dec,city.lat), noon-hourAngle(HOR,s.dec,city.lat), noon,
+            noon+asrAngle(asrF,s.dec,city.lat), mag,
+            M.min? mag+M.i/60 : noon+hourAngle(M.i,s.dec,city.lat) ];
+  var adj=ih?[1,0,1,0,1,1]:[0,0,0,0,0,0], out=[], i;
+  for(i=0;i<6;i++){
+    var mins=Math.round(raw[i]*60)+adj[i];
+    mins=((mins%1440)+1440)%1440;
+    out.push(mins/60);
+  }
+  return out;
+}
+function h12(h){
+  var mins=Math.round(h*60), hh=Math.floor(mins/60)%24, mm=mins%60;
+  return {h:(hh%12)||12, m:mm, H:hh};
+}
+function tstr(o){ return o.h+"."+(o.m<10?"0":"")+o.m; }
+
+/* ============ التاريخ ============ */
+var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+var MON=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+function pad(n){ return (n<10?"0":"")+n; }
+function toAr(s){ return String(s).replace(/[0-9]/g,function(d){ return "٠١٢٣٤٥٦٧٨٩"[+d]; }); }
+function hijri(d){
+  try{
+    var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",{day:"numeric",month:"long",year:"numeric"}).formatToParts(d),o={};
+    p.forEach(function(x){ o[x.type]=x.value; });
+    return {d:parseInt(o.day,10), m:String(o.month).replace("هـ","").trim(), y:String(o.year).replace(/\D/g,"")};
+  }catch(e){ return null; }
+}
+function hijriMonthNum(d){
+  try{
+    var p=new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"}).formatToParts(d),o={};
+    p.forEach(function(x){ o[x.type]=x.value; });
+    return {m:parseInt(o.month,10),d:parseInt(o.day,10)};
+  }catch(e){ return null; }
+}
+function daysToRamadan(d){
+  for(var i=0;i<420;i++){
+    var t=new Date(d.getTime()+i*86400000), h=hijriMonthNum(t);
+    if(h&&h.m===9&&h.d===1) return i;
+  }
+  return null;
+}
+function moonPhase(d){
+  var syn=29.530588853, ref=Date.UTC(2000,0,6,18,14);
+  return ((((d.getTime()-ref)/86400000)%syn)+syn)%syn/syn;
+}
+
+/* ============ أدوات الرسم ============ */
+function wrap(c,t,maxW){
+  var out=[];
+  String(t||"").split("\n").forEach(function(p){
+    if(!p.trim()){ return; }
+    var ws=p.trim().split(/\s+/), line="";
+    ws.forEach(function(w){
+      var test=line?line+" "+w:w;
+      if(c.measureText(test).width>maxW&&line){ out.push(line); line=w; } else line=test;
+    });
+    if(line) out.push(line);
+  });
+  return out;
+}
+function fitL(c,t,maxW,maxH,mx,mn,lh,fam,wt){
+  for(var s=mx;s>=mn;s-=2){
+    c.font=(wt?wt+" ":"")+s+"px "+fam;
+    var L=wrap(c,t,maxW);
+    if(L.length*s*lh<=maxH) return {size:s,lines:L};
+  }
+  c.font=(wt?wt+" ":"")+mn+"px "+fam;
+  return {size:mn,lines:wrap(c,t,maxW)};
+}
+function star8(c,x,y,r,inner,rot){
+  var i; c.beginPath();
+  for(i=0;i<16;i++){
+    var a=Math.PI/8*i+(rot||0), rad=(i%2===0)?r:r*inner;
+    var px=x+Math.cos(a)*rad, py=y+Math.sin(a)*rad;
+    if(i) c.lineTo(px,py); else c.moveTo(px,py);
+  }
+  c.closePath();
+}
+function pill(c,txt,cx,cy,fill,fg,fs){
+  c.font="600 "+fs+"px "+CA; c.textAlign="center"; c.textBaseline="middle";
+  var w=c.measureText(txt).width+42, h=fs*2.0;
+  var r=h/2;
+  c.beginPath(); c.moveTo(cx-w/2+r,cy-h/2);
+  c.arcTo(cx+w/2,cy-h/2,cx+w/2,cy+h/2,r); c.arcTo(cx+w/2,cy+h/2,cx-w/2,cy+h/2,r);
+  c.arcTo(cx-w/2,cy+h/2,cx-w/2,cy-h/2,r); c.arcTo(cx-w/2,cy-h/2,cx+w/2,cy-h/2,r);
+  c.closePath(); c.fillStyle=fill; c.fill();
+  c.fillStyle=fg; c.fillText(txt,cx,cy+1);
+  c.textBaseline="alphabetic";
+  return w;
+}
+function moonIcon(c,cx,cy,r,ph){
+  c.save();
+  c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.fillStyle="#E7E3D6"; c.fill();
+  c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.clip();
+  c.fillStyle=NIGHT;
+  c.beginPath(); c.arc(cx+r*2*Math.cos(ph*2*Math.PI),cy,r,0,Math.PI*2); c.fill();
+  c.restore();
+  c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.strokeStyle="rgba(0,0,0,.2)"; c.lineWidth=1.5; c.stroke();
+}
+
+/* ============ رسم البوستر ============ */
+function poster(c,S){
+  c.clearRect(0,0,W,H);
+  var g=c.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,"#FAF8F1"); g.addColorStop(1,"#EFEDE3");
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  c.save(); c.globalAlpha=.035; c.strokeStyle=INK; c.lineWidth=2;
+  for(var yy=-60;yy<H+220;yy+=210) for(var xx=((yy/210)|0)%2?105:0;xx<W+210;xx+=210){ star8(c,xx,yy,92,.42,0); c.stroke(); }
+  c.restore();
+
+  /* الشريط العلوي */
+  var ty=76, x=W-110;
+  var w1=pill(c,S.city,x,ty,"rgba(46,125,79,.10)",GREEN,26); x-=w1/2;
+  if(S.toR!==null){ x-=20; var w2=pill(c,"باقٍ على رمضان "+toAr(S.toR)+" يومًا",x-100,ty,"rgba(0,0,0,.045)",INK,25); x-=w2+40; }
+  moonIcon(c,150,ty,24,S.ph);
+  c.textAlign="left"; c.font="24px "+CA; c.fillStyle=MUT;
+  c.fillText("القمر",184,ty+9);
+
+  /* القرص */
+  var cx=W/2, cy=606, R=288, ring=46, inR=R-ring/2, outR=R+ring/2;
+  function ang(h){ return (h/24)*Math.PI*2-Math.PI/2; }
+  c.beginPath(); c.arc(cx,cy,R,ang(S.h[4]),ang(S.h[0]+24)); c.lineWidth=ring; c.strokeStyle=NIGHT; c.stroke();
+  c.beginPath(); c.arc(cx,cy,R,ang(S.h[0]),ang(S.h[1])); c.lineWidth=ring; c.strokeStyle=DAWN; c.stroke();
+  c.beginPath(); c.arc(cx,cy,R,ang(S.h[1]),ang(S.h[4])); c.lineWidth=ring; c.strokeStyle=DAYC; c.stroke();
+
+  c.beginPath(); c.arc(cx,cy,outR,0,Math.PI*2); c.strokeStyle="rgba(28,43,38,.16)"; c.lineWidth=2; c.stroke();
+  c.beginPath(); c.arc(cx,cy,inR,0,Math.PI*2); c.stroke();
+
+  /* تقسيمات الوقت داخل الحافة */
+  var i,a;
+  for(i=0;i<48;i++){
+    a=ang(i/2);
+    var half=(i%2===1), major=(i%6===0);
+    var len=half?9:(major?26:16);
+    c.beginPath();
+    c.moveTo(cx+Math.cos(a)*(inR-2),cy+Math.sin(a)*(inR-2));
+    c.lineTo(cx+Math.cos(a)*(inR-2-len),cy+Math.sin(a)*(inR-2-len));
+    c.strokeStyle=major?"rgba(168,128,47,.75)":(half?"rgba(28,43,38,.16)":"rgba(28,43,38,.30)");
+    c.lineWidth=major?3.5:(half?1.2:2);
+    c.stroke();
+  }
+  c.textAlign="center"; c.textBaseline="middle"; c.font="22px "+CA; c.fillStyle="rgba(28,43,38,.45)";
+  for(i=0;i<8;i++){
+    var hh=i*3; a=ang(hh);
+    var nx=cx+Math.cos(a)*(inR-52), ny=cy+Math.sin(a)*(inR-52);
+    c.fillText(toAr((hh%12)||12),nx,ny);
+  }
+  c.font="19px "+CA; c.fillStyle="rgba(28,43,38,.34)";
+  c.fillText("منتصف الليل",cx,cy-(inR-92));
+  c.fillText("الظهيرة",cx,cy+(inR-92));
+  c.textBaseline="alphabetic";
+
+  /* مؤشر الآن */
+  if(S.showNow){
+    a=ang(S.nowH);
+    var nr=outR+10;
+    c.save(); c.translate(cx+Math.cos(a)*nr,cy+Math.sin(a)*nr); c.rotate(a+Math.PI/2);
+    c.beginPath(); c.moveTo(0,0); c.lineTo(-13,-24); c.lineTo(13,-24); c.closePath();
+    c.fillStyle=ACC; c.fill(); c.restore();
+  }
+
+  /* علامات الصلوات */
+  var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
+  for(i=0;i<6;i++){
+    a=ang(S.h[i]);
+    c.beginPath();
+    c.moveTo(cx+Math.cos(a)*inR,cy+Math.sin(a)*inR);
+    c.lineTo(cx+Math.cos(a)*outR,cy+Math.sin(a)*outR);
+    c.strokeStyle=GOLD; c.lineWidth=5; c.stroke();
+    c.beginPath(); c.arc(cx+Math.cos(a)*R,cy+Math.sin(a)*R,9,0,Math.PI*2);
+    c.fillStyle=GOLD2; c.fill(); c.strokeStyle=GOLD; c.lineWidth=2; c.stroke();
+    var lx=cx+Math.cos(a)*(R+104), ly=cy+Math.sin(a)*(R+104);
+    c.textAlign="center";
+    c.font="700 42px "+CA; c.fillStyle=INK; c.fillText(S.disp[i],lx,ly+2);
+    c.font="23px "+CA; c.fillStyle=MUT; c.fillText(LAB[i],lx,ly+38);
+  }
+
+  /* قلب القرص */
+  c.textAlign="center";
+  c.font="700 92px "+AM; c.fillStyle=INK; c.fillText(S.day,cx,cy-24);
+  c.font="27px "+CA; c.fillStyle=MUT;
+  c.fillText(S.hijri,cx,cy+34);
+  c.fillText(S.greg,cx,cy+76);
+  c.beginPath(); c.moveTo(cx-66,cy+108); c.lineTo(cx+66,cy+108);
+  c.strokeStyle="rgba(168,128,47,.5)"; c.lineWidth=1.6; c.stroke();
+  c.font="22px "+CA; c.fillStyle=GOLD; c.fillText(S.dayLen,cx,cy+142);
+
+  /* الآية */
+  var vy=1124;
+  star8(c,cx,vy-46,15,.44,0); c.fillStyle=GOLD; c.fill();
+  var f=fitL(c,S.verse,W-230,200,58,30,1.78,SH,"700");
+  c.font="700 "+f.size+"px "+SH;
+  c.textAlign="center"; c.fillStyle=INK;
+  f.lines.forEach(function(l,i2){ c.fillText(l,cx,vy+f.size*0.9+i2*f.size*1.78); });
+  var vEnd=vy+f.size*0.9+(f.lines.length-1)*f.size*1.78;
+
+  c.font="29px "+CA; c.fillStyle=ACC;
+  c.fillText(S.ref,cx,vEnd+62);
+
+  if(S.refl.trim()){
+    var r2=fitL(c,S.refl,W-270,96,28,19,1.62,SH,"");
+    c.font=r2.size+"px "+SH; c.fillStyle=MUT;
+    r2.lines.forEach(function(l,i3){ c.fillText(l,cx,vEnd+122+i3*r2.size*1.62); });
+  }
+
+  /* الأسفل */
+  c.strokeStyle="rgba(28,43,38,.12)"; c.lineWidth=1.6;
+  c.beginPath(); c.moveTo(180,H-136); c.lineTo(W-180,H-136); c.stroke();
+  if(S.dua.trim()){
+    c.font="29px "+SH; c.fillStyle=INK; c.fillText(S.dua,cx,H-86);
+  }
+  if(S.sign.trim()){
+    c.font="23px "+CA; c.fillStyle=GOLD; c.fillText(S.sign,cx,H-38);
+  }
+}
+
+/* ============ الواجهة ============ */
+var cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+var ctx=cv.getContext("2d");
+function $(i){ return document.getElementById(i); }
+var idx=0;
+
+function pickedDate(){
+  var v=$("f_date").value, p=v?v.split("-"):null;
+  if(!p||p.length!==3) return new Date();
+  return new Date(+p[0],+p[1]-1,+p[2]);
+}
+function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
+function readTimes(){
+  var out=[],i,h,m;
+  for(i=0;i<6;i++){
+    h=parseInt($("h"+i).value,10); m=parseInt($("m"+i).value,10);
+    if(isNaN(h)) h=12; if(isNaN(m)) m=0;
+    out.push({h:h,m:m});
+  }
+  return out;
+}
+function to24(o,i){
+  var h=o.h%12;
+  /* الفجر والشروق صباحًا، الظهر ظهرًا، والباقي مساءً */
+  if(i<=1) return h+o.m/60;
+  if(i===2) return (o.h===12?12:h+12)+o.m/60;
+  return (h+12)+o.m/60;
+}
+function recalc(){
+  var d=pickedDate(), c=city();
+  var hrs=prayerHours(d.getFullYear(),d.getMonth()+1,d.getDate(),c,
+    $("f_method").value,parseInt($("f_asr").value,10),$("f_ihtiyat").value==="1");
+  hrs.forEach(function(h,i){ var o=h12(h); $("h"+i).value=o.h; $("m"+i).value=pad(o.m); });
+  $("calcNote").textContent="محسوبة لـ"+c.n+" حسب "+METHODS[$("f_method").value].label+". عدّل أي وقت يدويًا عند الحاجة.";
+}
+function state(){
+  var d=pickedDate(), c=city(), t=readTimes();
+  var h=t.map(to24), hj=hijri(new Date(d.getTime()+(parseInt($("f_hijriAdj").value,10)||0)*86400000));
+  var now=new Date();
+  var dayLen=h[4]-h[1];
+  return {
+    day:DAYS[d.getDay()],
+    hijri:hj? toAr(hj.d)+" "+hj.m+" "+toAr(hj.y)+" هـ" : "",
+    greg:toAr(d.getDate())+" "+MON[d.getMonth()]+" "+toAr(d.getFullYear())+" م",
+    dayLen:"طول النهار "+toAr(Math.floor(dayLen))+" ساعة و"+toAr(Math.round((dayLen%1)*60))+" دقيقة",
+    city:c.n, h:h, disp:t.map(tstr),
+    verse:$("f_verse").value, ref:$("f_ref").value, refl:$("f_refl").value,
+    dua:$("f_dua").value, sign:$("f_sign").value,
+    toR:daysToRamadan(d), ph:moonPhase(d),
+    showNow:$("f_now").checked, nowH:now.getHours()+now.getMinutes()/60
+  };
+}
+var timer=null;
+function render(){ poster(ctx,state()); $("out").src=cv.toDataURL("image/png"); }
+function schedule(){ clearTimeout(timer); timer=setTimeout(function(){ render(); save(); },240); }
+
+/* التخزين */
+var KEY="quran-dial:v1";
+function fbSet(v){ try{ window.localStorage.setItem(KEY,v); return true; }catch(e){ return false; } }
+function fbGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ return null; } }
+function snapshot(){
+  return JSON.stringify({verse:$("f_verse").value,ref:$("f_ref").value,refl:$("f_refl").value,
+    cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
+    ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,dua:$("f_dua").value,
+    sign:$("f_sign").value,now:$("f_now").checked});
+}
+function save(){
+  if(!$("f_auto").checked) return;
+  var v=snapshot(), done=false;
+  function ok(){ var el=$("saved"); el.textContent="تم الحفظ";
+    setTimeout(function(){ if(el.textContent==="تم الحفظ") el.textContent=""; },1400); }
+  try{
+    if(window.storage&&window.storage.set){ window.storage.set(KEY,v).then(ok)["catch"](function(){ if(fbSet(v)) ok(); }); done=true; }
+  }catch(e){}
+  if(!done&&fbSet(v)) ok();
+}
+function load(){
+  return new Promise(function(res){
+    function fin(r){ try{ res(r?JSON.parse(r):null); }catch(e){ res(null); } }
+    try{
+      if(window.storage&&window.storage.get){
+        window.storage.get(KEY).then(function(r){ fin(r&&r.value?r.value:fbGet()); })["catch"](function(){ fin(fbGet()); });
+        return;
+      }
+    }catch(e){}
+    fin(fbGet());
+  });
+}
+/* التصدير */
+function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+$("btnDl").onclick=function(){
+  render();
+  cv.toBlob(function(b){
+    var u=URL.createObjectURL(b), a=document.createElement("a");
+    a.href=u; a.download="ayah-"+stamp()+".png"; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(u); },3000);
+  },"image/png");
+};
+$("btnShare").onclick=function(){
+  render();
+  cv.toBlob(function(b){
+    try{
+      var f=[new File([b],"ayah-"+stamp()+".png",{type:"image/png"})];
+      if(navigator.canShare&&navigator.canShare({files:f})){ navigator.share({files:f})["catch"](function(){}); return; }
+    }catch(e){}
+    $("saved").textContent="المشاركة غير مدعومة هنا. استخدم التنزيل أو الضغط المطول على الصورة.";
+  },"image/png");
+};
+$("btnReset").onclick=function(){
+  $("f_city").selectedIndex=0; $("f_method").value="homs"; $("f_asr").value="1";
+  $("f_ihtiyat").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
+  $("f_dua").value=DUAS[0];
+  $("f_sign").value="ماجد"; $("f_now").checked=true;
+  use(0); recalc(); render(); save();
+};
+/* بناء حقول المواقيت */
+(function(){
+  var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"], box=$("timesBox"), i;
+  for(i=0;i<6;i++){
+    var cell=document.createElement("div");
+    cell.innerHTML='<label for="h'+i+'">'+LAB[i]+'</label><div class="hm">'+
+      '<input type="number" id="h'+i+'" min="1" max="12" inputmode="numeric"><span>:</span>'+
+      '<input type="number" id="m'+i+'" min="0" max="59" inputmode="numeric"></div>';
+    box.appendChild(cell);
+  }
+})();
+/* المكتبة والمدن */
+VERSES.forEach(function(v,i){
+  var o=document.createElement("option"); o.value=String(i); o.textContent=v.c+" · "+v.t; $("f_lib").appendChild(o);
+});
+function use(i){
+  idx=i; $("f_lib").selectedIndex=i;
+  $("f_verse").value=VERSES[i].v; $("f_ref").value=VERSES[i].r; $("f_refl").value=VERSES[i].n;
+  schedule();
+}
+$("f_lib").onchange=function(){ use(this.selectedIndex); };
+$("btnNext").onclick=function(){ use((idx+1)%VERSES.length); };
+DUAS.forEach(function(d,i){
+  var o=document.createElement("option"); o.value=String(i);
+  o.textContent=d.length>32?d.slice(0,32)+"…":d; $("f_duaLib").appendChild(o);
+});
+var duaIdx=0;
+function useDua(i){ duaIdx=i; $("f_duaLib").selectedIndex=i; $("f_dua").value=DUAS[i]; schedule(); }
+$("f_duaLib").onchange=function(){ useDua(this.selectedIndex); };
+$("btnNextDua").onclick=function(){ useDua((duaIdx+1)%DUAS.length); };
+CITIES.forEach(function(c){ var o=document.createElement("option"); o.textContent=c.n; $("f_city").appendChild(o); });
+$("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedule(); };
+$("f_date").onchange=function(){ recalc(); schedule(); };
+["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
+$("f_hijriAdj").onchange=schedule;
+$("btnRecalc").onclick=function(){ recalc(); schedule(); };
+["f_verse","f_ref","f_refl","f_dua","f_sign","f_now","h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"]
+ .forEach(function(id){ $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule); });
+
+(function start(){
+  $("f_date").value=isoToday();
+  $("f_dua").value=DUAS[0];
+  $("f_sign").value="ماجد";
+  use(0);
+  load().then(function(s){
+    if(s){
+      if(s.verse){ $("f_verse").value=s.verse; $("f_ref").value=s.ref||""; $("f_refl").value=s.refl||""; }
+      if(typeof s.cityIdx==="number") $("f_city").selectedIndex=s.cityIdx;
+      if(s.method) $("f_method").value=s.method;
+      if(s.asr) $("f_asr").value=s.asr;
+      if(s.ihtiyat) $("f_ihtiyat").value=s.ihtiyat;
+      if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
+      if(s.dua!==undefined) $("f_dua").value=s.dua;
+      if(s.sign!==undefined) $("f_sign").value=s.sign;
+      if(s.now!==undefined) $("f_now").checked=s.now;
+    }
+    recalc();
+    var go=function(){ render(); };
+    if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,1800); } else go();
+  });
+})();
+})();
+</script>
+</body>
+</html>
