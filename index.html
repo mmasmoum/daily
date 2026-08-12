@@ -68,7 +68,7 @@
 
 <header>
   <h1>البطاقتان اليوميتان</h1>
-  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت.</div>
+  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت. <b style="color:var(--gold)">نسخة 3.2</b></div>
 </header>
 
 <div class="styles" id="styleBar"></div>
@@ -807,19 +807,26 @@ function card2(c,S,d){
     c.font="34px "+AR;
     var m=fit(c,d.msg,W2-260,150,36,22,1.7,"");
     c.font=m.size+"px "+AR;
-    lines(c,m.lines,W2/2,H2-250-(m.lines.length-1)*m.size*1.7,m.size,1.7,
+    lines(c,m.lines,W2/2,H2-270-(m.lines.length-1)*m.size*1.7,m.size,1.7,
       S.dark?"rgba(255,255,255,.85)":S.ink);
   }
 
   if(d.ribbon.trim()){
-    c.font=B+"42px "+AR;
-    var bw=Math.min(W2-140,c.measureText(d.ribbon).width+130), by=H2-150;
-    c.beginPath(); c.moveTo(W2/2-bw/2,by); c.lineTo(W2/2+bw/2,by);
-    c.lineTo(W2/2+bw/2-34,by+40); c.lineTo(W2/2-bw/2+34,by+40); c.closePath();
-    c.fillStyle=S.dark?"rgba(217,180,90,.16)":"rgba(0,0,0,.05)"; c.fill();
-    c.strokeStyle=gg(c,W2/2-bw/2,by,W2/2+bw/2,by+40,S); c.lineWidth=3; c.stroke();
+    var rs=44, maxTW=W2-320;
+    c.font=B+rs+"px "+AR;
+    while(c.measureText(d.ribbon).width>maxTW&&rs>26){ rs-=2; c.font=B+rs+"px "+AR; }
+    var tw=c.measureText(d.ribbon).width, ry=H2-118;
     c.textAlign="center"; c.fillStyle=S.dark?S.gold2:S.band;
-    c.fillText(d.ribbon,W2/2,by+30);
+    c.fillText(d.ribbon,W2/2,ry);
+    var half=Math.min(W2/2-96,tw/2+58);
+    c.strokeStyle=gg(c,W2/2-half,0,W2/2+half,0,S); c.lineWidth=2.5;
+    [ry-rs*0.98,ry+rs*0.42].forEach(function(ly){
+      c.beginPath(); c.moveTo(W2/2-half,ly); c.lineTo(W2/2+half,ly); c.stroke();
+    });
+    [W2/2-half-34,W2/2+half+34].forEach(function(sx){
+      starPath(c,sx,ry-rs*0.28,18,.45,8,0); c.fillStyle=S.gold; c.fill();
+      starPath(c,sx,ry-rs*0.28,9,.45,8,Math.PI/8); c.fillStyle=S.dark?S.gold2:"#FFFFFF"; c.fill();
+    });
   }
 
   if(S.grain&&F!=="photo") grain(c,W2,H2,S.dark?.09:.18);
