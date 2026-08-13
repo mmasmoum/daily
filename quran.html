@@ -56,7 +56,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.5</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.6</b></div>
 </header>
 
 <div class="wrap">
@@ -131,10 +131,6 @@
       <input type="text" id="f_dua">
       <label for="f_sign">التوقيع</label>
       <input type="text" id="f_sign">
-      <div class="check">
-        <input type="checkbox" id="f_now" checked>
-        <label for="f_now" style="margin:0">إظهار مؤشر «الآن» على القرص</label>
-      </div>
     </fieldset>
 
     <div class="check">
@@ -495,15 +491,6 @@ function poster(c,S){
   c.fillText("الظهيرة",cx,cy+(inR-74));
   c.textBaseline="alphabetic";
 
-  /* مؤشر الآن */
-  if(S.showNow){
-    a=ang(S.nowH);
-    var nr=outR+10;
-    c.save(); c.translate(cx+Math.cos(a)*nr,cy+Math.sin(a)*nr); c.rotate(a+Math.PI/2);
-    c.beginPath(); c.moveTo(0,0); c.lineTo(-13,-24); c.lineTo(13,-24); c.closePath();
-    c.fillStyle=ACC; c.fill(); c.restore();
-  }
-
   /* علامات الصلوات */
   var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
   for(i=0;i<6;i++){
@@ -605,7 +592,6 @@ function recalc(){
 function state(){
   var d=pickedDate(), c=city(), t=readTimes();
   var h=t.map(to24), hj=hijri(new Date(d.getTime()+(parseInt($("f_hijriAdj").value,10)||0)*86400000));
-  var now=new Date();
   var dayLen=h[4]-h[1];
   return {
     day:DAYS[d.getDay()],
@@ -615,8 +601,7 @@ function state(){
     city:c.n, h:h, disp:t.map(tstr),
     verse:$("f_verse").value, ref:$("f_ref").value, refl:$("f_refl").value,
     dua:$("f_dua").value, sign:$("f_sign").value,
-    toR:daysToRamadan(d), ph:moonPhase(d),
-    showNow:$("f_now").checked, nowH:now.getHours()+now.getMinutes()/60
+    toR:daysToRamadan(d), ph:moonPhase(d)
   };
 }
 var timer=null;
@@ -631,7 +616,7 @@ function snapshot(){
   return JSON.stringify({verse:$("f_verse").value,ref:$("f_ref").value,refl:$("f_refl").value,
     cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
     ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,dua:$("f_dua").value,
-    sign:$("f_sign").value,now:$("f_now").checked});
+    sign:$("f_sign").value});
 }
 function save(){
   if(!$("f_auto").checked) return;
@@ -679,7 +664,7 @@ $("btnReset").onclick=function(){
   $("f_city").selectedIndex=0; $("f_method").value="homs"; $("f_asr").value="1";
   $("f_ihtiyat").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
   $("f_dua").value=DUAS[0];
-  $("f_sign").value="ماجد"; $("f_now").checked=true;
+  $("f_sign").value="ماجد";
   use(0); recalc(); render(); save();
 };
 /* بناء حقول المواقيت */
@@ -718,7 +703,7 @@ $("f_date").onchange=function(){ recalc(); schedule(); };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
 $("f_hijriAdj").onchange=schedule;
 $("btnRecalc").onclick=function(){ recalc(); schedule(); };
-["f_verse","f_ref","f_refl","f_dua","f_sign","f_now","h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"]
+["f_verse","f_ref","f_refl","f_dua","f_sign","h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"]
  .forEach(function(id){ $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule); });
 
 (function start(){
@@ -736,7 +721,6 @@ $("btnRecalc").onclick=function(){ recalc(); schedule(); };
       if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
       if(s.dua!==undefined) $("f_dua").value=s.dua;
       if(s.sign!==undefined) $("f_sign").value=s.sign;
-      if(s.now!==undefined) $("f_now").checked=s.now;
     }
     recalc();
     var go=function(){ render(); };
