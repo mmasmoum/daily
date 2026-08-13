@@ -56,7 +56,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.6</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.7</b></div>
 </header>
 
 <div class="wrap">
@@ -129,8 +129,8 @@
       </div>
       <label for="f_dua">دعاء قصير</label>
       <input type="text" id="f_dua">
-      <label for="f_sign">التوقيع</label>
-      <input type="text" id="f_sign">
+      <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز ولا يتغير مع الاستعادة)</label>
+      <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
     </fieldset>
 
     <div class="check">
@@ -664,7 +664,6 @@ $("btnReset").onclick=function(){
   $("f_city").selectedIndex=0; $("f_method").value="homs"; $("f_asr").value="1";
   $("f_ihtiyat").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
   $("f_dua").value=DUAS[0];
-  $("f_sign").value="ماجد";
   use(0); recalc(); render(); save();
 };
 /* بناء حقول المواقيت */
@@ -709,7 +708,6 @@ $("btnRecalc").onclick=function(){ recalc(); schedule(); };
 (function start(){
   $("f_date").value=isoToday();
   $("f_dua").value=DUAS[0];
-  $("f_sign").value="ماجد";
   use(0);
   load().then(function(s){
     if(s){
