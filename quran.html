@@ -48,6 +48,7 @@
   .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
   .check input{width:18px;height:18px;accent-color:var(--gold)}
   .saved{font-size:12px;color:var(--green);min-height:16px;margin-top:8px;line-height:1.6}
+  textarea[readonly],input[readonly]{background:#F1EFE7;color:#5A635C;cursor:default}
   .warn{font-size:12px;color:#8C2F26;line-height:1.7;margin:6px 0 0}
   button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 </style>
@@ -56,7 +57,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.8</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.11</b></div>
 </header>
 
 <div class="wrap">
@@ -74,11 +75,18 @@
         <div><label for="f_lib">مكتبة الآيات</label><select id="f_lib"></select></div>
         <button class="btn ghost sm" id="btnNext" type="button">التالية</button>
       </div>
-      <label for="f_verse">نص الآية</label>
-      <textarea id="f_verse"></textarea>
+      <div class="check">
+        <input type="checkbox" id="f_autoverse" checked>
+        <label for="f_autoverse" style="margin:0">آية اليوم ودعاؤه تلقائيًا (تتبدل كل يوم)</label>
+      </div>
+      <div class="row">
+        <div><label for="f_verse">نص الآية</label></div>
+        <button class="btn ghost sm" id="btnLock" type="button">فتح للتعديل</button>
+      </div>
+      <textarea id="f_verse" readonly></textarea>
       <p class="warn">راجع نص الآية ورقمها من مصحف أو تطبيق موثوق قبل الإرسال. المكتبة للتذكير لا للتوثيق.</p>
       <label for="f_ref">الموضع</label>
-      <input type="text" id="f_ref">
+      <input type="text" id="f_ref" readonly>
       <label for="f_refl">سطر التأمل (اتركه فارغًا للإخفاء)</label>
       <textarea id="f_refl" style="min-height:70px"></textarea>
     </fieldset>
@@ -590,6 +598,13 @@ function pickedDate(){
 }
 function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
+function dayIdx(d){ return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
+function applyAuto(){
+  if(!$("f_autoverse").checked) return;
+  var k=dayIdx(pickedDate());
+  use(((k%VERSES.length)+VERSES.length)%VERSES.length,true);
+  useDua(((k%DUAS.length)+DUAS.length)%DUAS.length,true);
+}
 function readTimes(){
   var out=[],i,h,m;
   for(i=0;i<6;i++){
@@ -640,7 +655,7 @@ function snapshot(){
   return JSON.stringify({verse:$("f_verse").value,ref:$("f_ref").value,refl:$("f_refl").value,
     cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
     ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,dua:$("f_dua").value,
-    sign:$("f_sign").value});
+    sign:$("f_sign").value,autoVerse:$("f_autoverse").checked});
 }
 function save(){
   if(!$("f_auto").checked) return;
@@ -687,8 +702,8 @@ $("btnShare").onclick=function(){
 $("btnReset").onclick=function(){
   $("f_city").selectedIndex=0; $("f_method").value="homs"; $("f_asr").value="1";
   $("f_ihtiyat").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
-  $("f_dua").value=DUAS[0];
-  use(0); recalc(); render(); save();
+  $("f_autoverse").checked=true;
+  applyAuto(); recalc(); render(); save();
 };
 /* بناء حقول المواقيت */
 (function(){
@@ -705,27 +720,43 @@ $("btnReset").onclick=function(){
 VERSES.forEach(function(v,i){
   var o=document.createElement("option"); o.value=String(i); o.textContent=v.c+" · "+v.t; $("f_lib").appendChild(o);
 });
-function use(i){
+function use(i,auto){
   idx=i; $("f_lib").selectedIndex=i;
   $("f_verse").value=VERSES[i].v; $("f_ref").value=VERSES[i].r; $("f_refl").value=VERSES[i].n;
+  if(!auto) $("f_autoverse").checked=false;
   schedule();
 }
+$("btnLock").onclick=function(){
+  var locked=$("f_verse").hasAttribute("readonly");
+  if(locked){
+    $("f_verse").removeAttribute("readonly"); $("f_ref").removeAttribute("readonly");
+    this.textContent="قفل الحقل"; $("f_autoverse").checked=false; $("f_verse").focus();
+  } else {
+    $("f_verse").setAttribute("readonly",""); $("f_ref").setAttribute("readonly","");
+    this.textContent="فتح للتعديل";
+  }
+};
 $("f_lib").onchange=function(){ use(this.selectedIndex); };
 $("btnNext").onclick=function(){ use((idx+1)%VERSES.length); };
+$("f_autoverse").onchange=function(){ if(this.checked) applyAuto(); else schedule(); };
 DUAS.forEach(function(d,i){
   var o=document.createElement("option"); o.value=String(i);
   o.textContent=d.length>32?d.slice(0,32)+"…":d; $("f_duaLib").appendChild(o);
 });
 var duaIdx=0;
-function useDua(i){ duaIdx=i; $("f_duaLib").selectedIndex=i; $("f_dua").value=DUAS[i]; schedule(); }
+function useDua(i,auto){ duaIdx=i; $("f_duaLib").selectedIndex=i; $("f_dua").value=DUAS[i];
+  if(!auto) $("f_autoverse").checked=false; schedule(); }
 $("f_duaLib").onchange=function(){ useDua(this.selectedIndex); };
 $("btnNextDua").onclick=function(){ useDua((duaIdx+1)%DUAS.length); };
 CITIES.forEach(function(c){ var o=document.createElement("option"); o.textContent=c.n; $("f_city").appendChild(o); });
 $("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedule(); };
-$("f_date").onchange=function(){ recalc(); schedule(); };
+$("f_date").onchange=function(){ applyAuto(); recalc(); schedule(); };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
 $("f_hijriAdj").onchange=schedule;
 $("btnRecalc").onclick=function(){ recalc(); schedule(); };
+["f_verse","f_ref","f_refl","f_dua"].forEach(function(id){
+  $(id).addEventListener("input",function(){ $("f_autoverse").checked=false; });
+});
 ["f_verse","f_ref","f_refl","f_dua","f_sign","h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"]
  .forEach(function(id){ $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule); });
 
@@ -743,7 +774,9 @@ $("btnRecalc").onclick=function(){ recalc(); schedule(); };
       if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
       if(s.dua!==undefined) $("f_dua").value=s.dua;
       if(s.sign!==undefined) $("f_sign").value=s.sign;
+      if(s.autoVerse!==undefined) $("f_autoverse").checked=s.autoVerse;
     }
+    applyAuto();
     recalc();
     var go=function(){ render(); };
     if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,1800); } else go();
