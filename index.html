@@ -68,7 +68,7 @@
 
 <header>
   <h1>البطاقتان اليوميتان</h1>
-  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت. <b style="color:var(--gold)">نسخة 3.6</b></div>
+  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت. <b style="color:var(--gold)">نسخة 3.7</b></div>
 </header>
 
 <div class="styles" id="styleBar"></div>
@@ -124,6 +124,25 @@
       <select id="f_multi"><option value="1">متناوب</option><option value="0">لون واحد</option></select>
     </fieldset>
 
+
+
+    <fieldset>
+      <legend>العبارات</legend>
+      <div class="row">
+        <div><label for="f_msgLib">مكتبة الرسائل</label><select id="f_msgLib"></select></div>
+        <button class="btn ghost sm" id="btnNextMsg" type="button">التالي</button>
+      </div>
+      <label for="f_msg">الرسالة السفلية</label>
+      <textarea id="f_msg" style="min-height:70px"></textarea>
+      <div class="row">
+        <div><label for="f_ribbon">عبارة الشريط</label><input type="text" id="f_ribbon"></div>
+        <button class="btn ghost sm" id="btnRibbon" type="button">التالي</button>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="f_autoribbon" checked>
+        <label for="f_autoribbon" style="margin:0">عبارة مناسبة لليوم تلقائيًا</label>
+      </div>
+    </fieldset>
     <fieldset>
       <legend>المكان والتاريخ</legend>
       <div class="g2">
@@ -163,29 +182,10 @@
       </div>
       <p class="hint" id="calcNote"></p>
     </fieldset>
-
     <fieldset>
       <legend>المواقيت</legend>
       <div class="times" id="timesBox"></div>
       <button class="btn ghost sm" id="btnRecalc" type="button" style="margin-top:10px">إعادة الحساب</button>
-    </fieldset>
-
-    <fieldset>
-      <legend>العبارات</legend>
-      <div class="row">
-        <div><label for="f_msgLib">مكتبة الرسائل</label><select id="f_msgLib"></select></div>
-        <button class="btn ghost sm" id="btnNextMsg" type="button">التالي</button>
-      </div>
-      <label for="f_msg">الرسالة السفلية</label>
-      <textarea id="f_msg" style="min-height:70px"></textarea>
-      <div class="row">
-        <div><label for="f_ribbon">عبارة الشريط</label><input type="text" id="f_ribbon"></div>
-        <button class="btn ghost sm" id="btnRibbon" type="button">التالي</button>
-      </div>
-      <div class="check">
-        <input type="checkbox" id="f_autoribbon" checked>
-        <label for="f_autoribbon" style="margin:0">عبارة مناسبة لليوم تلقائيًا</label>
-      </div>
     </fieldset>
 
     <div class="check">
