@@ -60,7 +60,7 @@
 
 <header>
   <h1>مِيقات</h1>
-  <div class="sub">آية ومواقيت الصلاة في صورة واحدة. <b>نسخة 1.14</b></div>
+  <div class="sub">آية ومواقيت الصلاة في صورة واحدة. <b>نسخة 1.15</b></div>
 </header>
 
 <div class="wrap">
@@ -94,6 +94,19 @@
       <textarea id="f_refl" style="min-height:70px"></textarea>
     </fieldset>
 
+
+
+    <fieldset>
+      <legend>الأسفل</legend>
+      <div class="row">
+        <div><label for="f_duaLib">مكتبة الأدعية</label><select id="f_duaLib"></select></div>
+        <button class="btn ghost sm" id="btnNextDua" type="button">التالي</button>
+      </div>
+      <label for="f_dua">دعاء قصير</label>
+      <input type="text" id="f_dua">
+      <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز ولا يتغير مع الاستعادة)</label>
+      <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
+    </fieldset>
     <fieldset>
       <legend>المكان والتاريخ</legend>
       <div class="g2">
@@ -126,23 +139,10 @@
       </div>
       <p class="hint" id="calcNote"></p>
     </fieldset>
-
     <fieldset>
       <legend>المواقيت</legend>
       <div class="times" id="timesBox"></div>
       <button class="btn ghost sm" id="btnRecalc" type="button" style="margin-top:10px">إعادة الحساب</button>
-    </fieldset>
-
-    <fieldset>
-      <legend>الأسفل</legend>
-      <div class="row">
-        <div><label for="f_duaLib">مكتبة الأدعية</label><select id="f_duaLib"></select></div>
-        <button class="btn ghost sm" id="btnNextDua" type="button">التالي</button>
-      </div>
-      <label for="f_dua">دعاء قصير</label>
-      <input type="text" id="f_dua">
-      <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز ولا يتغير مع الاستعادة)</label>
-      <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
     </fieldset>
 
     <div class="check">
