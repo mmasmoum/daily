@@ -68,7 +68,7 @@
 
 <header>
   <h1>البطاقتان اليوميتان</h1>
-  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت. <b style="color:var(--gold)">نسخة 3.3</b></div>
+  <div class="sub">سبعة أنماط، نمط لكل يوم، وتستطيع تغييره متى شئت. <b style="color:var(--gold)">نسخة 3.4</b></div>
 </header>
 
 <div class="styles" id="styleBar"></div>
@@ -107,6 +107,10 @@
           <select id="f_lib"></select>
         </div>
         <button class="btn ghost sm" id="btnNextHadith" type="button">التالي</button>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="f_autocontent" checked>
+        <label for="f_autocontent" style="margin:0">حديث اليوم ورسالته تلقائيًا (يتبدلان كل يوم)</label>
       </div>
       <label for="f_head">الترويسة</label>
       <input type="text" id="f_head">
@@ -874,6 +878,13 @@ function isoToday(){
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 }
 function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
+function dayIdx(dt){ return Math.floor(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate())/86400000); }
+function applyAuto(){
+  if(!$("f_autocontent").checked) return;
+  var k=dayIdx(pickedDate());
+  useHadith(((k%HADITHS.length)+HADITHS.length)%HADITHS.length,true);
+  useMsg(((k%MESSAGES.length)+MESSAGES.length)%MESSAGES.length,true);
+}
 function dateString(){
   var d=pickedDate(), off=parseInt($("f_hijriAdj").value,10)||0;
   var hd=new Date(d.getTime()+off*86400000), h=hijri(hd);
@@ -908,7 +919,8 @@ function readState(){
     multi:$("f_multi").value, cityIdx:$("f_city").selectedIndex, date:dateString(), iso:$("f_date").value,
     method:$("f_method").value, asr:$("f_asr").value, ihtiyat:$("f_ihtiyat").value, hijriAdj:$("f_hijriAdj").value,
     times:readTimes(), msg:$("f_msg").value, ribbon:$("f_ribbon").value,
-    styleKey:styleKey, autoStyle:$("f_autostyle").checked, autoRibbon:$("f_autoribbon").checked };
+    styleKey:styleKey, autoStyle:$("f_autostyle").checked, autoRibbon:$("f_autoribbon").checked,
+    autoContent:$("f_autocontent").checked };
 }
 function applyState(s){
   $("f_head").value=s.head; $("f_body").value=s.body; $("f_src").value=s.src; $("f_notes").value=s.notes;
@@ -922,9 +934,10 @@ function applyState(s){
   $("f_msg").value=s.msg;
   $("f_autostyle").checked=s.autoStyle!==false;
   $("f_autoribbon").checked=s.autoRibbon!==false;
+  $("f_autocontent").checked=s.autoContent!==false;
   $("f_ribbon").value=$("f_autoribbon").checked?defaultRibbon():(s.ribbon||defaultRibbon());
   styleKey=$("f_autostyle").checked?DAY_STYLE[pickedDate().getDay()]:(s.styleKey||styleKey);
-  markStyle(); recalc();
+  markStyle(); recalc(); applyAuto();
 }
 function markStyle(){
   Array.prototype.forEach.call($("styleBar").children,function(b){
@@ -997,7 +1010,7 @@ $("btnShare").onclick=function(){
 };
 $("btnReset").onclick=function(){
   var s=JSON.parse(JSON.stringify(DEF));
-  s.autoStyle=true; s.autoRibbon=true; s.cityIdx=0;
+  s.autoStyle=true; s.autoRibbon=true; s.autoContent=true; s.cityIdx=0;
   applyState(s); render(); save();
 };
 
@@ -1018,9 +1031,10 @@ $("btnReset").onclick=function(){
 HADITHS.forEach(function(h,i){
   var o=document.createElement("option"); o.value=String(i); o.textContent=h.t; $("f_lib").appendChild(o);
 });
-function useHadith(i){
+function useHadith(i,auto){
   hadithIdx=i; $("f_lib").selectedIndex=i;
   $("f_body").value=HADITHS[i].b; $("f_src").value=HADITHS[i].s; $("f_notes").value=HADITHS[i].n;
+  if(!auto) $("f_autocontent").checked=false;
   schedule();
 }
 $("f_lib").onchange=function(){ useHadith(this.selectedIndex); };
@@ -1030,7 +1044,9 @@ MESSAGES.forEach(function(m,i){
   var o=document.createElement("option"); o.value=String(i);
   o.textContent=m.length>34?m.slice(0,34)+"…":m; $("f_msgLib").appendChild(o);
 });
-function useMsg(i){ msgIdx=i; $("f_msgLib").selectedIndex=i; $("f_msg").value=MESSAGES[i]; schedule(); }
+function useMsg(i,auto){ msgIdx=i; $("f_msgLib").selectedIndex=i; $("f_msg").value=MESSAGES[i];
+  if(!auto) $("f_autocontent").checked=false; schedule(); }
+$("f_autocontent").onchange=function(){ if(this.checked) applyAuto(); else schedule(); };
 $("f_msgLib").onchange=function(){ useMsg(this.selectedIndex); };
 $("btnNextMsg").onclick=function(){ useMsg((msgIdx+1)%MESSAGES.length); };
 $("btnRibbon").onclick=function(){
@@ -1047,7 +1063,7 @@ $("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedul
 $("f_date").onchange=function(){
   if($("f_autostyle").checked){ styleKey=DAY_STYLE[pickedDate().getDay()]; markStyle(); }
   if($("f_autoribbon").checked) $("f_ribbon").value=defaultRibbon();
-  recalc(); schedule();
+  applyAuto(); recalc(); schedule();
 };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){
   $(id).onchange=function(){ recalc(); schedule(); };
@@ -1086,6 +1102,9 @@ function tabTo(n){
 $("tab1").onclick=function(){ tabTo(1); };
 $("tab2").onclick=function(){ tabTo(2); };
 
+["f_body","f_src","f_notes","f_msg"].forEach(function(id){
+  $(id).addEventListener("input",function(){ $("f_autocontent").checked=false; });
+});
 ["f_head","f_body","f_src","f_notes","f_multi","f_msg","f_ribbon",
  "h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"].forEach(function(id){
   $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule);
