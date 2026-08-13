@@ -47,6 +47,7 @@
   @media(min-width:960px){.actions{position:static;background:none;border:0;padding:14px 0 0;backdrop-filter:none}}
   .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
   .check input{width:18px;height:18px;accent-color:var(--gold)}
+  #f_verse[readonly],#f_ref[readonly]{background:#F1EFE7;color:#59635C}
   .saved{font-size:12px;color:var(--green);min-height:16px;margin-top:8px;line-height:1.6}
   textarea[readonly],input[readonly]{background:#F1EFE7;color:#5A635C;cursor:default}
   .warn{font-size:12px;color:#8C2F26;line-height:1.7;margin:6px 0 0}
@@ -57,7 +58,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.11</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.12</b></div>
 </header>
 
 <div class="wrap">
@@ -84,7 +85,7 @@
         <button class="btn ghost sm" id="btnLock" type="button">فتح للتعديل</button>
       </div>
       <textarea id="f_verse" readonly></textarea>
-      <p class="warn">راجع نص الآية ورقمها من مصحف أو تطبيق موثوق قبل الإرسال. المكتبة للتذكير لا للتوثيق.</p>
+      <p class="warn" id="editWarn" hidden>الحقل مفتوح. الصق نص الآية من مصحف موثوق، وتحقق من الحركات ورقم الآية قبل الإرسال.</p>
       <label for="f_ref">الموضع</label>
       <input type="text" id="f_ref" readonly>
       <label for="f_refl">سطر التأمل (اتركه فارغًا للإخفاء)</label>
@@ -723,18 +724,21 @@ VERSES.forEach(function(v,i){
 function use(i,auto){
   idx=i; $("f_lib").selectedIndex=i;
   $("f_verse").value=VERSES[i].v; $("f_ref").value=VERSES[i].r; $("f_refl").value=VERSES[i].n;
+  if(typeof setLock==="function") setLock(true);
   if(!auto) $("f_autoverse").checked=false;
   schedule();
 }
+function setLock(lock){
+  ["f_verse","f_ref"].forEach(function(id){
+    if(lock) $(id).setAttribute("readonly",""); else $(id).removeAttribute("readonly");
+  });
+  $("editWarn").hidden=lock;
+  $("btnLock").textContent=lock?"فتح للتعديل":"قفل الحقل";
+}
 $("btnLock").onclick=function(){
   var locked=$("f_verse").hasAttribute("readonly");
-  if(locked){
-    $("f_verse").removeAttribute("readonly"); $("f_ref").removeAttribute("readonly");
-    this.textContent="قفل الحقل"; $("f_autoverse").checked=false; $("f_verse").focus();
-  } else {
-    $("f_verse").setAttribute("readonly",""); $("f_ref").setAttribute("readonly","");
-    this.textContent="فتح للتعديل";
-  }
+  setLock(!locked);
+  if(locked){ $("f_autoverse").checked=false; $("f_verse").focus(); }
 };
 $("f_lib").onchange=function(){ use(this.selectedIndex); };
 $("btnNext").onclick=function(){ use((idx+1)%VERSES.length); };
