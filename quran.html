@@ -56,7 +56,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.7</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.8</b></div>
 </header>
 
 <div class="wrap">
@@ -98,6 +98,7 @@
             <option value="uaq">أم القرى</option>
             <option value="egypt">الهيئة المصرية</option>
             <option value="karachi">كراتشي</option>
+            <option value="diyanet">ديانت التركية</option>
           </select>
         </div>
         <div><label for="f_asr">العصر</label>
@@ -281,11 +282,34 @@ var CITIES=[
  {n:"الرياض",lat:24.7136,lng:46.6753,tz:3,m:"uaq"},{n:"جدة",lat:21.4858,lng:39.1925,tz:3,m:"uaq"},
  {n:"مكة المكرمة",lat:21.3891,lng:39.8579,tz:3,m:"uaq"},{n:"المدينة المنورة",lat:24.5247,lng:39.5692,tz:3,m:"uaq"},
  {n:"الدمام",lat:26.4207,lng:50.0888,tz:3,m:"uaq"},{n:"عمّان",lat:31.9539,lng:35.9106,tz:3,m:"mwl"},
- {n:"بغداد",lat:33.3152,lng:44.3661,tz:3,m:"karachi"},{n:"إسطنبول",lat:41.0082,lng:28.9784,tz:3,m:"mwl"},
+ {n:"بغداد",lat:33.3152,lng:44.3661,tz:3,m:"karachi"},
  {n:"الدوحة",lat:25.2854,lng:51.5310,tz:3,m:"uaq"},{n:"الكويت",lat:29.3759,lng:47.9774,tz:3,m:"uaq"},
- {n:"دبي",lat:25.2048,lng:55.2708,tz:4,m:"uaq"}
+ {n:"دبي",lat:25.2048,lng:55.2708,tz:4,m:"uaq"},
+ {n:"قيصري",lat:38.7312,lng:35.4787,tz:3,m:"diyanet"},
+ {n:"إسطنبول",lat:41.0082,lng:28.9784,tz:3,m:"diyanet"},
+ {n:"أنقرة",lat:39.9334,lng:32.8597,tz:3,m:"diyanet"},
+ {n:"إزمير",lat:38.4237,lng:27.1428,tz:3,m:"diyanet"},
+ {n:"بورصة",lat:40.1826,lng:29.0665,tz:3,m:"diyanet"},
+ {n:"غازي عنتاب",lat:37.0662,lng:37.3833,tz:3,m:"diyanet"},
+ {n:"شانلي أورفا",lat:37.1591,lng:38.7969,tz:3,m:"diyanet"},
+ {n:"أضنة",lat:37.0000,lng:35.3213,tz:3,m:"diyanet"},
+ {n:"مرسين",lat:36.8121,lng:34.6415,tz:3,m:"diyanet"},
+ {n:"أنطاكية",lat:36.2023,lng:36.1613,tz:3,m:"diyanet"},
+ {n:"قهرمان مرعش",lat:37.5858,lng:36.9371,tz:3,m:"diyanet"},
+ {n:"كلس",lat:36.7184,lng:37.1212,tz:3,m:"diyanet"},
+ {n:"ماردين",lat:37.3212,lng:40.7245,tz:3,m:"diyanet"},
+ {n:"مالطيا",lat:38.3552,lng:38.3095,tz:3,m:"diyanet"},
+ {n:"قونية",lat:37.8746,lng:32.4932,tz:3,m:"diyanet"},
+ {n:"إسكي شهير",lat:39.7767,lng:30.5206,tz:3,m:"diyanet"},
+ {n:"سكاريا",lat:40.7569,lng:30.3783,tz:3,m:"diyanet"},
+ {n:"كوجه إيلي",lat:40.7654,lng:29.9408,tz:3,m:"diyanet"},
+ {n:"يالوفا",lat:40.6550,lng:29.2769,tz:3,m:"diyanet"},
+ {n:"أنطاليا",lat:36.8969,lng:30.7133,tz:3,m:"diyanet"},
+ {n:"طرابزون",lat:41.0027,lng:39.7168,tz:3,m:"diyanet"},
+ {n:"سامسون",lat:41.2867,lng:36.3300,tz:3,m:"diyanet"}
 ];
 var METHODS={
+ diyanet:{f:18,i:17,min:false,label:"ديانت التركية"},
  homs:{f:18,i:16.6,min:false,label:"تقويم حمص المحلي"},
  mwl:{f:18,i:17,min:false,label:"رابطة العالم الإسلامي"},
  uaq:{f:18.5,i:90,min:true,label:"أم القرى"},
