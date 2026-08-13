@@ -58,7 +58,7 @@
 
 <header>
   <h1>قرص اليوم</h1>
-  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.12</b></div>
+  <div class="sub">آية وقرص مواقيت في صورة واحدة. <b>نسخة 1.13</b></div>
 </header>
 
 <div class="wrap">
@@ -600,8 +600,13 @@ function pickedDate(){
 function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
 function dayIdx(d){ return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
+var manualDate="";
+function markManual(){ manualDate=$("f_date").value; }
 function applyAuto(){
-  if(!$("f_autoverse").checked) return;
+  if(!$("f_autoverse").checked){
+    if(manualDate===$("f_date").value) return;   /* اختيار يدوي يخص هذا اليوم */
+    $("f_autoverse").checked=true;               /* تغيّر اليوم: يعود التلقائي */
+  }
   var k=dayIdx(pickedDate());
   use(((k%VERSES.length)+VERSES.length)%VERSES.length,true);
   useDua(((k%DUAS.length)+DUAS.length)%DUAS.length,true);
@@ -656,7 +661,7 @@ function snapshot(){
   return JSON.stringify({verse:$("f_verse").value,ref:$("f_ref").value,refl:$("f_refl").value,
     cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
     ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,dua:$("f_dua").value,
-    sign:$("f_sign").value,autoVerse:$("f_autoverse").checked});
+    sign:$("f_sign").value,autoVerse:$("f_autoverse").checked,manualDate:manualDate});
 }
 function save(){
   if(!$("f_auto").checked) return;
@@ -725,7 +730,7 @@ function use(i,auto){
   idx=i; $("f_lib").selectedIndex=i;
   $("f_verse").value=VERSES[i].v; $("f_ref").value=VERSES[i].r; $("f_refl").value=VERSES[i].n;
   if(typeof setLock==="function") setLock(true);
-  if(!auto) $("f_autoverse").checked=false;
+  if(!auto){ $("f_autoverse").checked=false; markManual(); }
   schedule();
 }
 function setLock(lock){
@@ -738,7 +743,7 @@ function setLock(lock){
 $("btnLock").onclick=function(){
   var locked=$("f_verse").hasAttribute("readonly");
   setLock(!locked);
-  if(locked){ $("f_autoverse").checked=false; $("f_verse").focus(); }
+  if(locked){ $("f_autoverse").checked=false; markManual(); $("f_verse").focus(); }
 };
 $("f_lib").onchange=function(){ use(this.selectedIndex); };
 $("btnNext").onclick=function(){ use((idx+1)%VERSES.length); };
@@ -749,7 +754,7 @@ DUAS.forEach(function(d,i){
 });
 var duaIdx=0;
 function useDua(i,auto){ duaIdx=i; $("f_duaLib").selectedIndex=i; $("f_dua").value=DUAS[i];
-  if(!auto) $("f_autoverse").checked=false; schedule(); }
+  if(!auto){ $("f_autoverse").checked=false; markManual(); } schedule(); }
 $("f_duaLib").onchange=function(){ useDua(this.selectedIndex); };
 $("btnNextDua").onclick=function(){ useDua((duaIdx+1)%DUAS.length); };
 CITIES.forEach(function(c){ var o=document.createElement("option"); o.textContent=c.n; $("f_city").appendChild(o); });
@@ -759,7 +764,7 @@ $("f_date").onchange=function(){ applyAuto(); recalc(); schedule(); };
 $("f_hijriAdj").onchange=schedule;
 $("btnRecalc").onclick=function(){ recalc(); schedule(); };
 ["f_verse","f_ref","f_refl","f_dua"].forEach(function(id){
-  $(id).addEventListener("input",function(){ $("f_autoverse").checked=false; });
+  $(id).addEventListener("input",function(){ $("f_autoverse").checked=false; markManual(); });
 });
 ["f_verse","f_ref","f_refl","f_dua","f_sign","h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5"]
  .forEach(function(id){ $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule); });
@@ -779,6 +784,7 @@ $("btnRecalc").onclick=function(){ recalc(); schedule(); };
       if(s.dua!==undefined) $("f_dua").value=s.dua;
       if(s.sign!==undefined) $("f_sign").value=s.sign;
       if(s.autoVerse!==undefined) $("f_autoverse").checked=s.autoVerse;
+      if(s.manualDate!==undefined) manualDate=s.manualDate;
     }
     applyAuto();
     recalc();
