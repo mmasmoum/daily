@@ -60,14 +60,14 @@
 
 <header>
   <h1>مِيقات</h1>
-  <div class="sub">آية ومواقيت الصلاة في صورة واحدة. <b>نسخة 1.15</b></div>
+  <div class="sub">آية ومواقيت الصلاة في صورة واحدة. <b>نسخة 1.16</b></div>
 </header>
 
 <div class="wrap">
   <main>
     <div class="stage">
       <img id="out" alt="معاينة البوستر">
-      <p class="hint">اضغط مطولًا على الصورة لحفظها أو إرسالها مباشرة من الجوال.</p>
+      <p class="hint">المثلث الأحمر يشير إلى الوقت الآن، ويظهر في المعاينة فقط ولا يخرج مع الصورة المصدَّرة. اضغط مطولًا على الصورة لحفظها أو إرسالها.</p>
     </div>
   </main>
 
@@ -466,6 +466,7 @@ function moonIcon(c,cx,cy,r,ph){
 }
 
 /* ============ رسم البوستر ============ */
+var EXPORTING=false;
 function poster(c,S){
   c.clearRect(0,0,W,H);
   c.direction="rtl";
@@ -525,6 +526,14 @@ function poster(c,S){
   c.fillText("منتصف الليل",cx,cy-(inR-74));
   c.fillText("الظهيرة",cx,cy+(inR-74));
   c.textBaseline="alphabetic";
+
+  /* مؤشر الآن: يظهر في المعاينة ولا يُصدَّر مع الصورة */
+  if(!EXPORTING){
+    var na=ang(S.nowH), nr=outR+10;
+    c.save(); c.translate(cx+Math.cos(na)*nr,cy+Math.sin(na)*nr); c.rotate(na+Math.PI/2);
+    c.beginPath(); c.moveTo(0,0); c.lineTo(-12,-22); c.lineTo(12,-22); c.closePath();
+    c.fillStyle=ACC; c.globalAlpha=.85; c.fill(); c.globalAlpha=1; c.restore();
+  }
 
   /* علامات الصلوات */
   var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
@@ -648,7 +657,8 @@ function state(){
     city:c.n, h:h, disp:t.map(tstr),
     verse:$("f_verse").value, ref:$("f_ref").value, refl:$("f_refl").value,
     dua:$("f_dua").value, sign:$("f_sign").value,
-    toR:daysToRamadan(d), ph:moonPhase(d)
+    toR:daysToRamadan(d), ph:moonPhase(d),
+    nowH:(function(){ var n=new Date(); return n.getHours()+n.getMinutes()/60; })()
   };
 }
 var timer=null;
@@ -689,22 +699,25 @@ function load(){
 }
 /* التصدير */
 function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function renderClean(){ EXPORTING=true; poster(ctx,state()); EXPORTING=false; }
 $("btnDl").onclick=function(){
-  render();
+  renderClean();
   cv.toBlob(function(b){
     var u=URL.createObjectURL(b), a=document.createElement("a");
     a.href=u; a.download="ayah-"+stamp()+".png"; document.body.appendChild(a); a.click();
     document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(u); },3000);
+    render();
   },"image/png");
 };
 $("btnShare").onclick=function(){
-  render();
+  renderClean();
   cv.toBlob(function(b){
     try{
       var f=[new File([b],"ayah-"+stamp()+".png",{type:"image/png"})];
       if(navigator.canShare&&navigator.canShare({files:f})){ navigator.share({files:f})["catch"](function(){}); return; }
     }catch(e){}
     $("saved").textContent="المشاركة غير مدعومة هنا. استخدم التنزيل أو الضغط المطول على الصورة.";
+    render();
   },"image/png");
 };
 $("btnReset").onclick=function(){
