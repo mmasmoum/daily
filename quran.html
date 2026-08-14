@@ -79,6 +79,12 @@
         <input type="checkbox" id="f_auto" checked>
         <label for="f_auto" style="margin:0">محتوى اليوم تلقائيًا (يتبدل كل يوم)</label>
       </div>
+      <label for="f_show">ما يظهر في البطاقة</label>
+      <select id="f_show">
+        <option value="vh">آية وحديث</option>
+        <option value="v">آية فقط</option>
+        <option value="h">حديث فقط</option>
+      </select>
       <label for="f_cat">الباب</label>
       <select id="f_cat"></select>
 
@@ -138,7 +144,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">نسخة 2.0</p>
+    <p class="ver">نسخة 2.1</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">تنزيل الصورة</button>
@@ -400,11 +406,12 @@ function poster(c,d){
     c.fillStyle=ACC; c.globalAlpha=.9; c.fill(); c.globalAlpha=1; c.restore();
   }
 
-  var items=[{t:d.verse,size:52,wt:"700 ",color:INK,after:12},
-             {t:d.vref,size:26,fam:CA,color:ACC,lh:1.5,after:22}];
+  var items=[], hasV=d.verse.trim().length>0;
+  if(hasV) items=items.concat([{t:d.verse,size:52,wt:"700 ",color:INK,after:12},
+             {t:d.vref,size:26,fam:CA,color:ACC,lh:1.5,after:22}]);
   if(d.hadith.trim()) items=items.concat([
-             {t:d.hadith,size:38,wt:"700 ",color:"#2B3A34",after:8},
-             {t:d.href,size:23,fam:CA,color:ACC,lh:1.5,after:0}]);
+             {t:d.hadith,size:hasV?38:50,wt:"700 ",color:hasV?"#2B3A34":INK,after:hasV?8:12},
+             {t:d.href,size:hasV?23:26,fam:CA,color:ACC,lh:1.5,after:0}]);
   var RT=inR-52, span=2*(inR-104), sc=1, guard=0;
   var res=layoutMass(c,items,cy,RT,cy-200,sc);
   while(res.total>span&&sc>0.45&&guard++<60){ sc-=0.04; res=layoutMass(c,items,cy,RT,cy-200,sc); }
@@ -539,14 +546,14 @@ function recalc(){
 function state(){
   var d=pickedDate(), c=city(), t=readTimes(), h=t.map(to24);
   var hj=hijri(new Date(d.getTime()+(parseInt($("f_hijriAdj").value,10)||0)*86400000));
-  var dl=h[4]-h[1], now=new Date();
+  var dl=h[4]-h[1], now=new Date(), sw=$("f_show").value;
   return {
     city:c.n, day:DAYS[d.getDay()], hijri:hj,
     greg:d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+" م",
     dayLen:Math.floor(dl)+":"+pad(Math.round((dl%1)*60)),
     h:h, disp:t.map(tstr),
-    verse:$("f_verse").value, vref:$("f_vref").value,
-    hadith:$("f_hadith").value, href:$("f_href").value,
+    verse:(sw==="h")?"":$("f_verse").value, vref:(sw==="h")?"":$("f_vref").value,
+    hadith:(sw==="v")?"":$("f_hadith").value, href:(sw==="v")?"":$("f_href").value,
     dua:$("f_dua").value, refl:$("f_refl").value, sign:$("f_sign").value,
     nowH:now.getHours()+now.getMinutes()/60
   };
@@ -568,7 +575,7 @@ function snapshot(){
     dua:$("f_dua").value,refl:$("f_refl").value,sign:$("f_sign").value,
     cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
     ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,
-    auto:$("f_auto").checked,manualDate:manualDate});
+    auto:$("f_auto").checked,manualDate:manualDate,show:$("f_show").value});
 }
 function save(){
   if(!$("f_autosave").checked) return;
@@ -648,6 +655,7 @@ $("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedul
 $("f_date").onchange=function(){ autoPick(); recalc(); schedule(); };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
 $("f_hijriAdj").onchange=schedule;
+$("f_show").onchange=schedule;
 $("btnRecalc").onclick=function(){ recalc(); schedule(); };
 ["f_verse","f_vref","f_hadith","f_href","f_dua","f_refl"].forEach(function(id){
   $(id).addEventListener("input",markManual);
@@ -667,6 +675,7 @@ load().then(function(s){
     if(s.asr) $("f_asr").value=s.asr;
     if(s.ihtiyat) $("f_ihtiyat").value=s.ihtiyat;
     if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
+    if(s.show) $("f_show").value=s.show;
     if(s.sign!==undefined) $("f_sign").value=s.sign;
     $("f_auto").checked=s.auto!==false;
     manualDate=s.manualDate||"";
