@@ -23,6 +23,10 @@
   @media(min-width:960px){.wrap{grid-template-columns:minmax(0,1fr) 430px;align-items:start;padding-bottom:40px}.panel{position:sticky;top:76px}}
   .stage{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
   .stage img{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
+  .quick{display:flex;gap:8px;margin-top:12px}
+  .quick button{flex:1;padding:15px 10px;border-radius:13px;border:0;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+  #btnShuffle{background:var(--gold);color:#1B1405}
+  #btnToday{background:var(--ink);color:#F2EFE2}
   .hint{font-size:12px;color:var(--soft);margin:10px 2px 0;line-height:1.7}
   #err{display:none;background:#8C2F26;color:#fff;padding:12px;border-radius:10px;font-size:13px;line-height:1.7;margin-bottom:10px;white-space:pre-wrap}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
@@ -68,7 +72,11 @@
     <div class="stage">
       <div id="err"></div>
       <img id="out" alt="معاينة البوستر">
-      <p class="hint">المثلث الأحمر يشير إلى الوقت الآن، ويظهر في المعاينة فقط ولا يخرج مع الصورة. اضغط مطولًا على الصورة لحفظها أو إرسالها.</p>
+      <div class="quick">
+        <button id="btnShuffle" type="button">بطاقة أخرى</button>
+        <button id="btnToday" type="button">بطاقة اليوم</button>
+      </div>
+      <p class="hint">اضغط «بطاقة أخرى» ليتغير المحتوى كله من باب واحد. المثلث الأحمر يشير إلى الوقت الآن، ويظهر في المعاينة فقط ولا يخرج مع الصورة. اضغط مطولًا على الصورة لحفظها أو إرسالها.</p>
     </div>
   </main>
 
@@ -144,7 +152,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">نسخة 2.1</p>
+    <p class="ver">نسخة 2.2</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">تنزيل الصورة</button>
@@ -654,6 +662,24 @@ $("btnLock").onclick=function(){
 $("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedule(); };
 $("f_date").onchange=function(){ autoPick(); recalc(); schedule(); };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
+var lastPick="";
+$("btnShuffle").onclick=function(){
+  var ci,idx,key,n=0;
+  do{
+    ci=Math.floor(Math.random()*CATEGORIES.length);
+    idx=Math.floor(Math.random()*10);
+    key=ci+"-"+idx;
+  } while(key===lastPick&&n++<8);
+  lastPick=key;
+  markManual();
+  $("f_cat").selectedIndex=ci;
+  applyPick(idx);
+  schedule();
+};
+$("btnToday").onclick=function(){
+  $("f_auto").checked=true; manualDate="";
+  autoPick(); schedule();
+};
 $("f_hijriAdj").onchange=schedule;
 $("f_show").onchange=schedule;
 $("btnRecalc").onclick=function(){ recalc(); schedule(); };
