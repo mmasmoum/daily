@@ -79,6 +79,7 @@
         <button id="btnShuffle" type="button">محتوى آخر</button>
         <button id="btnToday" type="button">محتوى اليوم</button>
       </div>
+      <p class="hint" id="diag" style="color:#8C2F26;font-weight:700"></p>
       <p class="hint">اضغط «محتوى آخر» لتبديل الآية والحديث والفائدة والدعاء معًا من موضوع واحد، ثم «مشاركة».</p>
     </div>
   </main>
@@ -144,7 +145,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">نسخة 1.0</p>
+    <p class="ver">نسخة 1.1 تشخيصية</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">حفظ الصورة</button>
@@ -159,6 +160,8 @@
 (function(){
 "use strict";
 function $(i){ return document.getElementById(i); }
+window.onerror=function(m,f,l,c,e){ try{ fail(e||new Error(m+" @"+l+":"+c)); }catch(x){} };
+window.addEventListener("unhandledrejection",function(ev){ try{ fail(ev.reason||new Error("رفض غير معالَج")); }catch(x){} });
 function fail(e){
   var el=$("err"); el.style.display="block";
   el.textContent="خطأ: "+(e&&e.message?e.message:e)+"\n"+((e&&e.stack)||"").split("\n").slice(0,3).join("\n");
@@ -534,6 +537,17 @@ load().then(function(s){
     } else autoPack();
     paintTimes();
   }
+  try{
+    var dg=$("diag");
+    dg.textContent="تشخيص | مواضيع:"+(typeof THEMES!=="undefined"?THEMES.length:"؟")+
+      " مجموعات:"+(typeof PACKS!=="undefined"?PACKS.length:"؟")+
+      " آيات:"+(typeof VERSES!=="undefined"?VERSES.length:"؟")+
+      " مدن:"+(typeof CITIES!=="undefined"?CITIES.length:"؟")+
+      " أول مدينة فيها بلد:"+((typeof CITIES!=="undefined"&&CITIES[0]&&CITIES[0].country)?"نعم":"لا")+
+      " | خيارات المدن:"+$("f_city").options.length+
+      " | نص الآية:"+($("f_verse").value?"موجود":"فارغ")+
+      " | الباقة:"+current;
+  }catch(dx){}
   var go=function(){ render(); };
   if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,2000); } else go();
 });
