@@ -93,7 +93,7 @@
         <option value="v">آية فقط</option>
         <option value="h">حديث فقط</option>
       </select>
-      <label for="f_cat">الباب</label>
+      <label for="f_cat">الموضوع</label>
       <select id="f_cat"></select>
 
       <div class="lockrow">
@@ -152,7 +152,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">نسخة 2.2</p>
+    <p class="ver">نسخة 3.0</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">تنزيل الصورة</button>
@@ -163,6 +163,7 @@
 </div>
 
 <script src="content.js"></script>
+<script src="packs.js"></script>
 <script>
 (function(){
 "use strict";
@@ -172,7 +173,9 @@ function fail(e){
   el.textContent="خطأ: "+(e&&e.message?e.message:e)+"\n"+((e&&e.stack)||"").split("\n").slice(0,3).join("\n");
 }
 try{
-if(typeof VERSES==="undefined") throw new Error("ملف المحتوى content.js غير محمّل. ارفعه بجانب هذه الصفحة.");
+if(typeof VERSES==="undefined") throw new Error("ملف content.js غير محمّل.");
+if(typeof PACKS==="undefined") throw new Error("ملف packs.js غير محمّل.");
+var CATEGORIES=THEMES;
 
 var AM='"Amiri",serif', SH='"Scheherazade New","Amiri",serif', CA='"Cairo",system-ui,sans-serif';
 var W=1080, H=1720;
@@ -493,7 +496,7 @@ function useVerse(){
   var ci=catIndex(), L=inCat(VERSES,ci), k=$("f_vsel").selectedIndex;
   if(k<0||!L[k]) return;
   $("f_verse").value=L[k].o.v; $("f_vref").value=L[k].o.r;
-  $("f_refl").value=REFLECTIONS[L[k].i]||"";
+  $("f_refl").value=L[k].o.t||"";
   setLock(true);
 }
 function useHadith(){
@@ -506,15 +509,28 @@ function useDua(){
   if(k<0||!L[k]) return;
   $("f_dua").value=L[k].o.v;
 }
+function packOfDay(){
+  var k=dayIdx(pickedDate());
+  return PACKS[((k%PACKS.length)+PACKS.length)%PACKS.length];
+}
+function applyPack(p){
+  var ci=CATEGORIES.indexOf(p.t);
+  if(ci<0) ci=0;
+  $("f_cat").selectedIndex=ci;
+  refreshLists();
+  function pos(arr,gi){ var L=inCat(arr,ci),n=0; L.forEach(function(x,j){ if(x.i===gi) n=j; }); return n; }
+  $("f_vsel").selectedIndex=pos(VERSES,p.v);
+  $("f_hsel").selectedIndex=pos(HADITHS,p.h);
+  $("f_dsel").selectedIndex=pos(DUAS,p.d);
+  useVerse(); useHadith(); useDua();
+  if(p.b) $("f_refl").value=p.b;
+}
 function autoPick(){
   if(!$("f_auto").checked){
     if(manualDate===$("f_date").value) return;
     $("f_auto").checked=true;
   }
-  var k=dayIdx(pickedDate());
-  var ci=((k%10)+10)%10, idx=((Math.floor(k/10)%10)+10)%10;
-  $("f_cat").selectedIndex=ci;
-  applyPick(idx);
+  applyPack(packOfDay());
 }
 function markManual(){ $("f_auto").checked=false; manualDate=$("f_date").value; }
 function setLock(lock){
@@ -662,18 +678,13 @@ $("btnLock").onclick=function(){
 $("f_city").onchange=function(){ $("f_method").value=city().m; recalc(); schedule(); };
 $("f_date").onchange=function(){ autoPick(); recalc(); schedule(); };
 ["f_method","f_asr","f_ihtiyat"].forEach(function(id){ $(id).onchange=function(){ recalc(); schedule(); }; });
-var lastPick="";
+var lastPack=-1;
 $("btnShuffle").onclick=function(){
-  var ci,idx,key,n=0;
-  do{
-    ci=Math.floor(Math.random()*CATEGORIES.length);
-    idx=Math.floor(Math.random()*10);
-    key=ci+"-"+idx;
-  } while(key===lastPick&&n++<8);
-  lastPick=key;
+  var k=lastPack, n=0;
+  while(k===lastPack&&n++<20) k=Math.floor(Math.random()*PACKS.length);
+  lastPack=k;
   markManual();
-  $("f_cat").selectedIndex=ci;
-  applyPick(idx);
+  applyPack(PACKS[k]);
   schedule();
 };
 $("btnToday").onclick=function(){

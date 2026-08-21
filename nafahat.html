@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نفحات يومية</title>
+<meta name="theme-color" content="#14402C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="نفحات">
+<style>
+  @font-face{font-family:"Naskh";src:url("font-naskh.ttf") format("truetype");font-weight:400;font-display:block}
+  @font-face{font-family:"Naskh";src:url("font-naskh-bold.ttf") format("truetype");font-weight:700;font-display:block}
+  @font-face{font-family:"Plex";src:url("font-plex.ttf") format("truetype");font-weight:400;font-display:block}
+  @font-face{font-family:"Plex";src:url("font-plex-med.ttf") format("truetype");font-weight:500;font-display:block}
+  @font-face{font-family:"AmiriB";src:url("font-amiri-bold.ttf") format("truetype");font-display:block}
+  :root{--ink:#2D3A32;--soft:#5A6155;--paper:#EFEADD;--card:#F8F5EB;--gold:#A0803F;--green:#1F4A35;--line:rgba(31,74,53,.16)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Plex",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+  header{padding:12px 18px 8px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  header h1{font-family:"AmiriB",serif;font-size:24px;margin:0;color:var(--green)}
+  header .sub{font-size:12px;color:var(--soft)}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 14px 130px;display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:980px){.wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:36px}.panel{position:sticky;top:72px}}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
+  .stage img{width:100%;height:auto;display:block;border-radius:9px;background:#fff}
+  .quick{display:flex;gap:8px;margin-top:11px}
+  .quick button{flex:1;padding:15px 8px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:16px}
+  #btnShuffle{background:var(--gold);color:#20190A}
+  #btnToday{background:var(--green);color:#F3EFE2}
+  .hint{font-size:12px;color:var(--soft);margin:9px 2px 0;line-height:1.7}
+  #err{display:none;background:#8C2F26;color:#fff;padding:11px;border-radius:9px;font-size:13px;line-height:1.7;margin-bottom:9px;white-space:pre-wrap}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px}
+  fieldset{border:0;padding:0;margin:0 0 15px}
+  legend{font-family:"Naskh",serif;font-weight:700;font-size:18px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--gold);width:100%;color:var(--green)}
+  label{display:block;font-size:12.5px;margin:10px 0 4px;color:var(--soft)}
+  input[type=text],textarea,select,input[type=date],input[type=number]{width:100%;min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:15px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
+  textarea{min-height:80px;resize:vertical;line-height:1.95;font-family:"Naskh",serif;font-size:17px}
+  textarea[readonly],input[readonly]{background:#F0EDE2;color:#5D6459}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.g2>div{min-width:0}
+  .lockrow{display:flex;justify-content:space-between;align-items:center;gap:9px;margin:10px 0 4px}
+  .lockrow label{margin:0}
+  .times{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .tcell{border:1px solid var(--line);border-radius:9px;padding:7px 8px;background:#fff}
+  .tcell .nm{font-size:12px;color:var(--soft);margin-bottom:3px}
+  .trow{display:flex;align-items:center;gap:5px}
+  .tval{flex:1;text-align:center;font-weight:700;font-size:17px;letter-spacing:.5px}
+  .tbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#F3F0E5;color:var(--green);font:inherit;font-size:17px;font-weight:700;line-height:1}
+  .off{font-size:11px;color:var(--gold);text-align:center;min-height:13px}
+  .btn{padding:11px 13px;border-radius:10px;border:1px solid var(--green);background:var(--green);color:#F3EFE2;font:inherit;font-weight:700;font-size:14px}
+  .btn.ghost{background:transparent;color:var(--green);border-color:var(--line)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#20190A}
+  .btn.sm{padding:8px 11px;font-size:13px}
+  .actions{position:fixed;inset:auto 0 0 0;background:rgba(239,234,221,.96);border-top:1px solid var(--line);padding:9px 13px calc(9px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px)}
+  .actions .btn{flex:1}
+  @media(min-width:980px){.actions{position:static;background:none;border:0;padding:13px 0 0;backdrop-filter:none}}
+  .check{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:13.5px}
+  .check input{width:18px;height:18px;accent-color:var(--gold)}
+  .saved{font-size:12px;color:var(--green);min-height:15px;margin-top:7px}
+  .ver{font-size:11px;color:#9AA39C;margin:2px 0 0}
+  details{margin-top:10px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff}
+  summary{font-size:13.5px;font-weight:700;color:var(--green);cursor:pointer}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>نَفَحَاتٌ يَوْمِيَّة</h1>
+  <div class="sub">من القرآن والسنة .. تذكرة وفائدة</div>
+</header>
+
+<div class="wrap">
+  <main>
+    <div class="stage">
+      <div id="err"></div>
+      <img id="out" alt="بطاقة اليوم">
+      <div class="quick">
+        <button id="btnShuffle" type="button">محتوى آخر</button>
+        <button id="btnToday" type="button">محتوى اليوم</button>
+      </div>
+      <p class="hint">اضغط «محتوى آخر» لتبديل الآية والحديث والفائدة والدعاء معًا من موضوع واحد، ثم «مشاركة».</p>
+    </div>
+  </main>
+
+  <aside class="panel">
+    <fieldset>
+      <legend>المكان والتاريخ</legend>
+      <div class="g2">
+        <div><label for="f_country">الدولة</label><select id="f_country"></select></div>
+        <div><label for="f_city">المدينة</label><select id="f_city"></select></div>
+      </div>
+      <p class="hint" id="calcNote"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>المواقيت</legend>
+      <div class="times" id="timesBox"></div>
+      <button class="btn ghost sm" id="btnResetTimes" type="button" style="margin-top:9px">إعادة المواقيت للوضع التلقائي</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>التوقيع</legend>
+      <label for="f_sign">اسمك (اختياري، يُحفظ في هذا الجهاز)</label>
+      <input type="text" id="f_sign" placeholder="اتركه فارغًا إن شئت">
+    </fieldset>
+
+    <details>
+      <summary>تعديل متقدم</summary>
+      <label for="f_date">التاريخ</label>
+      <input type="date" id="f_date">
+      <div class="g2">
+        <div><label for="f_hijriAdj">تعديل الهجري</label>
+          <select id="f_hijriAdj"><option value="-1">يوم أقل</option><option value="0" selected>بلا تعديل</option><option value="1">يوم أكثر</option></select></div>
+        <div><label for="f_asr">العصر</label>
+          <select id="f_asr"><option value="1">الجمهور</option><option value="2">الحنفي</option></select></div>
+      </div>
+      <label for="f_method">طريقة الحساب</label>
+      <select id="f_method"></select>
+
+      <label for="f_theme">الموضوع</label>
+      <select id="f_theme"></select>
+      <label for="f_pack">المجموعة</label>
+      <select id="f_pack"></select>
+
+      <div class="lockrow">
+        <label for="f_verse">الآية</label>
+        <button class="btn ghost sm" id="btnLock" type="button">فتح للتعديل</button>
+      </div>
+      <textarea id="f_verse" readonly></textarea>
+      <input type="text" id="f_vref" readonly style="margin-top:7px">
+      <label for="f_hadith">الحديث</label>
+      <textarea id="f_hadith"></textarea>
+      <input type="text" id="f_href" style="margin-top:7px">
+      <label for="f_benefit">الفائدة</label>
+      <textarea id="f_benefit" style="min-height:66px"></textarea>
+      <label for="f_dua">الدعاء</label>
+      <textarea id="f_dua" style="min-height:66px"></textarea>
+      <button class="btn ghost sm" id="btnResetAll" type="button" style="margin-top:9px">إعادة كل الإعدادات</button>
+    </details>
+
+    <div class="check">
+      <input type="checkbox" id="f_autosave" checked>
+      <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
+    </div>
+    <p class="saved" id="saved"></p>
+    <p class="ver">نسخة 1.0</p>
+
+    <div class="actions">
+      <button class="btn gold" id="btnDl">حفظ الصورة</button>
+      <button class="btn" id="btnShare">مشاركة البطاقة</button>
+    </div>
+  </aside>
+</div>
+
+<script src="content.js"></script>
+<script src="packs.js"></script>
+<script>
+(function(){
+"use strict";
+function $(i){ return document.getElementById(i); }
+function fail(e){
+  var el=$("err"); el.style.display="block";
+  el.textContent="خطأ: "+(e&&e.message?e.message:e)+"\n"+((e&&e.stack)||"").split("\n").slice(0,3).join("\n");
+}
+try{
+if(typeof VERSES==="undefined") throw new Error("ملف content.js غير محمّل.");
+if(typeof PACKS==="undefined") throw new Error("ملف packs.js غير محمّل.");
+
+/* ============ ثوابت الرسم ============ */
+var W=1023,H=1537;
+var AM='"AmiriB",serif', NK='"Naskh",serif', PX='"Plex",system-ui,sans-serif';
+var GREEN="#1F4A35", MAIN="#2D3A32", SRC="#A0803F";
+var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
+var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+var MON=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+/* مقيسة من القالب بالبكسل */
+var T_CENTERS=[895,750,594,440,287,131], T_VALUE_Y=536;
+var D_CELLS=[[812,963],[551,745],[291,551],[142,255]], D_Y=326;
+var BOX={ verse:[305,940,676,908], hadith:[300,940,992,1160],
+          benefit:[282,940,1242,1332], dua:[392,936,1408,1466] };
+var LH=1.66, S_MAIN=46, S_MAIN_MIN=17, S_SEC=30, S_SEC_MIN=15, S_SRC=22;
+
+/* ============ التاريخ والحساب ============ */
+function pad(n){ return (n<10?"0":"")+n; }
+function hijri(d){
+  try{
+    var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",{day:"numeric",month:"long",year:"numeric"}).formatToParts(d),o={};
+    p.forEach(function(x){ o[x.type]=x.value; });
+    return parseInt(o.day,10)+" "+String(o.month).replace("هـ","").trim()+" "+String(o.year).replace(/\D/g,"")+" هـ";
+  }catch(e){ return ""; }
+}
+function julian(y,m,d){ if(m<=2){ y-=1; m+=12; }
+  var a=Math.floor(y/100), b=2-a+Math.floor(a/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+b-1524.5; }
+function sunPos(J){
+  var Dd=J-2451545.0, rad=Math.PI/180;
+  var g=((357.529+0.98560028*Dd)%360)*rad, q=(280.459+0.98564736*Dd)%360;
+  var L=(((q+1.915*Math.sin(g)+0.020*Math.sin(2*g))%360)+360)%360*rad;
+  var e=(23.439-0.00000036*Dd)*rad;
+  var dec=Math.asin(Math.sin(e)*Math.sin(L));
+  var RA=((Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/rad)/15+24)%24;
+  var eq=q/15-RA; if(eq>12) eq-=24; if(eq<-12) eq+=24;
+  return {dec:dec,eq:eq};
+}
+function hourAngle(a2,dec,lat){
+  var la=lat*Math.PI/180;
+  var x=(-Math.sin(a2*Math.PI/180)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null; return (Math.acos(x)*180/Math.PI)/15;
+}
+function asrAngle(f,dec,lat){
+  var la=lat*Math.PI/180, a2=Math.atan(1/(f+Math.tan(Math.abs(la-dec))));
+  var x=(Math.sin(a2)-Math.sin(la)*Math.sin(dec))/(Math.cos(la)*Math.cos(dec));
+  if(x>1||x<-1) return null; return (Math.acos(x)*180/Math.PI)/15;
+}
+function prayerHours(y,mo,d,c,mk,asrF){
+  var M=METHODS[mk]||METHODS[c.m];
+  var J=julian(y,mo,d)-c.lng/(15*24), s=sunPos(J);
+  var noon=12+c.tz-c.lng/15-s.eq, HOR=0.833;
+  var mag=noon+hourAngle(HOR,s.dec,c.lat);
+  var raw=[noon-hourAngle(M.f,s.dec,c.lat), noon-hourAngle(HOR,s.dec,c.lat), noon,
+           noon+asrAngle(asrF,s.dec,c.lat), mag,
+           M.min? mag+M.i/60 : noon+hourAngle(M.i,s.dec,c.lat)];
+  var adj=[1,0,1,0,1,1], out=[], i;
+  for(i=0;i<6;i++){ var m2=Math.round(raw[i]*60)+adj[i]; out.push(((m2%1440)+1440)%1440); }
+  return out;   /* دقائق منذ منتصف الليل */
+}
+function fmt24(m){ return pad(Math.floor(m/60)%24)+":"+pad(m%60); }
+
+/* ============ أدوات الرسم ============ */
+function wrap(c,t,mw){
+  var o=[], ws=String(t).trim().split(/\s+/), line="";
+  ws.forEach(function(w){ var x=line?line+" "+w:w;
+    if(c.measureText(x).width>mw&&line){ o.push(line); line=w; } else line=x; });
+  if(line) o.push(line); return o;
+}
+function balance(c,t,mw){
+  /* يوزّع النص على أسطره بالتساوي: يضيّق العرض ما دام عدد الأسطر ثابتًا،
+     فيختفي السطر الأخير اليتيم بلا تصغير الخط */
+  var base=wrap(c,t,mw), n=base.length;
+  if(n<2) return base;
+  var best=base, w=mw;
+  while(w>mw*0.55){
+    w-=mw*0.03;
+    var L=wrap(c,t,w);
+    if(L.length!==n) break;
+    best=L;
+  }
+  return best;
+}
+function stack(c,box,rows,scaleMin){
+  scaleMin=scaleMin||0.52;
+  var x0=box[0],x1=box[1],y0=box[2],y1=box[3];
+  var cx=(x0+x1)/2, mw=x1-x0, mh=y1-y0, scale=1, plan, total, guard=0;
+  for(;;){
+    plan=[]; total=0;
+    rows.forEach(function(r){
+      var sz=Math.max(Math.round(r.size*scale), r.min||12);
+      c.font=(r.wt||"")+sz+"px "+(r.font||NK);
+      var L=balance(c,r.t,mw), h=L.length*sz*LH+(r.gap||0)*scale;
+      plan.push({L:L,sz:sz,r:r,h:h}); total+=h;
+    });
+    if(total<=mh){
+      var orphan=plan.some(function(p){ return p.L.length>1 && p.L[p.L.length-1].split(/\s+/).length<=1; });
+      if(orphan && scale>scaleMin+0.06 && guard++<40){ scale-=0.03; continue; }
+      break;
+    }
+    if(scale<=scaleMin||guard++>60) break;
+    scale-=0.03;
+  }
+  var y=y0+(mh-total)/2;
+  c.textAlign="center";
+  plan.forEach(function(p){
+    c.font=(p.r.wt||"")+p.sz+"px "+(p.r.font||NK); c.fillStyle=p.r.color;
+    p.L.forEach(function(l){ c.fillText(l,cx,y+p.sz*0.82); y+=p.sz*LH; });
+    y+=(p.r.gap||0)*scale;
+  });
+}
+var tpl=new Image(), tplReady=false;
+tpl.onload=function(){ tplReady=true; render(); };
+tpl.onerror=function(){ fail(new Error("تعذّر تحميل nafahat-template.png")); };
+tpl.src="nafahat-template.png";
+
+function card(c,d){
+  c.canvas.width=W; c.canvas.height=H; c.direction="rtl";
+  if(tplReady) c.drawImage(tpl,0,0,W,H); else { c.fillStyle="#F8F5EB"; c.fillRect(0,0,W,H); }
+  var i;
+  /* شريط اليوم والتاريخ والمكان */
+  [d.day,d.hijri,d.greg,d.place].forEach(function(t,k){
+    var a=D_CELLS[k][0], b=D_CELLS[k][1], cw=(b-a)-18, sz=27;
+    for(;;){ c.font=sz+"px "+PX; if(c.measureText(t).width<=cw||sz<=15) break; sz--; }
+    c.textAlign="center"; c.fillStyle=GREEN;
+    c.fillText(t,(a+b)/2,D_Y+(27-sz)*0.42+sz*0.82);
+  });
+  /* أرقام المواقيت */
+  c.font="500 40px "+PX; c.fillStyle=GREEN; c.textAlign="center";
+  for(i=0;i<6;i++) c.fillText(d.times[i],T_CENTERS[i],T_VALUE_Y+33);
+  /* آية اليوم */
+  stack(c,BOX.verse,[
+    {t:"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",size:30,min:23,font:AM,wt:"",color:SRC,gap:18},
+    {t:"﴿ "+d.verse+" ﴾",size:S_MAIN,min:S_MAIN_MIN,font:AM,wt:"",color:MAIN,gap:18},
+    {t:d.vref,size:S_SRC,min:16,font:PX,color:SRC}]);
+  /* حديث اليوم */
+  stack(c,BOX.hadith,[
+    {t:"قال رسول الله ﷺ:",size:26,min:20,font:PX,color:SRC,gap:16},
+    {t:"«"+d.hadith+"»",size:S_MAIN-6,min:S_MAIN_MIN,font:NK,wt:"700 ",color:MAIN,gap:16},
+    {t:d.href,size:S_SRC,min:16,font:PX,color:SRC}]);
+  /* فائدة اليوم */
+  if(d.benefit.trim()) stack(c,BOX.benefit,[{t:d.benefit,size:S_SEC,min:S_SEC_MIN,font:NK,color:MAIN}]);
+  /* دعاء اليوم */
+  if(d.dua.trim()) stack(c,BOX.dua,[{t:d.dua,size:S_SEC,min:13,font:NK,color:MAIN}],0.42);
+  /* التوقيع */
+  if(d.sign.trim()){
+    c.textAlign="center"; c.font="28px "+NK; c.fillStyle=GREEN;
+    c.fillText(d.sign,W/2,1486);
+  }
+}
+
+/* ============ الواجهة ============ */
+var cv=document.createElement("canvas"), ctx=cv.getContext("2d");
+var offsets={}, manualDate="";
+function pickedDate(){ var v=$("f_date").value, p=v?v.split("-"):null;
+  if(!p||p.length!==3) return new Date(); return new Date(+p[0],+p[1]-1,+p[2]); }
+function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function dayIdx(d){ return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
+function countries(){
+  var o=[],s={};
+  CITIES.forEach(function(c){ var k=c.country||"سوريا"; if(!s[k]){ s[k]=1; o.push(k); } });
+  return o;
+}
+function citiesOf(co){ return CITIES.filter(function(c){ return (c.country||"سوريا")===co; }); }
+function city(){
+  var list=citiesOf($("f_country").value), i=$("f_city").selectedIndex;
+  return list[i]||list[0]||CITIES[0];
+}
+function methodKey(){ var k=$("f_method").value; if(!k||!METHODS[k]){ k=city().m; $("f_method").value=k; } return k; }
+function baseTimes(){
+  var d=pickedDate(), c=city();
+  return prayerHours(d.getFullYear(),d.getMonth()+1,d.getDate(),c,methodKey(),parseInt($("f_asr").value,10)||1);
+}
+function offKey(){ return city().n; }
+function getOff(){ return offsets[offKey()]||[0,0,0,0,0,0]; }
+function finalTimes(){
+  var b=baseTimes(), o=getOff();
+  return b.map(function(m,i){ return ((m+o[i])%1440+1440)%1440; });
+}
+function paintTimes(){
+  var t=finalTimes(), o=getOff(), i;
+  for(i=0;i<6;i++){
+    $("tv"+i).textContent=fmt24(t[i]);
+    $("to"+i).textContent=o[i]?(o[i]>0?"+"+o[i]:o[i])+" دقيقة":"";
+  }
+  $("calcNote").textContent="محسوبة لـ"+city().n+" حسب "+METHODS[methodKey()].label+".";
+}
+function bump(i,delta){
+  var o=getOff().slice(); o[i]+=delta; offsets[offKey()]=o;
+  paintTimes(); schedule();
+}
+function packIndexForDay(){
+  var k=dayIdx(pickedDate());
+  return ((k%PACKS.length)+PACKS.length)%PACKS.length;
+}
+function applyPack(idx){
+  var p=PACKS[idx];
+  $("f_theme").value=p.t;
+  fillPackList();
+  var list=PACKS.map(function(x,i){ return {x:x,i:i}; }).filter(function(x){ return x.x.t===p.t; });
+  var pos=0; list.forEach(function(x,k){ if(x.i===idx) pos=k; });
+  $("f_pack").selectedIndex=pos;
+  $("f_verse").value=VERSES[p.v].v; $("f_vref").value="سورة "+VERSES[p.v].r;
+  $("f_hadith").value=HADITHS[p.h].v; $("f_href").value=HADITHS[p.h].r||"";
+  $("f_benefit").value=p.b;
+  $("f_dua").value=DUAS[p.d].v;
+  setLock(true);
+  current=idx;
+}
+var current=0;
+function autoPack(){ manualDate=""; applyPack(packIndexForDay()); }
+function setLock(lock){
+  ["f_verse","f_vref"].forEach(function(id){
+    if(lock) $(id).setAttribute("readonly",""); else $(id).removeAttribute("readonly"); });
+  $("btnLock").textContent=lock?"فتح للتعديل":"قفل الحقل";
+}
+function state(){
+  var d=pickedDate(), t=finalTimes();
+  var hj=hijri(new Date(d.getTime()+(parseInt($("f_hijriAdj").value,10)||0)*86400000));
+  return {
+    day:DAYS[d.getDay()], hijri:hj,
+    greg:d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+" م",
+    place:city().n,
+    times:t.map(fmt24),
+    verse:$("f_verse").value, vref:$("f_vref").value,
+    hadith:$("f_hadith").value, href:$("f_href").value,
+    benefit:$("f_benefit").value, dua:$("f_dua").value, sign:$("f_sign").value
+  };
+}
+var timer=null;
+function render(){
+  try{ card(ctx,state()); $("out").src=cv.toDataURL("image/png"); $("err").style.display="none"; }
+  catch(e){ fail(e); }
+}
+function schedule(){ clearTimeout(timer); timer=setTimeout(function(){ render(); save(); },240); }
+
+/* التخزين */
+var KEY="nafahat:v1";
+function fbSet(v){ try{ window.localStorage.setItem(KEY,v); return true; }catch(e){ return false; } }
+function fbGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ return null; } }
+function snapshot(){
+  return JSON.stringify({country:$("f_country").value,cityIdx:$("f_city").selectedIndex,
+    method:$("f_method").value,asr:$("f_asr").value,hijriAdj:$("f_hijriAdj").value,
+    sign:$("f_sign").value,offsets:offsets,pack:current,manualDate:manualDate,
+    verse:$("f_verse").value,vref:$("f_vref").value,hadith:$("f_hadith").value,
+    href:$("f_href").value,benefit:$("f_benefit").value,dua:$("f_dua").value});
+}
+function save(){
+  if(!$("f_autosave").checked) return;
+  var v=snapshot();
+  function ok(){ var el=$("saved"); el.textContent="تم الحفظ";
+    setTimeout(function(){ if(el.textContent==="تم الحفظ") el.textContent=""; },1300); }
+  var done=false;
+  try{ if(window.storage&&window.storage.set){ window.storage.set(KEY,v).then(ok)["catch"](function(){ if(fbSet(v)) ok(); }); done=true; } }catch(e){}
+  if(!done&&fbSet(v)) ok();
+}
+function load(){
+  return new Promise(function(res){
+    function fin(r){ try{ res(r?JSON.parse(r):null); }catch(e){ res(null); } }
+    try{ if(window.storage&&window.storage.get){
+      window.storage.get(KEY).then(function(r){ fin(r&&r.value?r.value:fbGet()); })["catch"](function(){ fin(fbGet()); }); return; } }catch(e){}
+    fin(fbGet());
+  });
+}
+/* التصدير */
+function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+$("btnDl").onclick=function(){
+  cv.toBlob(function(b){
+    var u=URL.createObjectURL(b), a=document.createElement("a");
+    a.href=u; a.download="nafahat-"+stamp()+".png"; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(u); },3000);
+  },"image/png");
+};
+$("btnShare").onclick=function(){
+  cv.toBlob(function(b){
+    try{
+      var f=[new File([b],"nafahat-"+stamp()+".png",{type:"image/png"})];
+      if(navigator.canShare&&navigator.canShare({files:f})){ navigator.share({files:f})["catch"](function(){}); return; }
+    }catch(e){}
+    $("saved").textContent="المشاركة غير مدعومة هنا. استخدم حفظ الصورة.";
+  },"image/png");
+};
+$("btnShuffle").onclick=function(){
+  var n=PACKS.length, k=current;
+  for(var g=0;g<20&&k===current;g++) k=Math.floor(Math.random()*n);
+  manualDate=$("f_date").value;
+  applyPack(k); schedule();
+};
+$("btnToday").onclick=function(){ autoPack(); schedule(); };
+$("btnResetTimes").onclick=function(){ delete offsets[offKey()]; paintTimes(); schedule(); };
+$("btnResetAll").onclick=function(){
+  offsets={}; $("f_asr").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
+  $("f_country").selectedIndex=0; fillCities(); $("f_method").value=city().m;
+  autoPack(); paintTimes(); render(); save();
+};
+$("btnLock").onclick=function(){
+  var locked=$("f_verse").hasAttribute("readonly");
+  setLock(!locked); if(locked) $("f_verse").focus();
+};
+/* بناء الحقول */
+(function(){
+  var box=$("timesBox"), i;
+  for(i=0;i<6;i++){
+    var cell=document.createElement("div");
+    cell.className="tcell";
+    cell.innerHTML='<div class="nm">'+LAB[i]+'</div><div class="trow">'+
+      '<button class="tbtn" data-i="'+i+'" data-d="-1" type="button">−</button>'+
+      '<div class="tval" id="tv'+i+'">--:--</div>'+
+      '<button class="tbtn" data-i="'+i+'" data-d="1" type="button">+</button></div>'+
+      '<div class="off" id="to'+i+'"></div>';
+    box.appendChild(cell);
+  }
+  box.addEventListener("click",function(e){
+    var b=e.target.closest?e.target.closest(".tbtn"):null;
+    if(b) bump(parseInt(b.getAttribute("data-i"),10),parseInt(b.getAttribute("data-d"),10));
+  });
+  countries().forEach(function(c){ var o=document.createElement("option"); o.value=c; o.textContent=c; $("f_country").appendChild(o); });
+  Object.keys(METHODS).forEach(function(k){ var o=document.createElement("option"); o.value=k; o.textContent=METHODS[k].label; $("f_method").appendChild(o); });
+  THEMES.forEach(function(t){ var o=document.createElement("option"); o.value=t; o.textContent=t; $("f_theme").appendChild(o); });
+})();
+function fillCities(){
+  var sel=$("f_city"); sel.innerHTML="";
+  citiesOf($("f_country").value).forEach(function(c){
+    var o=document.createElement("option"); o.textContent=c.n; sel.appendChild(o); });
+}
+function fillPackList(){
+  var sel=$("f_pack"), t=$("f_theme").value; sel.innerHTML="";
+  PACKS.forEach(function(p,i){
+    if(p.t!==t) return;
+    var o=document.createElement("option"); o.value=String(i);
+    var s=VERSES[p.v].v; o.textContent=(s.length>38?s.slice(0,38)+"…":s);
+    sel.appendChild(o); });
+}
+$("f_country").onchange=function(){ fillCities(); $("f_method").value=city().m; paintTimes(); schedule(); };
+$("f_city").onchange=function(){ $("f_method").value=city().m; paintTimes(); schedule(); };
+$("f_date").onchange=function(){ if(!manualDate) autoPack(); paintTimes(); schedule(); };
+["f_method","f_asr"].forEach(function(id){ $(id).onchange=function(){ paintTimes(); schedule(); }; });
+$("f_hijriAdj").onchange=schedule;
+$("f_theme").onchange=function(){ fillPackList(); $("f_pack").selectedIndex=0;
+  manualDate=$("f_date").value; applyPack(parseInt($("f_pack").value,10)); schedule(); };
+$("f_pack").onchange=function(){ manualDate=$("f_date").value; applyPack(parseInt(this.value,10)); schedule(); };
+["f_verse","f_vref","f_hadith","f_href","f_benefit","f_dua","f_sign"].forEach(function(id){
+  $(id).addEventListener("input",schedule); });
+
+/* الإقلاع */
+$("f_date").value=isoToday();
+fillCities(); $("f_method").value=city().m;
+autoPack(); paintTimes();
+load().then(function(s){
+  if(s){
+    if(s.country){ $("f_country").value=s.country; fillCities(); }
+    if(typeof s.cityIdx==="number") $("f_city").selectedIndex=s.cityIdx;
+    if(s.method&&METHODS[s.method]) $("f_method").value=s.method;
+    if(s.asr) $("f_asr").value=s.asr;
+    if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
+    if(s.sign!==undefined) $("f_sign").value=s.sign;
+    if(s.offsets) offsets=s.offsets;
+    manualDate=s.manualDate||"";
+    if(manualDate===$("f_date").value&&typeof s.pack==="number"){
+      applyPack(s.pack);
+      if(s.verse) $("f_verse").value=s.verse;
+      if(s.vref) $("f_vref").value=s.vref;
+      if(s.hadith!==undefined) $("f_hadith").value=s.hadith;
+      if(s.href!==undefined) $("f_href").value=s.href;
+      if(s.benefit!==undefined) $("f_benefit").value=s.benefit;
+      if(s.dua!==undefined) $("f_dua").value=s.dua;
+    } else autoPack();
+    paintTimes();
+  }
+  var go=function(){ render(); };
+  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,2000); } else go();
+});
+}catch(e){ fail(e); }
+})();
+</script>
+</body>
+</html>
