@@ -8,6 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="نفحات">
+<link rel="apple-touch-icon" href="nafahat-icon.png">
+<link rel="icon" type="image/png" href="nafahat-icon.png">
 <style>
   @font-face{font-family:"Naskh";src:url("font-naskh.ttf") format("truetype");font-weight:400;font-display:block}
   @font-face{font-family:"Naskh";src:url("font-naskh-bold.ttf") format("truetype");font-weight:700;font-display:block}
@@ -17,10 +19,7 @@
   :root{--ink:#2D3A32;--soft:#5A6155;--paper:#EFEADD;--card:#F8F5EB;--gold:#A0803F;--green:#1F4A35;--line:rgba(31,74,53,.16)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:"Plex",system-ui,sans-serif;-webkit-text-size-adjust:100%}
-  header{padding:12px 18px 8px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-  header h1{font-family:"AmiriB",serif;font-size:24px;margin:0;color:var(--green)}
-  header .sub{font-size:12px;color:var(--soft)}
-  .wrap{max-width:1180px;margin:0 auto;padding:14px 14px 130px;display:grid;grid-template-columns:1fr;gap:18px}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 130px;display:grid;grid-template-columns:1fr;gap:18px}
   @media(min-width:980px){.wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:36px}.panel{position:sticky;top:72px}}
   .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
   .stage img{width:100%;height:auto;display:block;border-radius:9px;background:#fff}
@@ -65,10 +64,6 @@
 </head>
 <body>
 
-<header>
-  <h1>نَفَحَاتٌ يَوْمِيَّة</h1>
-  <div class="sub">من القرآن والسنة .. تذكرة وفائدة</div>
-</header>
 
 <div class="wrap">
   <main>
@@ -79,7 +74,6 @@
         <button id="btnShuffle" type="button">محتوى آخر</button>
         <button id="btnToday" type="button">محتوى اليوم</button>
       </div>
-      <p class="hint" id="diag" style="color:#8C2F26;font-weight:700"></p>
       <p class="hint">اضغط «محتوى آخر» لتبديل الآية والحديث والفائدة والدعاء معًا من موضوع واحد، ثم «مشاركة».</p>
     </div>
   </main>
@@ -145,7 +139,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">نسخة 1.1 تشخيصية</p>
+    <p class="ver">نسخة 1.2</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">حفظ الصورة</button>
@@ -314,8 +308,12 @@ function card(c,d){
   if(d.dua.trim()) stack(c,BOX.dua,[{t:d.dua,size:S_SEC,min:13,font:NK,color:MAIN}],0.42);
   /* التوقيع */
   if(d.sign.trim()){
-    c.textAlign="center"; c.font="28px "+NK; c.fillStyle=GREEN;
-    c.fillText(d.sign,W/2,1486);
+    /* الفراغ بين الزخرفتين: x من 405 إلى 620، ومركزه 512 عند y=1506 */
+    var sg=d.sign.trim(), sz=30;
+    c.textAlign="center"; c.textBaseline="middle";
+    for(;;){ c.font=sz+"px "+NK; if(c.measureText(sg).width<=200||sz<=15) break; sz--; }
+    c.fillStyle=GREEN; c.fillText(sg,W/2,1508);
+    c.textBaseline="alphabetic";
   }
 }
 
@@ -537,17 +535,6 @@ load().then(function(s){
     } else autoPack();
     paintTimes();
   }
-  try{
-    var dg=$("diag");
-    dg.textContent="تشخيص | مواضيع:"+(typeof THEMES!=="undefined"?THEMES.length:"؟")+
-      " مجموعات:"+(typeof PACKS!=="undefined"?PACKS.length:"؟")+
-      " آيات:"+(typeof VERSES!=="undefined"?VERSES.length:"؟")+
-      " مدن:"+(typeof CITIES!=="undefined"?CITIES.length:"؟")+
-      " أول مدينة فيها بلد:"+((typeof CITIES!=="undefined"&&CITIES[0]&&CITIES[0].country)?"نعم":"لا")+
-      " | خيارات المدن:"+$("f_city").options.length+
-      " | نص الآية:"+($("f_verse").value?"موجود":"فارغ")+
-      " | الباقة:"+current;
-  }catch(dx){}
   var go=function(){ render(); };
   if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,2000); } else go();
 });
