@@ -221,7 +221,6 @@ function prayerHours(y,mo,d,c,mk,asrF){
   for(i=0;i<6;i++){ var m2=Math.round(raw[i]*60)+adj[i]; out.push(((m2%1440)+1440)%1440); }
   return out;   /* دقائق منذ منتصف الليل */
 }
-function fmt24(m){ return pad(Math.floor(m/60)%24)+":"+pad(m%60); }
 function fmt12(m){ var h=Math.floor(m/60)%24; return ((h%12)||12)+":"+pad(m%60); }
 
 /* ============ أدوات الرسم ============ */
@@ -349,7 +348,7 @@ function finalTimes(){
 function paintTimes(){
   var t=finalTimes(), o=getOff(), i;
   for(i=0;i<6;i++){
-    $("tv"+i).textContent=fmt24(t[i]);
+    $("tv"+i).textContent=fmt12(t[i]);
     $("to"+i).textContent=o[i]?(o[i]>0?"+"+o[i]:o[i])+" دقيقة":"";
   }
   $("calcNote").textContent="محسوبة لـ"+city().n+" حسب "+METHODS[methodKey()].label+".";
