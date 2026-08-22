@@ -222,6 +222,7 @@ function prayerHours(y,mo,d,c,mk,asrF){
   return out;   /* دقائق منذ منتصف الليل */
 }
 function fmt24(m){ return pad(Math.floor(m/60)%24)+":"+pad(m%60); }
+function fmt12(m){ var h=Math.floor(m/60)%24; return ((h%12)||12)+":"+pad(m%60); }
 
 /* ============ أدوات الرسم ============ */
 function wrap(c,t,mw){
@@ -389,7 +390,7 @@ function state(){
     day:DAYS[d.getDay()], hijri:hj,
     greg:d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+" م",
     place:city().n,
-    times:t.map(fmt24),
+    times:t.map(fmt12),
     verse:$("f_verse").value, vref:$("f_vref").value,
     hadith:$("f_hadith").value, href:$("f_href").value,
     benefit:$("f_benefit").value, dua:$("f_dua").value, sign:$("f_sign").value
