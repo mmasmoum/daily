@@ -19,12 +19,15 @@
   :root{--ink:#2D3A32;--soft:#5A6155;--paper:#EFEADD;--card:#F8F5EB;--gold:#A0803F;--green:#1F4A35;--line:rgba(31,74,53,.16)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:"Plex",system-ui,sans-serif;-webkit-text-size-adjust:100%}
-  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 130px;display:grid;grid-template-columns:1fr;gap:18px}
-  @media(min-width:980px){.wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:36px}.panel{position:sticky;top:72px}}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 14px 104px;display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:980px){.stage img{max-height:none}
+  .wrap{grid-template-columns:minmax(0,1fr) 420px;align-items:start;padding-bottom:36px}.panel{position:sticky;top:72px}}
   .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
-  .stage img{width:100%;height:auto;display:block;border-radius:9px;background:#fff}
-  .quick{display:flex;gap:8px;margin-top:11px}
-  .quick button{flex:1;padding:15px 8px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:16px}
+  .stage img{width:100%;height:auto;display:block;border-radius:9px;background:#fff;
+    max-height:56vh;object-fit:contain;margin:0 auto}
+  @supports (height:100svh){ .stage img{max-height:56svh} }
+  .quick{display:flex;gap:8px;margin-top:10px}
+  .quick button{flex:1;padding:13px 8px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:16px}
   #btnShuffle{background:var(--gold);color:#20190A}
   #btnToday{background:var(--green);color:#F3EFE2}
   .seg{display:flex;align-items:center;gap:6px;margin:0 0 10px;background:#F2EEE1;border:1px solid var(--line);border-radius:12px;padding:5px}
@@ -153,7 +156,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 1.9</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 2.0</p>
 
     <div class="actions">
       <button class="btn send" id="btnShare">مشاركة البطاقة</button>
