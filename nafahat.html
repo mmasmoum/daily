@@ -27,6 +27,10 @@
   .quick button{flex:1;padding:15px 8px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:16px}
   #btnShuffle{background:var(--gold);color:#20190A}
   #btnToday{background:var(--green);color:#F3EFE2}
+  .seg{display:flex;align-items:center;gap:6px;margin-top:9px;background:#F2EEE1;border:1px solid var(--line);border-radius:12px;padding:5px}
+  .seg span{font-size:12.5px;color:var(--soft);padding:0 8px;white-space:nowrap}
+  .seg button{flex:1;padding:9px 6px;border-radius:9px;border:0;background:transparent;color:var(--soft);font:inherit;font-size:14px;font-weight:700}
+  .seg button[aria-pressed="true"]{background:var(--green);color:#F3EFE2}
   .hint{font-size:12px;color:var(--soft);margin:9px 2px 0;line-height:1.7}
   #err{display:none;background:#8C2F26;color:#fff;padding:11px;border-radius:9px;font-size:13px;line-height:1.7;margin-bottom:9px;white-space:pre-wrap}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px}
@@ -49,6 +53,7 @@
   .btn{padding:11px 13px;border-radius:10px;border:1px solid var(--green);background:var(--green);color:#F3EFE2;font:inherit;font-weight:700;font-size:14px}
   .btn.ghost{background:transparent;color:var(--green);border-color:var(--line)}
   .btn.gold{background:var(--gold);border-color:var(--gold);color:#20190A}
+  .btn.send{background:#1E7A4D;border-color:#1E7A4D;color:#FFF;font-size:16px;padding:14px}
   .btn.sm{padding:8px 11px;font-size:13px}
   .actions{position:fixed;inset:auto 0 0 0;background:rgba(239,234,221,.96);border-top:1px solid var(--line);padding:9px 13px calc(9px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:30;backdrop-filter:blur(6px)}
   .actions .btn{flex:1}
@@ -74,6 +79,15 @@
         <button id="btnShuffle" type="button">محتوى آخر</button>
         <button id="btnToday" type="button">محتوى اليوم</button>
       </div>
+      <div class="seg" id="dateSeg">
+        <span>تاريخ البطاقة</span>
+        <button type="button" data-v="0">اليوم</button>
+        <button type="button" data-v="1">الغد</button>
+      </div>
+      <select id="f_shift" hidden>
+        <option value="0">اليوم</option>
+        <option value="1" selected>الغد</option>
+      </select>
       <p class="hint">اضغط «محتوى آخر» لتبديل الآية والحديث والفائدة والدعاء معًا من موضوع واحد، ثم «مشاركة».</p>
     </div>
   </main>
@@ -98,11 +112,6 @@
       <legend>التوقيع</legend>
       <label for="f_sign">اسمك (اختياري، يُحفظ في هذا الجهاز)</label>
       <input type="text" id="f_sign" placeholder="اتركه فارغًا إن شئت">
-      <label for="f_shift">تاريخ البطاقة</label>
-      <select id="f_shift">
-        <option value="0">اليوم</option>
-        <option value="1">الغد</option>
-      </select>
     </fieldset>
 
     <details>
@@ -144,11 +153,10 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">إعداد وتطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 1.7</p>
+    <p class="ver">إعداد وتطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 1.8</p>
 
     <div class="actions">
-      <button class="btn gold" id="btnDl">حفظ الصورة</button>
-      <button class="btn" id="btnShare">مشاركة البطاقة</button>
+      <button class="btn send" id="btnShare">مشاركة البطاقة</button>
     </div>
   </aside>
 </div>
@@ -464,13 +472,6 @@ function load(){
 }
 /* التصدير */
 function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
-$("btnDl").onclick=function(){
-  cv.toBlob(function(b){
-    var u=URL.createObjectURL(b), a=document.createElement("a");
-    a.href=u; a.download="nafahat-"+stamp()+".png"; document.body.appendChild(a); a.click();
-    document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(u); },3000);
-  },"image/png");
-};
 $("btnShare").onclick=function(){
   cv.toBlob(function(b){
     try{
@@ -489,7 +490,7 @@ $("btnShuffle").onclick=function(){
 $("btnToday").onclick=function(){ autoPack(); schedule(); };
 $("btnResetTimes").onclick=function(){ delete offsets[offKey()]; paintTimes(); schedule(); };
 $("btnResetAll").onclick=function(){
-  offsets={}; $("f_asr").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday(); $("f_shift").value="0";
+  offsets={}; $("f_asr").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday(); $("f_shift").value="1"; paintSeg();
   $("f_country").selectedIndex=0; fillCities(); $("f_method").value=city().m;
   autoPack(); paintTimes(); render(); save();
 };
@@ -537,6 +538,19 @@ $("f_date").onchange=function(){ if(!manualDate) autoPack(); paintTimes(); sched
 ["f_method","f_asr"].forEach(function(id){ $(id).onchange=function(){ paintTimes(); schedule(); }; });
 $("f_hijriAdj").onchange=schedule;
 $("f_shift").onchange=function(){ if(!manualDate) autoPack(); recalcShown(); schedule(); };
+function paintSeg(){
+  var v=$("f_shift").value;
+  Array.prototype.forEach.call($("dateSeg").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", b.getAttribute("data-v")===v ? "true" : "false"); });
+}
+Array.prototype.forEach.call($("dateSeg").querySelectorAll("button"),function(b){
+  b.onclick=function(){
+    $("f_shift").value=b.getAttribute("data-v");
+    paintSeg();
+    if(!manualDate) autoPack();
+    recalcShown(); schedule();
+  };
+});
 $("f_theme").onchange=function(){ fillPackList(); $("f_pack").selectedIndex=0;
   manualDate=$("f_date").value; applyPack(parseInt($("f_pack").value,10)); schedule(); };
 $("f_pack").onchange=function(){ manualDate=$("f_date").value; applyPack(parseInt(this.value,10)); schedule(); };
@@ -545,6 +559,7 @@ $("f_pack").onchange=function(){ manualDate=$("f_date").value; applyPack(parseIn
 
 /* الإقلاع */
 $("f_date").value=isoToday();
+paintSeg();
 fillCities(); $("f_method").value=city().m;
 autoPack(); paintTimes();
 load().then(function(s){
@@ -555,7 +570,7 @@ load().then(function(s){
     if(s.asr) $("f_asr").value=s.asr;
     if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
     if(s.sign!==undefined) $("f_sign").value=s.sign;
-    if(s.shift) $("f_shift").value=s.shift;
+    if(s.shift!==undefined) $("f_shift").value=s.shift;
     if(s.offsets) offsets=s.offsets;
     manualDate=s.manualDate||"";
     if(manualDate===$("f_date").value&&typeof s.pack==="number"){
@@ -569,6 +584,7 @@ load().then(function(s){
     } else autoPack();
     paintTimes();
   }
+  paintSeg();
   var go=function(){ render(); };
   if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,2000); } else go();
 });
