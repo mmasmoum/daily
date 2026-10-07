@@ -98,6 +98,11 @@
       <legend>التوقيع</legend>
       <label for="f_sign">اسمك (اختياري، يُحفظ في هذا الجهاز)</label>
       <input type="text" id="f_sign" placeholder="اتركه فارغًا إن شئت">
+      <label for="f_shift">تاريخ البطاقة</label>
+      <select id="f_shift">
+        <option value="0">اليوم</option>
+        <option value="1">الغد</option>
+      </select>
     </fieldset>
 
     <details>
@@ -139,7 +144,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">إعداد وتطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 1.3</p>
+    <p class="ver">إعداد وتطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 1.7</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">حفظ الصورة</button>
@@ -173,9 +178,12 @@ var MON=["يناير","فبراير","مارس","أبريل","مايو","يون�
 var T_CENTERS=[895,750,594,440,287,131], T_VALUE_Y=536;
 var D_CELLS=[[812,963],[551,745],[291,551],[142,255]], D_Y=326;
 /* الحد الأيسر = نهاية الرسم الصلب + هامش، والنص يتمركز على محور اللوح 512 */
-var BOX={ verse:[290,940,676,908], hadith:[282,940,984,1164],
-          benefit:[262,940,1235,1335], dua:[200,940,1405,1468] };
-var LH=1.66, S_MAIN=46, S_MAIN_MIN=17, S_SEC=30, S_SEC_MIN=15, S_SRC=22;
+var BOX={ verse:[290,940,676,912], hadith:[282,940,982,1168],
+          benefit:[262,940,1235,1335], dua:[200,940,1402,1470] };
+var LH=1.66;                 /* الافتراضي */
+var LH_MAIN=1.50;            /* النصوص الرئيسية: أضيق قليلًا فيتسع سطر أكبر */
+var LH_VERSE=1.56;           /* الآية: أميري حركاته مرتفعة فتحتاج فسحة */
+var S_MAIN=54, S_MAIN_MIN=18, S_SEC=34, S_SEC_MIN=16, S_SRC=21;
 
 /* ============ التاريخ والحساب ============ */
 function pad(n){ return (n<10?"0":"")+n; }
@@ -244,6 +252,20 @@ function balance(c,t,mw){
   }
   return best;
 }
+var SIDE_CX=854, SIDE_W=226;   /* الحيز الفارغ يمين الألواح: 735 إلى 972 */
+var COL=[300,724];             /* عمود نص واحد للآية والحديث، فيتطابق عرضهما */
+function side(c,t,y,size,font,color){
+  /* سطر جانبي في الفراغ يمين النص، فلا يأخذ حيزًا منه */
+  var sz=size;
+  for(;;){ c.font=sz+"px "+font; if(c.measureText(t).width<=SIDE_W||sz<=13) break; sz--; }
+  c.textAlign="center"; c.fillStyle=color; c.fillText(t,SIDE_CX,y);
+}
+function pin(c,t,y,size,font,color,maxw){
+  /* سطر ثابت على حافة اللوح، خارج الكتلة المرنة، فلا يزاحم النص الرئيسي */
+  var sz=size;
+  for(;;){ c.font=sz+"px "+font; if(c.measureText(t).width<=maxw||sz<=13) break; sz--; }
+  c.textAlign="center"; c.fillStyle=color; c.fillText(t,512,y);
+}
 function stack(c,box,rows,scaleMin){
   scaleMin=scaleMin||0.52;
   var x0=box[0],x1=box[1],y0=box[2],y1=box[3];
@@ -254,8 +276,9 @@ function stack(c,box,rows,scaleMin){
     rows.forEach(function(r){
       var sz=Math.max(Math.round(r.size*scale), r.min||12);
       c.font=(r.wt||"")+sz+"px "+(r.font||NK);
-      var L=balance(c,r.t,mw), h=L.length*sz*LH+(r.gap||0)*scale;
-      plan.push({L:L,sz:sz,r:r,h:h}); total+=h;
+      var lh=r.lh||LH;
+      var L=balance(c,r.t,mw), h=L.length*sz*lh+(r.gap||0)*scale;
+      plan.push({L:L,sz:sz,r:r,h:h,lh:lh}); total+=h;
     });
     if(total<=mh){
       var orphan=plan.some(function(p){ return p.L.length>1 && p.L[p.L.length-1].split(/\s+/).length<=1; });
@@ -269,7 +292,7 @@ function stack(c,box,rows,scaleMin){
   c.textAlign="center";
   plan.forEach(function(p){
     c.font=(p.r.wt||"")+p.sz+"px "+(p.r.font||NK); c.fillStyle=p.r.color;
-    p.L.forEach(function(l){ c.fillText(l,cx,y+p.sz*0.82); y+=p.sz*LH; });
+    p.L.forEach(function(l){ c.fillText(l,cx,y+p.sz*0.82); y+=p.sz*p.lh; });
     y+=(p.r.gap||0)*scale;
   });
 }
@@ -292,20 +315,22 @@ function card(c,d){
   /* أرقام المواقيت */
   c.font="500 40px "+PX; c.fillStyle=GREEN; c.textAlign="center";
   for(i=0;i<6;i++) c.fillText(d.times[i],T_CENTERS[i],T_VALUE_Y+33);
-  /* آية اليوم */
-  stack(c,BOX.verse,[
-    {t:"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",size:30,min:23,font:AM,wt:"",color:SRC,gap:18},
-    {t:"﴿ "+d.verse+" ﴾",size:S_MAIN,min:S_MAIN_MIN,font:AM,wt:"",color:MAIN,gap:18},
-    {t:d.vref,size:S_SRC,min:16,font:PX,color:SRC}]);
-  /* حديث اليوم */
-  stack(c,BOX.hadith,[
-    {t:"قال رسول الله ﷺ:",size:26,min:20,font:PX,color:SRC,gap:16},
-    {t:"«"+d.hadith+"»",size:S_MAIN-6,min:S_MAIN_MIN,font:NK,wt:"700 ",color:MAIN,gap:16},
-    {t:d.href,size:S_SRC,min:16,font:PX,color:SRC}]);
+  /* آية اليوم: البسملة والمرجع في الفراغ الأيمن، واللوح كله للآية */
+  var vm=(BOX.verse[2]+BOX.verse[3])/2;
+  side(c,"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",vm-6,23,AM,SRC);
+  side(c,d.vref,vm+28,20,PX,SRC);
+  stack(c,[COL[0],COL[1],BOX.verse[2]+10,BOX.verse[3]-10],
+    [{t:"﴿ "+d.verse+" ﴾",size:S_MAIN,min:S_MAIN_MIN,font:AM,wt:"",color:MAIN,lh:LH_VERSE}]);
+  /* حديث اليوم: الصدر والتخريج في الفراغ الأيمن كذلك */
+  var hm=(BOX.hadith[2]+BOX.hadith[3])/2;
+  side(c,"قال رسول الله ﷺ:",hm-6,22,PX,SRC);
+  side(c,d.href,hm+26,20,PX,SRC);
+  stack(c,[COL[0],COL[1],BOX.hadith[2]+8,BOX.hadith[3]-8],
+    [{t:"«"+d.hadith+"»",size:S_MAIN-6,min:S_MAIN_MIN,font:NK,wt:"700 ",color:MAIN,lh:LH_MAIN}]);
   /* فائدة اليوم */
-  if(d.benefit.trim()) stack(c,BOX.benefit,[{t:d.benefit,size:S_SEC,min:S_SEC_MIN,font:NK,color:MAIN}]);
+  if(d.benefit.trim()) stack(c,BOX.benefit,[{t:d.benefit,size:S_SEC,min:S_SEC_MIN,font:NK,color:MAIN,lh:LH_MAIN}]);
   /* دعاء اليوم */
-  if(d.dua.trim()) stack(c,BOX.dua,[{t:d.dua,size:S_SEC,min:13,font:NK,color:MAIN}],0.42);
+  if(d.dua.trim()) stack(c,BOX.dua,[{t:d.dua,size:S_SEC,min:14,font:NK,color:MAIN,lh:LH_MAIN}],0.42);
   /* التوقيع */
   if(d.sign.trim()){
     /* الفراغ بين الزخرفتين: x من 405 إلى 620، ومركزه 512 عند y=1506 */
@@ -320,8 +345,14 @@ function card(c,d){
 /* ============ الواجهة ============ */
 var cv=document.createElement("canvas"), ctx=cv.getContext("2d");
 var offsets={}, manualDate="";
-function pickedDate(){ var v=$("f_date").value, p=v?v.split("-"):null;
-  if(!p||p.length!==3) return new Date(); return new Date(+p[0],+p[1]-1,+p[2]); }
+function shiftDays(){ return parseInt($("f_shift").value,10)||0; }
+function pickedDate(){
+  var v=$("f_date").value, p=v?v.split("-"):null, d;
+  d=(!p||p.length!==3)? new Date() : new Date(+p[0],+p[1]-1,+p[2]);
+  /* الإزاحة تنقل التاريخ والمواقيت والمحتوى معًا، فتبقى البطاقة متسقة */
+  if(shiftDays()) d=new Date(d.getTime()+shiftDays()*86400000);
+  return d;
+}
 function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function dayIdx(d){ return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function countries(){
@@ -353,6 +384,7 @@ function paintTimes(){
   }
   $("calcNote").textContent="محسوبة لـ"+city().n+" حسب "+METHODS[methodKey()].label+".";
 }
+function recalcShown(){ paintTimes(); }
 function bump(i,delta){
   var o=getOff().slice(); o[i]+=delta; offsets[offKey()]=o;
   paintTimes(); schedule();
@@ -409,7 +441,7 @@ function fbGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ retur
 function snapshot(){
   return JSON.stringify({country:$("f_country").value,cityIdx:$("f_city").selectedIndex,
     method:$("f_method").value,asr:$("f_asr").value,hijriAdj:$("f_hijriAdj").value,
-    sign:$("f_sign").value,offsets:offsets,pack:current,manualDate:manualDate,
+    sign:$("f_sign").value,offsets:offsets,pack:current,manualDate:manualDate,shift:$("f_shift").value,
     verse:$("f_verse").value,vref:$("f_vref").value,hadith:$("f_hadith").value,
     href:$("f_href").value,benefit:$("f_benefit").value,dua:$("f_dua").value});
 }
@@ -457,7 +489,7 @@ $("btnShuffle").onclick=function(){
 $("btnToday").onclick=function(){ autoPack(); schedule(); };
 $("btnResetTimes").onclick=function(){ delete offsets[offKey()]; paintTimes(); schedule(); };
 $("btnResetAll").onclick=function(){
-  offsets={}; $("f_asr").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday();
+  offsets={}; $("f_asr").value="1"; $("f_hijriAdj").value="0"; $("f_date").value=isoToday(); $("f_shift").value="0";
   $("f_country").selectedIndex=0; fillCities(); $("f_method").value=city().m;
   autoPack(); paintTimes(); render(); save();
 };
@@ -504,6 +536,7 @@ $("f_city").onchange=function(){ $("f_method").value=city().m; paintTimes(); sch
 $("f_date").onchange=function(){ if(!manualDate) autoPack(); paintTimes(); schedule(); };
 ["f_method","f_asr"].forEach(function(id){ $(id).onchange=function(){ paintTimes(); schedule(); }; });
 $("f_hijriAdj").onchange=schedule;
+$("f_shift").onchange=function(){ if(!manualDate) autoPack(); recalcShown(); schedule(); };
 $("f_theme").onchange=function(){ fillPackList(); $("f_pack").selectedIndex=0;
   manualDate=$("f_date").value; applyPack(parseInt($("f_pack").value,10)); schedule(); };
 $("f_pack").onchange=function(){ manualDate=$("f_date").value; applyPack(parseInt(this.value,10)); schedule(); };
@@ -522,6 +555,7 @@ load().then(function(s){
     if(s.asr) $("f_asr").value=s.asr;
     if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
     if(s.sign!==undefined) $("f_sign").value=s.sign;
+    if(s.shift) $("f_shift").value=s.shift;
     if(s.offsets) offsets=s.offsets;
     manualDate=s.manualDate||"";
     if(manualDate===$("f_date").value&&typeof s.pack==="number"){
