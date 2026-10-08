@@ -11,11 +11,11 @@
 <link rel="apple-touch-icon" href="nafahat-icon.png">
 <link rel="icon" type="image/png" href="nafahat-icon.png">
 <style>
-  @font-face{font-family:"Naskh";src:url("font-naskh.ttf") format("truetype");font-weight:400;font-display:block}
-  @font-face{font-family:"Naskh";src:url("font-naskh-bold.ttf") format("truetype");font-weight:700;font-display:block}
-  @font-face{font-family:"Plex";src:url("font-plex.ttf") format("truetype");font-weight:400;font-display:block}
-  @font-face{font-family:"Plex";src:url("font-plex-med.ttf") format("truetype");font-weight:500;font-display:block}
-  @font-face{font-family:"AmiriB";src:url("font-amiri-bold.ttf") format("truetype");font-display:block}
+  @font-face{font-family:"Naskh";src:url("font-naskh.woff2") format("woff2"),url("font-naskh.ttf") format("truetype");font-weight:400;font-display:block}
+  @font-face{font-family:"Naskh";src:url("font-naskh-bold.woff2") format("woff2"),url("font-naskh-bold.ttf") format("truetype");font-weight:700;font-display:block}
+  @font-face{font-family:"Plex";src:url("font-plex.woff2") format("woff2"),url("font-plex.ttf") format("truetype");font-weight:400;font-display:block}
+  @font-face{font-family:"Plex";src:url("font-plex-med.woff2") format("woff2"),url("font-plex-med.ttf") format("truetype");font-weight:500;font-display:block}
+  @font-face{font-family:"AmiriB";src:url("font-amiri-bold.woff2") format("woff2"),url("font-amiri-bold.ttf") format("truetype");font-display:block}
   :root{--ink:#2D3A32;--soft:#5A6155;--paper:#EFEADD;--card:#F8F5EB;--gold:#A0803F;--green:#1F4A35;--line:rgba(31,74,53,.16)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:"Plex",system-ui,sans-serif;-webkit-text-size-adjust:100%}
@@ -84,6 +84,8 @@
         <option value="0">اليوم</option>
         <option value="1" selected>الغد</option>
       </select>
+      <div id="tplmsg" style="display:none;margin:10px 0;padding:12px 14px;border-radius:10px;
+        background:#FFF4D6;border:1px solid #D9B96A;color:#6B5420;font-size:15px;text-align:center"></div>
       <img id="out" alt="بطاقة اليوم">
     </div>
   </main>
@@ -304,14 +306,27 @@ function stack(c,box,rows,scaleMin){
     y+=(p.r.gap||0)*scale;
   });
 }
-var tpl=new Image(), tplReady=false;
-tpl.onload=function(){ tplReady=true; render(); };
-tpl.onerror=function(){ fail(new Error("تعذّر تحميل nafahat-template.png")); };
-tpl.src="nafahat-template.png";
+var tpl=new Image(), tplReady=false, tplTries=0;
+var TPL_SRC=["nafahat-template.webp","nafahat-template.png"];
+function tplNote(msg){
+  var el=$("tplmsg"); if(!el) return;
+  el.textContent=msg||""; el.style.display=msg?"block":"none";
+  var b=$("btnShare"); if(b) b.disabled=!!msg;
+}
+function tplLoad(){
+  var i=tplTries%2, round=Math.floor(tplTries/2);
+  tplNote(round===0?"جارٍ تحميل خلفية البطاقة…":"الاتصال ضعيف، تُعاد المحاولة…");
+  tpl=new Image();
+  tpl.onload=function(){ tplReady=true; tplNote(""); setTimeout(render,0); };
+  tpl.onerror=function(){ tplTries++; setTimeout(tplLoad, Math.min(1000*Math.pow(2,Math.floor(tplTries/2)),15000)); };
+  tpl.src=TPL_SRC[i]+(round?"?r="+round:"");
+}
+tplLoad();
 
 function card(c,d){
   c.canvas.width=W; c.canvas.height=H; c.direction="rtl";
-  if(tplReady) c.drawImage(tpl,0,0,W,H); else { c.fillStyle="#F8F5EB"; c.fillRect(0,0,W,H); }
+  if(!tplReady) throw new Error("__notpl__");
+  c.drawImage(tpl,0,0,W,H);
   var i;
   /* شريط اليوم والتاريخ والمكان */
   [d.day,d.hijri,d.greg,d.place].forEach(function(t,k){
@@ -449,7 +464,7 @@ function state(){
 var timer=null;
 function render(){
   try{ card(ctx,state()); $("out").src=cv.toDataURL("image/png"); $("err").style.display="none"; }
-  catch(e){ fail(e); }
+  catch(e){ if(e&&e.message==="__notpl__") return; fail(e); }
 }
 function schedule(){ clearTimeout(timer); timer=setTimeout(function(){ render(); save(); },240); }
 
@@ -601,6 +616,13 @@ load().then(function(s){
 });
 }catch(e){ fail(e); }
 })();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
 </script>
 </body>
 </html>
