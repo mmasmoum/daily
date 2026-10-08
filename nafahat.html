@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>نفحات يومية</title>
+<title>نفحات إيمانية</title>
 <meta name="theme-color" content="#14402C">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -149,7 +149,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 2.0</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 2.1</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">محتوى آخر</button>
@@ -179,7 +179,9 @@ var AM='"AmiriB",serif', NK='"Naskh",serif', PX='"Plex",system-ui,sans-serif';
 var GREEN="#1F4A35", MAIN="#2D3A32", SRC="#A0803F";
 var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
 var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-var MON=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+var MON_SHAM=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+var MON_WEST=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+var SHAM_LANDS=["سوريا","الأردن","العراق","لبنان","فلسطين","تركيا"];
 /* مقيسة من القالب بالبكسل */
 var T_CENTERS=[895,750,594,440,287,131], T_VALUE_Y=536;
 var D_CELLS=[[812,963],[551,745],[291,551],[142,255]], D_Y=326;
@@ -313,8 +315,9 @@ function card(c,d){
   var i;
   /* شريط اليوم والتاريخ والمكان */
   [d.day,d.hijri,d.greg,d.place].forEach(function(t,k){
-    var a=D_CELLS[k][0], b=D_CELLS[k][1], cw=(b-a)-18, sz=27;
-    for(;;){ c.font=sz+"px "+PX; if(c.measureText(t).width<=cw||sz<=15) break; sz--; }
+    var a=D_CELLS[k][0], b=D_CELLS[k][1], cw=(b-a)-18;
+    var wt=(k===0)?"500 ":"", sz=(k===0)?29:27;   /* اسم اليوم أعرض وأكبر */
+    for(;;){ c.font=wt+sz+"px "+PX; if(c.measureText(t).width<=cw||sz<=15) break; sz--; }
     c.textAlign="center"; c.fillStyle=GREEN;
     c.fillText(t,(a+b)/2,D_Y+(27-sz)*0.42+sz*0.82);
   });
@@ -367,6 +370,15 @@ function countries(){
   return o;
 }
 function citiesOf(co){ return CITIES.filter(function(c){ return (c.country||"سوريا")===co; }); }
+function srcOf(h){
+  /* التخريج، ومعه رقم الحديث إن وُجد الحقل n في content.js */
+  return (h.r||"")+(h.n?" ("+h.n+")":"");
+}
+function monthName(i){
+  /* الشام وتركيا: كانون الثاني وشباط وآذار. والخليج: يناير وفبراير */
+  var co=""; try{ co=city().country||""; }catch(e){}
+  return (SHAM_LANDS.indexOf(co)>=0 ? MON_SHAM : MON_WEST)[i];
+}
 function city(){
   var list=citiesOf($("f_country").value), i=$("f_city").selectedIndex;
   return list[i]||list[0]||CITIES[0];
@@ -407,7 +419,8 @@ function applyPack(idx){
   var pos=0; list.forEach(function(x,k){ if(x.i===idx) pos=k; });
   $("f_pack").selectedIndex=pos;
   $("f_verse").value=VERSES[p.v].v; $("f_vref").value="سورة "+VERSES[p.v].r;
-  $("f_hadith").value=HADITHS[p.h].v; $("f_href").value=HADITHS[p.h].r||"";
+  $("f_hadith").value=HADITHS[p.h].v;
+  $("f_href").value=srcOf(HADITHS[p.h]);
   $("f_benefit").value=p.b;
   $("f_dua").value=DUAS[p.d].v;
   setLock(true);
@@ -425,7 +438,7 @@ function state(){
   var hj=hijri(new Date(d.getTime()+(parseInt($("f_hijriAdj").value,10)||0)*86400000));
   return {
     day:DAYS[d.getDay()], hijri:hj,
-    greg:d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+" م",
+    greg:d.getDate()+" "+monthName(d.getMonth())+" "+d.getFullYear()+" م",
     place:city().n,
     times:t.map(fmt12),
     verse:$("f_verse").value, vref:$("f_vref").value,
