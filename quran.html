@@ -174,7 +174,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.3</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.6</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -432,15 +432,32 @@ function bgDraw(c){
   for(var y=-60;y<H+220;y+=210) for(var x=((y/210)|0)%2?105:0;x<W+210;x+=210){ star8(c,x,y,92,.42,0); c.stroke(); }
   c.restore();
 }
-function cityPill(c,x,y,txt){
-  c.font="600 24px "+CA; c.textAlign="center"; c.textBaseline="middle";
-  var w=c.measureText(txt).width+40, h=48;
-  c.beginPath();
-  c.moveTo(x-w/2+h/2,y-h/2);
-  c.arcTo(x+w/2,y-h/2,x+w/2,y+h/2,h/2); c.arcTo(x+w/2,y+h/2,x-w/2,y+h/2,h/2);
-  c.arcTo(x-w/2,y+h/2,x-w/2,y-h/2,h/2); c.arcTo(x-w/2,y-h/2,x+w/2,y-h/2,h/2);
-  c.closePath(); c.fillStyle=PILLBG; c.fill();
-  c.fillStyle=GREEN; c.fillText(txt,x,y+1); c.textBaseline="alphabetic";
+/* اسم البطاقة أعلاها، بخطّين ذهبيين ومعيّنين على الجانبين */
+/* اسم البطاقة: خط عربي مرسوم، يُصبغ بلون اللوحة المختارة */
+var markImg=null, markOK=false, markTries=0;
+function markLoad(){
+  markImg=new Image();
+  markImg.onload=function(){ markOK=true; setTimeout(render,0); };
+  markImg.onerror=function(){ markTries++; if(markTries<6) setTimeout(markLoad,1200*markTries); };
+  markImg.src="title-tarafay.png"+(markTries?"?r="+markTries:"");
+}
+markLoad();
+var _tintCv=null;
+function cardTitle(c,cx,y,maxW){
+  if(!markOK){                 /* احتياط نصّي ريثما تصل الصورة */
+    c.textAlign="center"; c.font="700 58px "+AM; c.fillStyle=GOLD;
+    c.fillText("طَرَفَيِ النَّهَار",cx,y); return;
+  }
+  var w=maxW||600, h=Math.round(markImg.height*w/markImg.width);
+  if(!_tintCv) _tintCv=document.createElement("canvas");
+  _tintCv.width=w; _tintCv.height=h;
+  var o=_tintCv.getContext("2d");
+  o.clearRect(0,0,w,h);
+  o.drawImage(markImg,0,0,w,h);
+  o.globalCompositeOperation="source-in";
+  o.fillStyle=GOLD; o.fillRect(0,0,w,h);
+  o.globalCompositeOperation="source-over";
+  c.drawImage(_tintCv,cx-w/2,y-h);
 }
 function timeBadge(c,cx,cy,R,a,name,val){
   var x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
@@ -466,13 +483,14 @@ function poster(c,d){
   bgDraw(c);
   cornerOrn(c,0,0,1,1,.82); cornerOrn(c,W,0,-1,1,.82);
   cornerOrn(c,0,H,1,-1,.70); cornerOrn(c,W,H,-1,-1,.70);
-  var cx=W/2, cy=812, R=452, ring=32, inR=R-ring/2, outR=R+ring/2, i, a;
+  var cx=W/2, cy=812, R=432, ring=32, inR=R-ring/2, outR=R+ring/2, i, a;
 
-  cityPill(c,cx,92,d.city);
+  cardTitle(c,cx,188,500);
   c.textAlign="center";
-  c.font="700 88px "+AM; c.fillStyle=INK; c.fillText(d.day,cx,220);
-  c.font="600 31px "+CA; c.fillStyle=INK; c.globalAlpha=.78; c.fillText(d.hijri+"   ·   "+d.greg,cx,266); c.globalAlpha=1;
-  c.font="600 27px "+CA; c.fillStyle=GOLD; c.fillText("طول النهار "+d.dayLen,cx,310);
+  c.font="700 56px "+AM; c.fillStyle=INK; c.fillText(d.day,cx,254);
+  c.font="600 28px "+CA; c.fillStyle=INK; c.globalAlpha=.78; c.fillText(d.hijri+"   ·   "+d.greg,cx,300); c.globalAlpha=1;
+  c.font="600 25px "+CA; c.fillStyle=GOLD;
+  c.fillText(d.city+"   ·   النهار "+d.dayLen+"   ·   الليل "+d.nightLen,cx,340);
 
   c.beginPath(); c.arc(cx,cy,R,ang(d.h[4]),ang(d.h[0]+24)); c.lineWidth=ring; c.strokeStyle=NIGHT; c.stroke();
   c.beginPath(); c.arc(cx,cy,R,ang(d.h[0]),ang(d.h[1])); c.lineWidth=ring; c.strokeStyle=DAWN; c.stroke();
@@ -678,6 +696,8 @@ function state(){
     city:c.n, day:DAYS[d.getDay()], hijri:hj, palette:$("f_palette").value,
     greg:d.getDate()+" "+monthName(d.getMonth())+" "+d.getFullYear()+" م",
     dayLen:Math.floor(dl)+":"+pad(Math.round((dl%1)*60)),
+    nightLen:(function(nl){ var m=Math.round((nl%1)*60), hh=Math.floor(nl);
+      if(m===60){ m=0; hh+=1; } return hh+":"+pad(m); })(24-dl),
     h:h, disp:t.map(tstr),
     verse:(sw==="h")?"":$("f_verse").value, vref:(sw==="h")?"":$("f_vref").value,
     hadith:(sw==="v")?"":$("f_hadith").value, href:(sw==="v")?"":$("f_href").value,
