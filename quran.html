@@ -174,7 +174,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.6</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.7</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -445,8 +445,9 @@ markLoad();
 var _tintCv=null;
 function cardTitle(c,cx,y,maxW){
   if(!markOK){                 /* احتياط نصّي ريثما تصل الصورة */
-    c.textAlign="center"; c.font="700 58px "+AM; c.fillStyle=GOLD;
-    c.fillText("طَرَفَيِ النَّهَار",cx,y); return;
+    c.textAlign="center"; c.font="700 54px "+AM; c.fillStyle=GOLD;
+    c.fillText("طَرَفَيِ النَّهَار",cx,y-46);
+    titleOrn(c,cx,y-62,170); return;
   }
   var w=maxW||600, h=Math.round(markImg.height*w/markImg.width);
   if(!_tintCv) _tintCv=document.createElement("canvas");
@@ -458,6 +459,20 @@ function cardTitle(c,cx,y,maxW){
   o.fillStyle=GOLD; o.fillRect(0,0,w,h);
   o.globalCompositeOperation="source-over";
   c.drawImage(_tintCv,cx-w/2,y-h);
+  titleOrn(c,cx,y-h*0.46,w/2+26);
+}
+/* نجمة ثمانية وخيط ذهبي على كل جانب، من نفس زخرفة الخلفية */
+function titleOrn(c,cx,ym,off){
+  var i;
+  c.save(); c.strokeStyle=GOLD; c.fillStyle=GOLD;
+  for(i=-1;i<=1;i+=2){
+    var x0=cx+i*off, x1=cx+i*(off+44);
+    c.globalAlpha=.45; c.lineWidth=1.8;
+    c.beginPath(); c.moveTo(x0,ym); c.lineTo(x1,ym); c.stroke();
+    c.globalAlpha=.9;
+    star8(c,x1+i*16,ym,13,.42,Math.PI/8); c.fill();
+  }
+  c.restore();
 }
 function timeBadge(c,cx,cy,R,a,name,val){
   var x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
@@ -485,12 +500,12 @@ function poster(c,d){
   cornerOrn(c,0,H,1,-1,.70); cornerOrn(c,W,H,-1,-1,.70);
   var cx=W/2, cy=812, R=432, ring=32, inR=R-ring/2, outR=R+ring/2, i, a;
 
-  cardTitle(c,cx,188,500);
+  cardTitle(c,cx,182,470);
   c.textAlign="center";
-  c.font="700 56px "+AM; c.fillStyle=INK; c.fillText(d.day,cx,254);
-  c.font="600 28px "+CA; c.fillStyle=INK; c.globalAlpha=.78; c.fillText(d.hijri+"   ·   "+d.greg,cx,300); c.globalAlpha=1;
+  c.font="700 56px "+AM; c.fillStyle=INK; c.fillText(d.day,cx,240);
+  c.font="600 28px "+CA; c.fillStyle=INK; c.globalAlpha=.78; c.fillText(d.hijri+"   ·   "+d.greg,cx,294); c.globalAlpha=1;
   c.font="600 25px "+CA; c.fillStyle=GOLD;
-  c.fillText(d.city+"   ·   النهار "+d.dayLen+"   ·   الليل "+d.nightLen,cx,340);
+  c.fillText(d.city+"   ·   النهار "+d.dayLen+"   ·   الليل "+d.nightLen,cx,338);
 
   c.beginPath(); c.arc(cx,cy,R,ang(d.h[4]),ang(d.h[0]+24)); c.lineWidth=ring; c.strokeStyle=NIGHT; c.stroke();
   c.beginPath(); c.arc(cx,cy,R,ang(d.h[0]),ang(d.h[1])); c.lineWidth=ring; c.strokeStyle=DAWN; c.stroke();
