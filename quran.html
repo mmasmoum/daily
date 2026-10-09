@@ -10,9 +10,15 @@
 <meta name="apple-mobile-web-app-title" content="ميقات">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  /* خطوط مستضافة في المستودع بدل Google، لتعمل الصفحة على الشبكات البطيئة أو المحجوبة */
+  @font-face{font-family:"Amiri";src:url("font-amiri-400.woff2") format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Amiri";src:url("font-amiri-700.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"Scheherazade New";src:url("font-sheh-400.woff2") format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Scheherazade New";src:url("font-sheh-700.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"Cairo";src:url("font-cairo-400.woff2") format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Cairo";src:url("font-cairo-600.woff2") format("woff2");font-weight:600;font-display:swap}
+  @font-face{font-family:"Cairo";src:url("font-cairo-700.woff2") format("woff2");font-weight:700;font-display:swap}
   :root{--ink:#1C2B26;--soft:#4E5F58;--paper:#F2F0E8;--card:#FBFAF6;--gold:#A8802F;--green:#2E7D4F;--line:rgba(28,43,38,.14)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:"Cairo",system-ui,sans-serif;-webkit-text-size-adjust:100%}
@@ -152,7 +158,7 @@
       <label for="f_autosave" style="margin:0">حفظ تلقائي</label>
     </div>
     <p class="saved" id="saved"></p>
-    <p class="ver">إعداد وتطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.0</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.0</p>
 
     <div class="actions">
       <button class="btn gold" id="btnDl">تنزيل الصورة</button>
@@ -183,7 +189,9 @@ var INK="#1C2B26", GOLD="#A8802F", GOLD2="#D8B267", NIGHT="#243440", DAWN="#8FA0
     DAYC="#EDE7D4", MUT="#78827B", ACC="#8C2F26", GREEN="#2E7D4F";
 var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
 var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-var MON=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+var MON_SHAM=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+var MON_WEST=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+var SHAM_LANDS=["سوريا","الأردن","العراق","لبنان","فلسطين","تركيا"];
 var EXPORTING=false;
 
 /* ============ التاريخ والحساب ============ */
@@ -463,6 +471,14 @@ function pickedDate(){
   return new Date(+p[0],+p[1]-1,+p[2]);
 }
 function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function srcOf(h){
+  return (h.r||"")+(h.n?" ("+h.n+")":"");
+}
+function monthName(i){
+  /* الشام وتركيا: كانون الثاني وشباط وآذار. والخليج: يناير وفبراير */
+  var co=""; try{ co=city().country||""; }catch(e){}
+  return (SHAM_LANDS.indexOf(co)>=0 ? MON_SHAM : MON_WEST)[i];
+}
 function city(){ return CITIES[$("f_city").selectedIndex]||CITIES[0]; }
 function dayIdx(d){ return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function catIndex(){ return $("f_cat").selectedIndex; }
@@ -502,7 +518,7 @@ function useVerse(){
 function useHadith(){
   var L=inCat(HADITHS,catIndex()), k=$("f_hsel").selectedIndex;
   if(k<0||!L[k]) return;
-  $("f_hadith").value=L[k].o.v; $("f_href").value=L[k].o.r||"";
+  $("f_hadith").value=L[k].o.v; $("f_href").value=srcOf(L[k].o);
 }
 function useDua(){
   var L=inCat(DUAS,catIndex()), k=$("f_dsel").selectedIndex;
@@ -573,7 +589,7 @@ function state(){
   var dl=h[4]-h[1], now=new Date(), sw=$("f_show").value;
   return {
     city:c.n, day:DAYS[d.getDay()], hijri:hj,
-    greg:d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+" م",
+    greg:d.getDate()+" "+monthName(d.getMonth())+" "+d.getFullYear()+" م",
     dayLen:Math.floor(dl)+":"+pad(Math.round((dl%1)*60)),
     h:h, disp:t.map(tstr),
     verse:(sw==="h")?"":$("f_verse").value, vref:(sw==="h")?"":$("f_vref").value,
@@ -736,6 +752,13 @@ load().then(function(s){
 
 }catch(e){ fail(e); }
 })();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
 </script>
 </body>
 </html>

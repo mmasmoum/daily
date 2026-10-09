@@ -1,67 +1,54 @@
-/* عامل الخدمة: يجعل الصفحة تعمل بلا شبكة بعد أول فتحة ناجحة.
-   الخطوط والخلفية: من الذاكرة أولًا (لا تتغير إلا نادرًا).
-   الصفحات وملفات المحتوى: من الذاكرة فورًا مع تحديثها في الخلفية. */
-var CACHE = "nafahat-v1";
+/* عامل خدمة واحد لصفحتي نفحات وميقات.
+   لا يُنزِّل شيئًا مسبقًا: يختزن كل ملف ثقيل عند أول استعمال فعلي،
+   فلا تُحمَّل خطوط ميقات على زائر نفحات ولا العكس.
+   النتيجة: بعد أول فتحة ناجحة تعمل الصفحة بلا شبكة. */
+var CACHE = "daily-v2";
 
-/* تُحمَّل مسبقًا عند أول زيارة. البدائل القديمة (png و ttf) ليست هنا
-   كي لا تُنزَّل بلا داعٍ؛ تُخزَّن تلقائيًا إن طلبها متصفح قديم. */
-var HEAVY = [
-  "nafahat-template.webp",
-  "font-naskh.woff2", "font-naskh-bold.woff2",
-  "font-plex.woff2", "font-plex-med.woff2", "font-amiri-bold.woff2"
-];
-var ALSO = ["nafahat-template.png",
-  "font-naskh.ttf","font-naskh-bold.ttf","font-plex.ttf","font-plex-med.ttf","font-amiri-bold.ttf"];
+/* الملفات الثقيلة التي لا تتغير إلا نادرًا: من الذاكرة أولًا */
+function isAsset(path){
+  return /\.(woff2|ttf|otf|webp|png|jpg|jpeg|svg|ico)$/i.test(path);
+}
 
-self.addEventListener("install", function(e){
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function(c){
-      return Promise.all(HEAVY.map(function(u){
-        return c.add(u).catch(function(){});   /* ملف مفقود لا يُفشل التثبيت */
-      }));
-    })
-  );
-});
+self.addEventListener("install", function(){ self.skipWaiting(); });
 
 self.addEventListener("activate", function(e){
   e.waitUntil(
     caches.keys().then(function(ks){
-      return Promise.all(ks.map(function(k){ return k===CACHE ? null : caches.delete(k); }));
+      return Promise.all(ks.map(function(k){ return k === CACHE ? null : caches.delete(k); }));
     }).then(function(){ return self.clients.claim(); })
   );
 });
 
-function isHeavy(url){
-  return HEAVY.concat(ALSO).some(function(u){ return url.pathname.indexOf(u) >= 0; });
+function put(req, res){
+  if (res && res.ok && res.status === 200) {
+    var cp = res.clone();
+    caches.open(CACHE).then(function(c){ c.put(req, cp); });
+  }
+  return res;
 }
 
 self.addEventListener("fetch", function(e){
   var req = e.request;
   if (req.method !== "GET") return;
-  var url = new URL(req.url);
+  var url;
+  try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;
 
-  /* الخطوط والخلفية: الذاكرة أولًا */
-  if (isHeavy(url)) {
+  /* خطوط وصور: الذاكرة أولًا، والشبكة عند أول مرة فقط */
+  if (isAsset(url.pathname)) {
     e.respondWith(
       caches.match(req, {ignoreSearch:true}).then(function(hit){
-        return hit || fetch(req).then(function(res){
-          if (res && res.ok) { var cp=res.clone(); caches.open(CACHE).then(function(c){ c.put(req,cp); }); }
-          return res;
-        });
+        return hit || fetch(req).then(function(res){ return put(req, res); });
       })
     );
     return;
   }
 
-  /* الصفحات وملفات المحتوى: من الذاكرة فورًا، ثم تحديث صامت */
+  /* الصفحات وملفات المحتوى: تُعرض من الذاكرة فورًا وتُحدَّث في الخلفية */
   e.respondWith(
     caches.match(req).then(function(hit){
-      var net = fetch(req).then(function(res){
-        if (res && res.ok) { var cp=res.clone(); caches.open(CACHE).then(function(c){ c.put(req,cp); }); }
-        return res;
-      }).catch(function(){ return hit; });
+      var net = fetch(req).then(function(res){ return put(req, res); })
+                          .catch(function(){ return hit; });
       return hit || net;
     })
   );
