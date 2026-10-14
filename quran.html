@@ -100,7 +100,7 @@
         <input type="checkbox" id="f_auto" checked>
         <label for="f_auto" style="margin:0">محتوى اليوم تلقائيًا (يتبدل كل يوم)</label>
       </div>
-      <label for="f_refl">سطر التأمل (يظهر أسفل البطاقة فوق التوقيع)</label>
+      <label for="f_refl">سطر التأمل (أسفل البطاقة فوق التوقيع) — اضغط Enter لسطر جديد بفاصل</label>
       <textarea id="f_refl" style="min-height:70px"></textarea>
 
       <label for="f_palette">ألوان البطاقة</label>
@@ -179,7 +179,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.8</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.9</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -670,8 +670,24 @@ function poster(c,d){
   c.beginPath(); c.moveTo(180,ly); c.lineTo(W-180,ly); c.stroke(); c.globalAlpha=1;
   var e=ly+28;
   if(d.refl.trim()){
-    var fr=fitPlain(c,"«"+d.refl+"»",W-250,124,42,26,1.52,SH,"");
-    e=drawPlain(c,fr,ly+26,1.52,REFLC,SH,"");
+    /* كل سطر يكتبه المستخدم (بالضغط على Enter) كتلة مستقلة، وبينها فاصل خفيف.
+       الأولى سطر التأمل فتوضع بين علامتي اقتباس، وما بعدها كلام المستخدم كما كتبه. */
+    var parts=String(d.refl).split(/\r?\n+/), blocks=[], bi;
+    for(bi=0;bi<parts.length;bi++){ var tt=parts[bi].trim(); if(tt) blocks.push(tt); }
+    var nB=blocks.length, AV=150, GAP=24;
+    var hEach=(AV-(nB-1)*GAP)/nB, mx=(nB===1)?42:(nB===2?31:25);
+    var yy=ly+26;
+    for(bi=0;bi<nB;bi++){
+      if(bi>0){
+        c.save(); c.strokeStyle=INK; c.globalAlpha=.13; c.lineWidth=1.2;
+        c.beginPath(); c.moveTo(cx-110,yy+4); c.lineTo(cx+110,yy+4); c.stroke(); c.restore();
+        yy+=GAP;
+      }
+      var txt=(bi===0)?("«"+blocks[bi]+"»"):blocks[bi];
+      var fr=fitPlain(c,txt,W-250,hEach,mx,21,1.5,SH,"");
+      yy=drawPlain(c,fr,yy,1.5,REFLC,SH,"");
+    }
+    e=yy;
   }
   if(d.sign.trim()){
     c.textAlign="center"; c.font="27px "+CA; c.fillStyle=GOLD;
