@@ -100,6 +100,9 @@
         <input type="checkbox" id="f_auto" checked>
         <label for="f_auto" style="margin:0">محتوى اليوم تلقائيًا (يتبدل كل يوم)</label>
       </div>
+      <label for="f_refl">سطر التأمل (يظهر أسفل البطاقة فوق التوقيع)</label>
+      <textarea id="f_refl" style="min-height:70px"></textarea>
+
       <label for="f_palette">ألوان البطاقة</label>
       <select id="f_palette">
         <option value="zaytoon">زيتي (الأصل)</option>
@@ -140,9 +143,6 @@
       <select id="f_dsel"></select>
       <textarea id="f_dua" style="min-height:76px;margin-top:8px"></textarea>
 
-      <label for="f_refl">سطر التأمل (يظهر فوق التوقيع)</label>
-      <textarea id="f_refl" style="min-height:70px"></textarea>
-
       <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز)</label>
       <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
     </fieldset>
@@ -179,7 +179,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.7</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.8</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -637,11 +637,16 @@ function poster(c,d){
   if(d.hadith.trim()) items=items.concat([
              {t:d.hadith,size:hasV?46:60,wt:"700 ",color:hasV?"#2B3A34":INK,after:hasV?10:14},
              {t:d.href,size:hasV?27:30,fam:CA,color:ACC,lh:1.5,after:0}]);
-  var RT=inR-52, span=2*(inR-110), sc=1, guard=0;
-  var res=layoutMass(c,items,cy,RT,cy-200,sc);
-  while(res.total>span&&sc>0.45&&guard++<60){ sc-=0.04; res=layoutMass(c,items,cy,RT,cy-200,sc); }
-  res=layoutMass(c,items,cy,RT,cy-res.total/2,sc);
-  res=layoutMass(c,items,cy,RT,cy-res.total/2,sc);
+  /* عرض السطر داخل الدائرة يتغيّر بتغيّر ارتفاعه، فإعادة التوسيط قد تزيد
+     عدد الأسطر. لذلك يُعاد الفحص بعد التوسيط لا قبله. */
+  var RT=inR-52, span=2*(inR-128), sc=1, guard=0, res;
+  for(;;){
+    res=layoutMass(c,items,cy,RT,cy-200,sc);
+    res=layoutMass(c,items,cy,RT,cy-res.total/2,sc);
+    res=layoutMass(c,items,cy,RT,cy-res.total/2,sc);
+    if(res.total<=span || sc<=0.45 || guard++>60) break;
+    sc-=0.04;
+  }
   c.textAlign="center";
   res.lines.forEach(function(l){
     c.font=(l.wt||"")+l.size+"px "+l.fam; c.fillStyle=l.color;
@@ -654,19 +659,19 @@ function poster(c,d){
   if(d.dayNote){
     arcText(c,d.dayNote,cx,cy,inR-66,29,SH,"600 ",INK,Math.PI/2,true,NOTE_STYLE);
   }
-  var ry=cy+R+58;
-  /* سطر التأمل تحت الدائرة، ثم الدعاء آخر شيء */
-  if(d.refl.trim()){
-    var fr=fitPlain(c,"«"+d.refl+"»",W-230,124,44,26,1.52,SH,"");
-    drawPlain(c,fr,ry,1.52,REFLC,SH,"");
+  /* الدعاء تحت الدائرة، ثم الفاصل، ثم سطر التأمل قبل التوقيع */
+  var ry=cy+R+56;
+  if(d.dua.trim()){
+    var g2=fitPlain(c,d.dua,W-250,140,40,24,1.54,SH,"");
+    drawPlain(c,g2,ry,1.54,DUAC,SH,"");
   }
-  var ly=H-266;
+  var ly=H-258;
   c.strokeStyle=INK; c.globalAlpha=.12; c.lineWidth=1.6;
   c.beginPath(); c.moveTo(180,ly); c.lineTo(W-180,ly); c.stroke(); c.globalAlpha=1;
   var e=ly+28;
-  if(d.dua.trim()){
-    var g2=fitPlain(c,d.dua,W-320,150,40,23,1.56,SH,"");
-    e=drawPlain(c,g2,ly+26,1.56,DUAC,SH,"");
+  if(d.refl.trim()){
+    var fr=fitPlain(c,"«"+d.refl+"»",W-250,124,42,26,1.52,SH,"");
+    e=drawPlain(c,fr,ly+26,1.52,REFLC,SH,"");
   }
   if(d.sign.trim()){
     c.textAlign="center"; c.font="27px "+CA; c.fillStyle=GOLD;
