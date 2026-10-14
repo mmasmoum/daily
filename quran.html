@@ -107,6 +107,11 @@
         <option value="bunni">بنّي دافئ</option>
         <option value="fahmi">فحمي وذهبي</option>
         <option value="wardi">عنّابي هادئ</option>
+        <option value="zumurrud">زمرّدي</option>
+        <option value="fayruz">فيروزي</option>
+        <option value="neeli">نيلي</option>
+        <option value="ramli">رملي</option>
+        <option value="khuzama">خزامى</option>
       </select>
       <label for="f_show">ما يظهر في البطاقة</label>
       <select id="f_show">
@@ -174,7 +179,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 3.7</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.7</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -203,43 +208,68 @@ var AM='"Amiri",serif', SH='"Scheherazade New","Amiri",serif', CA='"Cairo",syste
 var W=1080, H=1720;
 var INK="#1C2B26", GOLD="#A8802F", GOLD2="#D8B267", NIGHT="#243440", DAWN="#8FA0A4",
     DAYC="#EDE7D4", MUT="#78827B", ACC="#8C2F26", GREEN="#2E7D4F";
-var BG1="#FAF8F1", BG2="#EFEDE3", PILLBG="rgba(46,125,79,.12)", BADGE="#FBF9F3",
+var NOTE_STYLE="both";   /* "fill" أو "rules" أو "both" */
+var BG1="#FAF8F1", BG2="#EFEDE3", PILLBG="rgba(46,125,79,.12)", BADGE="#FBF9F3", NOTEBG="rgba(168,128,47,.17)",
     DUAC="#4E5A54", REFLC="#5A6660";
 /* لوحات ألوان البطاقة. التعديل هنا وحده يغيّر البطاقة كلها. */
 var PALETTES={
+ "zumurrud":{n:"زمرّدي",INK:"#16301F",GOLD:"#9C7C2E",GOLD2:"#CDAE63",NIGHT:"#12291B",
+   DAWN:"#93B0A0",DAYC:"#E4EEE6",MUT:"#52675A",ACC:"#8A3028",GREEN:"#1F6B45",
+   BG1:"#F7FBF8",BG2:"#E9F1EB",PILLBG:"rgba(31,107,69,.13)",BADGE:"#FBFDFB",
+   DUAC:"#32453A",REFLC:"#42554A",NOTEBG:"rgba(156,124,46,.17)"},
+ "fayruz":{n:"فيروزي",INK:"#11333A",GOLD:"#96803A",GOLD2:"#C9B06B",NIGHT:"#0F2A31",
+   DAWN:"#8DB4BB",DAYC:"#E1EEF0",MUT:"#4E6B72",ACC:"#8A3A2E",GREEN:"#1E6E78",
+   BG1:"#F6FBFC",BG2:"#E8F1F3",PILLBG:"rgba(30,110,120,.13)",BADGE:"#FAFDFD",
+   DUAC:"#2E474E",REFLC:"#3E575E",NOTEBG:"rgba(150,128,58,.18)"},
+ "neeli":{n:"نيلي",INK:"#221F3E",GOLD:"#8F7A3C",GOLD2:"#C4AC70",NIGHT:"#1C1935",
+   DAWN:"#9D9AB8",DAYC:"#E7E6F0",MUT:"#5A567A",ACC:"#7E3348",GREEN:"#3C4A86",
+   BG1:"#F9F8FC",BG2:"#ECEAF3",PILLBG:"rgba(60,74,134,.12)",BADGE:"#FCFBFE",
+   DUAC:"#38345C",REFLC:"#4A4670",NOTEBG:"rgba(143,122,60,.18)"},
+ "ramli":{n:"رملي",INK:"#4A2E22",GOLD:"#B07A33",GOLD2:"#DEB878",NIGHT:"#45301F",
+   DAWN:"#D9B49A",DAYC:"#F6E6D8",MUT:"#7C5F49",ACC:"#9B4328",GREEN:"#75713A",
+   BG1:"#FDFAF4",BG2:"#F5EADC",PILLBG:"rgba(117,113,58,.13)",BADGE:"#FEFCF8",
+   DUAC:"#5B3B2B",REFLC:"#6B4B3A",NOTEBG:"rgba(176,122,51,.17)"},
+ "khuzama":{n:"خزامى",INK:"#342A40",GOLD:"#937E42",GOLD2:"#C6AE74",NIGHT:"#2C2437",
+   DAWN:"#B3A3C0",DAYC:"#EDE6F2",MUT:"#645A73",ACC:"#83364F",GREEN:"#5B4C78",
+   BG1:"#FBF9FD",BG2:"#F0EAF4",PILLBG:"rgba(91,76,120,.12)",BADGE:"#FDFCFE",
+   DUAC:"#463A54",REFLC:"#564A66",NOTEBG:"rgba(147,126,66,.18)"},
  "zaytoon":{n:"زيتي (الأصل)",INK:"#1C2B26",GOLD:"#A8802F",GOLD2:"#D8B267",NIGHT:"#243440",
    DAWN:"#8FA0A4",DAYC:"#EDE7D4",MUT:"#5F6B63",ACC:"#8C2F26",GREEN:"#2E7D4F",
    BG1:"#FAF8F1",BG2:"#EFEDE3",PILLBG:"rgba(46,125,79,.12)",BADGE:"#FBF9F3",
-   DUAC:"#3E4A45",REFLC:"#4A5650"},
+   DUAC:"#3E4A45",REFLC:"#4A5650",NOTEBG:"rgba(168,128,47,.17)"},
  "layl":{n:"أزرق ليلي",INK:"#15293B",GOLD:"#9A7C3A",GOLD2:"#CBAD6B",NIGHT:"#152536",
    DAWN:"#8FA6B8",DAYC:"#E4E9EE",MUT:"#58697A",ACC:"#7A3A2E",GREEN:"#2B6B7D",
    BG1:"#F7F9FB",BG2:"#E9EEF3",PILLBG:"rgba(43,107,125,.13)",BADGE:"#FBFCFD",
-   DUAC:"#35485A",REFLC:"#43566A"},
+   DUAC:"#35485A",REFLC:"#43566A",NOTEBG:"rgba(154,124,58,.17)"},
  "bunni":{n:"بنّي دافئ",INK:"#3A2A1C",GOLD:"#9C6B22",GOLD2:"#D4A857",NIGHT:"#3B2A1E",
    DAWN:"#BCA487",DAYC:"#F0E6D4",MUT:"#6E5B48",ACC:"#8A3520",GREEN:"#5E6B33",
    BG1:"#FBF7EF",BG2:"#F1E9DB",PILLBG:"rgba(94,107,51,.14)",BADGE:"#FDFAF4",
-   DUAC:"#4E3C2C",REFLC:"#5C4936"},
+   DUAC:"#4E3C2C",REFLC:"#5C4936",NOTEBG:"rgba(156,107,34,.17)"},
  "fahmi":{n:"فحمي وذهبي",INK:"#232323",GOLD:"#9F7B28",GOLD2:"#D3B35E",NIGHT:"#1E1E1E",
    DAWN:"#A8A8A4",DAYC:"#E8E6DF",MUT:"#5A5A57",ACC:"#7E3327",GREEN:"#3F6B4B",
    BG1:"#FAF9F6",BG2:"#EDEBE5",PILLBG:"rgba(63,107,75,.13)",BADGE:"#FCFBF8",
-   DUAC:"#3A3A38",REFLC:"#4A4A47"},
+   DUAC:"#3A3A38",REFLC:"#4A4A47",NOTEBG:"rgba(159,123,40,.17)"},
  "wardi":{n:"عنّابي هادئ",INK:"#33202A",GOLD:"#9B6F3A",GOLD2:"#D0A96E",NIGHT:"#2E1C26",
    DAWN:"#BFA3AC",DAYC:"#F0E4E7",MUT:"#6B5059",ACC:"#8A2F3E",GREEN:"#4F6B57",
    BG1:"#FCF7F8",BG2:"#F2E9EB",PILLBG:"rgba(79,107,87,.13)",BADGE:"#FDFAFB",
-   DUAC:"#48313B",REFLC:"#563E48"}
+   DUAC:"#48313B",REFLC:"#563E48",NOTEBG:"rgba(155,111,58,.17)"}
 };
 function applyPalette(k){
   var P=PALETTES[k]||PALETTES.zaytoon;
   INK=P.INK; GOLD=P.GOLD; GOLD2=P.GOLD2; NIGHT=P.NIGHT; DAWN=P.DAWN; DAYC=P.DAYC;
   MUT=P.MUT; ACC=P.ACC; GREEN=P.GREEN; BG1=P.BG1; BG2=P.BG2;
-  PILLBG=P.PILLBG; BADGE=P.BADGE; DUAC=P.DUAC; REFLC=P.REFLC;
+  PILLBG=P.PILLBG; BADGE=P.BADGE; DUAC=P.DUAC; REFLC=P.REFLC; NOTEBG=P.NOTEBG||NOTEBG;
 }
 var LAB=["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"];
 var DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+/* تذكير يظهر على القوس السفلي، حسب يوم الأسبوع. الفهرس: 0 الأحد … 6 السبت */
+var DAY_NOTE=["",
+  "مِنَ السُّنَّةِ صِيَامُ الاثْنَيْنِ","",
+  "","مِنَ السُّنَّةِ صِيَامُ الْخَمِيسِ",
+  "مِنَ السُّنَّةِ قِرَاءَةُ سُورَةِ الْكَهْفِ",""];
 var MON_SHAM=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 var MON_WEST=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 var SHAM_LANDS=["سوريا","الأردن","العراق","لبنان","فلسطين","تركيا"];
-var EXPORTING=false;
 
 /* ============ التاريخ والحساب ============ */
 function pad(n){ return (n<10?"0":"")+n; }
@@ -433,6 +463,50 @@ function bgDraw(c){
   c.restore();
 }
 /* اسم البطاقة أعلاها، بخطّين ذهبيين ومعيّنين على الجانبين */
+/* نص يتبع محيط الدائرة. يُرسم مستقيمًا في لوح خفي ثم تُحنى صورته،
+   فتبقى الحروف موصولة والتشكيل في مواضعه. */
+var _arcCv=null;
+function arcText(c,txt,cx,cy,r,px,fam,wt,color,mid,flip,band){
+  if(!_arcCv) _arcCv=document.createElement("canvas");
+  var m=_arcCv, mc=m.getContext("2d"), f=(wt?wt+" ":"")+px+"px "+fam;
+  mc.font=f;
+  var w=Math.ceil(mc.measureText(txt).width)+10, h=Math.ceil(px*1.9);
+  m.width=w; m.height=h;
+  mc=m.getContext("2d");
+  mc.font=f; mc.direction="rtl"; mc.textAlign="center"; mc.textBaseline="middle";
+  mc.fillStyle=color; mc.fillText(txt,w/2,h/2);
+  var span=w/r, i;
+  if(band){
+    var a1=mid-span/2-0.05, a2=mid+span/2+0.05, off=px*0.80, k;
+    c.save();
+    if(band==="fill"||band==="both"){
+      c.strokeStyle=NOTEBG; c.lineWidth=h*0.62; c.lineCap="round";
+      c.beginPath(); c.arc(cx,cy,r,a1,a2); c.stroke();
+    }
+    if(band==="rules"||band==="both"){
+      /* خطّان ذهبيان رفيعان يحضنان النص، ونجمة ثمانية في كل طرف */
+      c.strokeStyle=GOLD; c.lineCap="butt"; c.globalAlpha=.5; c.lineWidth=1.7;
+      c.beginPath(); c.arc(cx,cy,r-off,a1,a2); c.stroke();
+      c.beginPath(); c.arc(cx,cy,r+off,a1,a2); c.stroke();
+      c.globalAlpha=.9; c.fillStyle=GOLD;
+      for(k=0;k<2;k++){
+        var aa=k?a2:a1, sx=cx+Math.cos(aa)*r, sy=cy+Math.sin(aa)*r;
+        star8(c,sx,sy,10,.42,Math.PI/8); c.fill();
+      }
+    }
+    c.globalAlpha=1; c.restore();
+  }
+  for(i=0;i<w;i++){
+    /* على القوس السفلي يُعكس ترتيب الشرائح ليبقى النص مقروءًا */
+    var t=flip ? (1-i/w) : (i/w);
+    var a=mid-span/2+t*span;
+    c.save();
+    c.translate(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
+    c.rotate(a+(flip?-Math.PI/2:Math.PI/2));
+    c.drawImage(m,i,0,1,h,-0.6,-h/2,1.6,h);
+    c.restore();
+  }
+}
 /* اسم البطاقة: خط عربي مرسوم، يُصبغ بلون اللوحة المختارة */
 var markImg=null, markOK=false, markTries=0;
 function markLoad(){
@@ -512,27 +586,50 @@ function poster(c,d){
   c.beginPath(); c.arc(cx,cy,R,ang(d.h[1]),ang(d.h[4])); c.lineWidth=ring; c.strokeStyle=DAYC; c.stroke();
   c.beginPath(); c.arc(cx,cy,outR,0,Math.PI*2); c.strokeStyle="rgba(28,43,38,.14)"; c.lineWidth=2; c.stroke();
   c.beginPath(); c.arc(cx,cy,inR,0,Math.PI*2); c.stroke();
+  /* ثلاث طبقات: أرباع اليوم (كل ٦ ساعات) أغمق وأطول، ثم كل ٣ ساعات، ثم الباقي.
+     والربع الواقع خلف نص منحنٍ يُرسم بالطبقة الأخف كي لا يزاحمه. */
+  function underArc(x,mid){
+    var dd=Math.atan2(Math.sin(x-mid),Math.cos(x-mid));
+    return Math.abs(dd)<0.52;
+  }
   for(i=0;i<48;i++){
     a=ang(i/2);
-    var half=(i%2===1), major=(i%6===0), len=half?8:(major?20:13);
+    var half=(i%2===1), quar=(i%12===0), major=(i%6===0);
+    if(quar && (underArc(a,-Math.PI/2) || (d.dayNote && underArc(a,Math.PI/2)))) quar=false;
+    var len=quar?30:(half?8:(major?20:13));
     c.beginPath();
     c.moveTo(cx+Math.cos(a)*(inR-2),cy+Math.sin(a)*(inR-2));
     c.lineTo(cx+Math.cos(a)*(inR-2-len),cy+Math.sin(a)*(inR-2-len));
-    c.strokeStyle=major?"rgba(168,128,47,.72)":(half?"rgba(28,43,38,.13)":"rgba(28,43,38,.26)");
-    c.lineWidth=major?3:(half?1.2:1.8); c.stroke();
+    c.strokeStyle=quar?INK:(major?"rgba(168,128,47,.72)":(half?"rgba(28,43,38,.13)":"rgba(28,43,38,.26)"));
+    c.lineWidth=quar?4.4:(major?3:(half?1.2:1.8));
+    c.globalAlpha=quar?0.62:1;
+    c.stroke(); c.globalAlpha=1;
   }
+  /* أرقام الساعة بنظام 24: 3 و6 و9 و12 و15 و18 و21 و24.
+     يُخفى الرقم الواقع تحت نص منحنٍ (24 تحت البسملة دائمًا، و12 تحت التذكير أيام وجوده). */
   c.textAlign="center"; c.textBaseline="middle";
-  c.font="600 26px "+CA; c.fillStyle=MUT;
+  c.font="600 25px "+CA; c.fillStyle=MUT;
   for(i=0;i<8;i++){ var hh=i*3; a=ang(hh);
-    c.fillText(String((hh%12)||12),cx+Math.cos(a)*(inR-42),cy+Math.sin(a)*(inR-42)); }
-  c.textBaseline="alphabetic";
+    if(underArc(a,-Math.PI/2)) continue;
+    if(d.dayNote && underArc(a,Math.PI/2)) continue;
+    /* ويُخفى الرقم إن وقعت نقطته داخل مستطيل شارة وقت. اختبار هندسي دقيق،
+       لأن الشارة المائلة تمتدّ إلى الداخل أكثر من الشارة العلوية أو السفلية. */
+    var nx=cx+Math.cos(a)*(inR-44), ny=cy+Math.sin(a)*(inR-44), hid=false, j;
+    for(j=0;j<6;j++){
+      var ba=ang(d.h[j]), bx=cx+Math.cos(ba)*R, by=cy+Math.sin(ba)*R;
+      c.font="700 42px "+CA; var w1=c.measureText(d.disp[j]).width;
+      c.font="24px "+CA;
+      var bw=Math.max(w1,c.measureText(LAB[j]).width)+50;
+      if(Math.abs(nx-bx)<bw/2+13 && Math.abs(ny-by)<45+9){ hid=true; break; }
+    }
+    c.font="600 25px "+CA; c.fillStyle=MUT;
+    if(hid) continue;
+    c.fillText(String(hh===0?24:hh),cx+Math.cos(a)*(inR-44),cy+Math.sin(a)*(inR-44)); }
+  c.textAlign="center"; c.textBaseline="alphabetic";
 
-  if(!EXPORTING){
-    a=ang(d.nowH);
-    c.save(); c.translate(cx+Math.cos(a)*(inR-24),cy+Math.sin(a)*(inR-24)); c.rotate(a-Math.PI/2);
-    c.beginPath(); c.moveTo(0,0); c.lineTo(-12,-22); c.lineTo(12,-22); c.closePath();
-    c.fillStyle=ACC; c.globalAlpha=.9; c.fill(); c.globalAlpha=1; c.restore();
-  }
+
+  /* البسملة على القوس العلوي، موازية لخط الدائرة */
+  arcText(c,"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",cx,cy,inR-54,30,SH,"",GOLD,-Math.PI/2,false);
 
   var items=[], hasV=d.verse.trim().length>0;
   if(hasV) items=items.concat([{t:d.verse,size:62,wt:"700 ",color:INK,after:14},
@@ -540,7 +637,7 @@ function poster(c,d){
   if(d.hadith.trim()) items=items.concat([
              {t:d.hadith,size:hasV?46:60,wt:"700 ",color:hasV?"#2B3A34":INK,after:hasV?10:14},
              {t:d.href,size:hasV?27:30,fam:CA,color:ACC,lh:1.5,after:0}]);
-  var RT=inR-52, span=2*(inR-104), sc=1, guard=0;
+  var RT=inR-52, span=2*(inR-110), sc=1, guard=0;
   var res=layoutMass(c,items,cy,RT,cy-200,sc);
   while(res.total>span&&sc>0.45&&guard++<60){ sc-=0.04; res=layoutMass(c,items,cy,RT,cy-200,sc); }
   res=layoutMass(c,items,cy,RT,cy-res.total/2,sc);
@@ -553,10 +650,15 @@ function poster(c,d){
 
   for(i=0;i<6;i++) timeBadge(c,cx,cy,R,ang(d.h[i]),LAB[i],d.disp[i]);
 
+  /* تذكير اليوم على القوس السفلي (صيام الاثنين والخميس، وسورة الكهف الجمعة) */
+  if(d.dayNote){
+    arcText(c,d.dayNote,cx,cy,inR-66,29,SH,"600 ",INK,Math.PI/2,true,NOTE_STYLE);
+  }
+  var ry=cy+R+58;
   /* سطر التأمل تحت الدائرة، ثم الدعاء آخر شيء */
   if(d.refl.trim()){
-    var fr=fitPlain(c,"«"+d.refl+"»",W-250,120,36,22,1.58,SH,"");
-    drawPlain(c,fr,cy+R+62,1.58,REFLC,SH,"");
+    var fr=fitPlain(c,"«"+d.refl+"»",W-230,124,44,26,1.52,SH,"");
+    drawPlain(c,fr,ry,1.52,REFLC,SH,"");
   }
   var ly=H-266;
   c.strokeStyle=INK; c.globalAlpha=.12; c.lineWidth=1.6;
@@ -709,6 +811,7 @@ function state(){
   var dl=h[4]-h[1], now=new Date(), sw=$("f_show").value;
   return {
     city:c.n, day:DAYS[d.getDay()], hijri:hj, palette:$("f_palette").value,
+    dayNote:DAY_NOTE[d.getDay()]||"",
     greg:d.getDate()+" "+monthName(d.getMonth())+" "+d.getFullYear()+" م",
     dayLen:Math.floor(dl)+":"+pad(Math.round((dl%1)*60)),
     nightLen:(function(nl){ var m=Math.round((nl%1)*60), hh=Math.floor(nl);
@@ -716,8 +819,7 @@ function state(){
     h:h, disp:t.map(tstr),
     verse:(sw==="h")?"":$("f_verse").value, vref:(sw==="h")?"":$("f_vref").value,
     hadith:(sw==="v")?"":$("f_hadith").value, href:(sw==="v")?"":$("f_href").value,
-    dua:$("f_dua").value, refl:$("f_refl").value, sign:$("f_sign").value,
-    nowH:now.getHours()+now.getMinutes()/60
+    dua:$("f_dua").value, refl:$("f_refl").value, sign:$("f_sign").value
   };
 }
 var timer=null;
@@ -761,9 +863,7 @@ function load(){
 }
 /* التصدير */
 function stamp(){ var d=pickedDate(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
-function renderClean(){ EXPORTING=true; poster(ctx,state()); EXPORTING=false; }
 $("btnShare").onclick=function(){
-  renderClean();
   cv.toBlob(function(b){
     try{
       var f=[new File([b],"miqat-"+stamp()+".png",{type:"image/png"})];
