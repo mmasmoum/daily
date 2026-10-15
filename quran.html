@@ -95,14 +95,21 @@
 
   <aside class="panel">
     <fieldset>
+      <legend>عبارتك وتوقيعك</legend>
+      <label for="f_snote">العبارة فوق التوقيع</label>
+      <input type="text" id="f_snote" placeholder="مثال: برجاء دعوة صادقة">
+
+      <label for="f_sign">التوقيع</label>
+      <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
+      <p class="hint">يُحفظان في هذا الجهاز، فتكتبهما مرة واحدة ويثبتان في كل بطاقة.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>المحتوى</legend>
       <div class="check">
         <input type="checkbox" id="f_auto" checked>
         <label for="f_auto" style="margin:0">محتوى اليوم تلقائيًا (يتبدل كل يوم)</label>
       </div>
-      <label for="f_refl">سطر التأمل (أسفل البطاقة) — اضغط Enter لسطر جديد بفاصل</label>
-      <textarea id="f_refl" style="min-height:70px"></textarea>
-
       <label for="f_palette">ألوان البطاقة</label>
       <select id="f_palette">
         <option value="zaytoon">زيتي (الأصل)</option>
@@ -143,11 +150,8 @@
       <select id="f_dsel"></select>
       <textarea id="f_dua" style="min-height:76px;margin-top:8px"></textarea>
 
-      <label for="f_snote">عبارتك فوق التوقيع (تُحفظ في هذا الجهاز)</label>
-      <input type="text" id="f_snote" placeholder="مثال: برجاء دعوة صادقة">
-
-      <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز)</label>
-      <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
+      <label for="f_refl">سطر التأمل (أسفل البطاقة) — اضغط Enter لسطر جديد بفاصل</label>
+      <textarea id="f_refl" style="min-height:70px"></textarea>
     </fieldset>
 
     <fieldset>
