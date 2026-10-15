@@ -100,7 +100,7 @@
         <input type="checkbox" id="f_auto" checked>
         <label for="f_auto" style="margin:0">محتوى اليوم تلقائيًا (يتبدل كل يوم)</label>
       </div>
-      <label for="f_refl">سطر التأمل (أسفل البطاقة فوق التوقيع) — اضغط Enter لسطر جديد بفاصل</label>
+      <label for="f_refl">سطر التأمل (أسفل البطاقة) — اضغط Enter لسطر جديد بفاصل</label>
       <textarea id="f_refl" style="min-height:70px"></textarea>
 
       <label for="f_palette">ألوان البطاقة</label>
@@ -143,6 +143,9 @@
       <select id="f_dsel"></select>
       <textarea id="f_dua" style="min-height:76px;margin-top:8px"></textarea>
 
+      <label for="f_snote">عبارتك فوق التوقيع (تُحفظ في هذا الجهاز)</label>
+      <input type="text" id="f_snote" placeholder="مثال: برجاء دعوة صادقة">
+
       <label for="f_sign">التوقيع (يُحفظ في هذا الجهاز)</label>
       <input type="text" id="f_sign" placeholder="اسمك أو كنيتك">
     </fieldset>
@@ -179,7 +182,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 4.9</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 5.0</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -668,31 +671,39 @@ function poster(c,d){
   var ly=H-258;
   c.strokeStyle=INK; c.globalAlpha=.12; c.lineWidth=1.6;
   c.beginPath(); c.moveTo(180,ly); c.lineTo(W-180,ly); c.stroke(); c.globalAlpha=1;
-  var e=ly+28;
+  /* ذيل البطاقة (عبارة صاحبها ثم توقيعه) مثبّت من الأسفل، فلا يتحرك مكانه
+     مهما طال سطر التأمل، وما يبقى فوقه هو حيّز التأمل. */
+  var hasN=d.snote.trim()!=="", hasS=d.sign.trim()!=="";
+  var signY=H-64, noteY=hasS?signY-38:signY;
+  var refTop=ly+26, refLimit=hasN?(noteY-40):(hasS?(signY-42):signY);
   if(d.refl.trim()){
     /* كل سطر يكتبه المستخدم (بالضغط على Enter) كتلة مستقلة، وبينها فاصل خفيف.
        الأولى سطر التأمل فتوضع بين علامتي اقتباس، وما بعدها كلام المستخدم كما كتبه. */
     var parts=String(d.refl).split(/\r?\n+/), blocks=[], bi;
     for(bi=0;bi<parts.length;bi++){ var tt=parts[bi].trim(); if(tt) blocks.push(tt); }
-    var nB=blocks.length, AV=150, GAP=24;
+    var nB=blocks.length, GAP=24, AV=Math.max(64,refLimit-refTop);
     var hEach=(AV-(nB-1)*GAP)/nB, mx=(nB===1)?42:(nB===2?31:25);
-    var yy=ly+26;
+    /* تُقاس الكتل أولًا ثم تُوسَّط في حيّزها، فلا تبقى فجوة فوق الذيل
+       حين يكون سطر التأمل قصيرًا. */
+    var fits=[], tot=(nB-1)*GAP, yy;
+    for(bi=0;bi<nB;bi++){
+      var txt=(bi===0)?("«"+blocks[bi]+"»"):blocks[bi];
+      fits.push(fitPlain(c,txt,W-250,hEach,mx,21,1.5,SH,""));
+      tot+=fits[bi].lines.length*fits[bi].size*1.5;
+    }
+    yy=refTop+Math.max(0,(AV-tot)/2);
     for(bi=0;bi<nB;bi++){
       if(bi>0){
         c.save(); c.strokeStyle=INK; c.globalAlpha=.13; c.lineWidth=1.2;
-        c.beginPath(); c.moveTo(cx-110,yy+4); c.lineTo(cx+110,yy+4); c.stroke(); c.restore();
+        c.beginPath(); c.moveTo(cx-110,yy+GAP/2); c.lineTo(cx+110,yy+GAP/2); c.stroke(); c.restore();
         yy+=GAP;
       }
-      var txt=(bi===0)?("«"+blocks[bi]+"»"):blocks[bi];
-      var fr=fitPlain(c,txt,W-250,hEach,mx,21,1.5,SH,"");
-      yy=drawPlain(c,fr,yy,1.5,REFLC,SH,"");
+      yy=drawPlain(c,fits[bi],yy,1.5,REFLC,SH,"");
     }
-    e=yy;
   }
-  if(d.sign.trim()){
-    c.textAlign="center"; c.font="27px "+CA; c.fillStyle=GOLD;
-    c.fillText(d.sign,cx,e+44);
-  }
+  c.textAlign="center";
+  if(hasN){ c.font="23px "+CA; c.fillStyle=REFLC; c.fillText(d.snote,cx,noteY); }
+  if(hasS){ c.font="27px "+CA; c.fillStyle=GOLD; c.fillText(d.sign,cx,signY); }
 }
 
 /* ============ الواجهة ============ */
@@ -840,7 +851,8 @@ function state(){
     h:h, disp:t.map(tstr),
     verse:(sw==="h")?"":$("f_verse").value, vref:(sw==="h")?"":$("f_vref").value,
     hadith:(sw==="v")?"":$("f_hadith").value, href:(sw==="v")?"":$("f_href").value,
-    dua:$("f_dua").value, refl:$("f_refl").value, sign:$("f_sign").value
+    dua:$("f_dua").value, refl:$("f_refl").value,
+    snote:$("f_snote").value, sign:$("f_sign").value
   };
 }
 var timer=null;
@@ -857,7 +869,8 @@ function fbGet(){ try{ return window.localStorage.getItem(KEY); }catch(e){ retur
 function snapshot(){
   return JSON.stringify({cat:catIndex(),vs:$("f_vsel").selectedIndex,hs:$("f_hsel").selectedIndex,ds:$("f_dsel").selectedIndex,
     verse:$("f_verse").value,vref:$("f_vref").value,hadith:$("f_hadith").value,href:$("f_href").value,
-    dua:$("f_dua").value,refl:$("f_refl").value,sign:$("f_sign").value,
+    dua:$("f_dua").value,refl:$("f_refl").value,
+    snote:$("f_snote").value,sign:$("f_sign").value,
     cityIdx:$("f_city").selectedIndex,method:$("f_method").value,asr:$("f_asr").value,
     ihtiyat:$("f_ihtiyat").value,hijriAdj:$("f_hijriAdj").value,
     auto:$("f_auto").checked,manualDate:manualDate,show:$("f_show").value,palette:$("f_palette").value});
@@ -954,7 +967,7 @@ $("btnRecalc").onclick=function(){ recalc(); schedule(); };
 ["f_verse","f_vref","f_hadith","f_href","f_dua","f_refl"].forEach(function(id){
   $(id).addEventListener("input",markManual);
 });
-["f_verse","f_vref","f_hadith","f_href","f_dua","f_refl","f_sign",
+["f_verse","f_vref","f_hadith","f_href","f_dua","f_refl","f_snote","f_sign",
  "h0","h1","h2","h3","h4","h5","m0","m1","m2","m3","m4","m5","f_palette"].forEach(function(id){
   $(id).addEventListener("input",schedule); $(id).addEventListener("change",schedule);
 });
@@ -971,6 +984,7 @@ load().then(function(s){
     if(s.hijriAdj) $("f_hijriAdj").value=s.hijriAdj;
     if(s.show) $("f_show").value=s.show;
     if(s.palette&&PALETTES[s.palette]) $("f_palette").value=s.palette;
+    if(s.snote!==undefined) $("f_snote").value=s.snote;
     if(s.sign!==undefined) $("f_sign").value=s.sign;
     $("f_auto").checked=s.auto!==false;
     manualDate=s.manualDate||"";
