@@ -186,7 +186,7 @@
     </div>
     <button class="btn ghost sm" id="btnReset" type="button" style="margin-top:12px">استعادة الإعدادات</button>
     <p class="saved" id="saved"></p>
-    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 5.1</p>
+    <p class="ver">فكرة: سري مزيد &nbsp;·&nbsp; تطوير: ماجد المسموم &nbsp;·&nbsp; نسخة 5.2</p>
 
     <div class="actions">
       <button class="btn gold" id="btnShuffle" type="button">بطاقة أخرى</button>
@@ -826,7 +826,10 @@ function readTimes(){
 function to24(o,i){
   var h=o.h%12;
   if(i<=1) return h+o.m/60;
-  if(i===2) return (o.h===12?12:h+12)+o.m/60;
+  /* الظهر قد يقع قبل الثانية عشرة في المدن الواقعة شرق نطاقها الزمني
+     (الدمام والدوحة والرياض مثلًا)، فلا يصحّ افتراض أنه بعد الظهر دائمًا.
+     ومداه الحقيقي من العاشرة صباحًا إلى الثالثة بعد الظهر. */
+  if(i===2) return (o.h>=10 ? o.h : o.h+12)+o.m/60;
   return (h+12)+o.m/60;
 }
 function methodKey(){
