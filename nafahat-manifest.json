@@ -1,0 +1,19 @@
+{
+  "id": "/daily/nafahat",
+  "name": "نفحات إيمانية",
+  "short_name": "نفحات",
+  "description": "من القرآن والسنة النبوية، تذكرة وفائدة كل يوم.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "nafahat-c3nwpo.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F5EB",
+  "theme_color": "#10233F",
+  "icons": [
+    { "src": "nafahat-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "nafahat-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "nafahat-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
